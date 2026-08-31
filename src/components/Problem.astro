@@ -1,0 +1,85 @@
+---
+const options = [
+  {
+    name: 'Lock it down',
+    verdict: 'and it cannot work',
+    body:
+      'Every useful action needs a tool you did not allowlist, a package you did not preinstall, a command you have to approve. The agent spends its time asking permission and you spend yours granting it.',
+  },
+  {
+    name: 'Let it loose',
+    verdict: 'and it has everything',
+    body:
+      'Your shell history, your SSH keys, your cloud credentials, your .env files. One prompt injection, one confused tool call, one bad dependency it installed — and the blast radius is your machine and every system it can reach.',
+  },
+];
+---
+
+<section class="section" id="why">
+  <div class="page">
+    <p class="eyebrow">The trade nobody should have to make</p>
+    <h2 class="section__title">There are two ways to run an agent today. Both are bad.</h2>
+
+    <div class="options">
+      {
+        options.map((option) => (
+          <div class="card option">
+            <h3 class="option__name">
+              {option.name} <span class="option__verdict">{option.verdict}</span>
+            </h3>
+            <p class="option__body">{option.body}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="turn">
+      Discobox rejects the premise. The constraint does not belong on what an agent
+      <em>can do</em> — that is infinitely enumerable, and it is the part you actually
+      want. It belongs on what an agent <em>can reach</em>, which is finite, and which
+      is exactly one thing.
+    </p>
+  </div>
+</section>
+
+<style>
+  .options {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 48rem) {
+    .options {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .option__name {
+    font-size: 1.15rem;
+  }
+
+  .option__verdict {
+    color: var(--salmon);
+    font-weight: 400;
+  }
+
+  .option__body {
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.97rem;
+  }
+
+  .turn {
+    margin-top: 2.5rem;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    max-width: 60ch;
+    color: var(--text);
+  }
+
+  .turn em {
+    font-style: normal;
+    color: var(--magenta);
+  }
+</style>

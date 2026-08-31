@@ -1,0 +1,135 @@
+---
+// Six properties, each answering the doubt the previous one creates. The order
+// is the argument; do not sort these.
+
+const links = [
+  {
+    claim: 'The agent gets a whole computer.',
+    body:
+      'Root, package installs, nested Docker, arbitrary software. No tool allowlists, no command approvals, no asking. It is a machine, and the agent owns it.',
+    doubt: 'You gave an agent root?',
+    status: 'shipped',
+  },
+  {
+    claim: 'It is isolated by VM and container.',
+    body:
+      'Linux pools are libkrun microVMs, macOS pools use Virtualization.framework, and user namespaces are the default. The box is disposable and so is everything the agent did to it.',
+    doubt: 'Sandboxes get escaped — and it can still phone home.',
+    status: 'shipped',
+  },
+  {
+    claim: 'There is one way out.',
+    body:
+      'All traffic leaves through a MITM proxy carrying a per-box mTLS identity. Destinations are policy, not the internet. Every request is audited and attributable to a single box.',
+    doubt: 'Fine, but my API key is sitting in its environment.',
+    status: 'shipped',
+  },
+  {
+    claim: 'Credentials never enter the box in cleartext.',
+    body:
+      'The agent holds sentinels. The proxy swaps in the real value on the way out, and only for the domain that credential is bound to. Prompt injection cannot steal what is not there.',
+    doubt: 'Then how does it deploy anything?',
+    status: 'shipped',
+  },
+  {
+    claim: 'Privileged use is granted by a human.',
+    body:
+      'The agent asks for a credential and says what it needs it for. You approve. The grant carries a host, a scope, and an expiry, and it is enforced outside the box.',
+    doubt: 'So I approve a prompt for every single call?',
+    status: 'shipped',
+  },
+  {
+    claim: 'Policy is written in English.',
+    body:
+      'Grants are natural language, evaluated by a model, so one grant covers a whole class of requests instead of generating a prompt per call. Whether a flow is a violation is a judgment about meaning — no allowlist can express it.',
+    doubt: null,
+    status: 'partial',
+  },
+];
+
+const label = { shipped: 'Shipped', partial: 'Partial', designed: 'Designed' };
+---
+
+<section class="section" id="how-it-works">
+  <div class="page">
+    <p class="eyebrow">How it holds</p>
+    <h2 class="section__title">Six properties. Each one answers the last one's doubt.</h2>
+
+    <ol class="chain">
+      {
+        links.map((link, index) => (
+          <li class="chain__item">
+            <div class="chain__index">{String(index + 1).padStart(2, '0')}</div>
+            <div class="chain__body">
+              <div class="chain__head">
+                <h3 class="chain__claim">{link.claim}</h3>
+                <span class:list={['tag', `tag--${link.status}`]}>
+                  {label[link.status as keyof typeof label]}
+                </span>
+              </div>
+              <p class="chain__text">{link.body}</p>
+              {link.doubt && <p class="chain__doubt">{link.doubt}</p>}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .chain {
+    list-style: none;
+    counter-reset: none;
+    padding: 0;
+    margin: 2.5rem 0 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .chain__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1.25rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .chain__item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .chain__index {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--magenta);
+    padding-top: 0.25rem;
+  }
+
+  .chain__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .chain__claim {
+    font-size: 1.18rem;
+  }
+
+  .chain__text {
+    margin-top: 0.65rem;
+    color: var(--text-muted);
+    max-width: 64ch;
+  }
+
+  /* The doubt is the hinge: it is what the next property exists to answer. */
+  .chain__doubt {
+    margin-top: 0.9rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--line-bright);
+    font-size: 0.95rem;
+    color: var(--text-faint);
+    font-style: italic;
+  }
+</style>

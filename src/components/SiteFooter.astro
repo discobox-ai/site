@@ -1,0 +1,63 @@
+---
+import Wordmark from './Wordmark.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="page footer__inner">
+    <a class="brand" href="/" aria-label="Discobox">
+      <Wordmark variant="white" size="1.5rem" />
+    </a>
+
+    <nav class="footer__links" aria-label="Footer">
+      <a href="https://github.com/discobox-ai/discobox">GitHub</a>
+      <a href="https://github.com/discobox-ai/discobox/tree/main/docs/adr">Decisions</a>
+      <a href="https://github.com/discobox-ai/discobox/blob/main/DESIGN.md">Design</a>
+    </nav>
+
+    <p class="footer__legal">© {year} Obot Platform</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-block: 2.5rem;
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+
+  .footer__links {
+    display: flex;
+    gap: 1.4rem;
+    font-size: 0.92rem;
+  }
+
+  .footer__links a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .footer__links a:hover {
+    color: var(--magenta);
+  }
+
+  .footer__legal {
+    color: var(--text-faint);
+    font-size: 0.85rem;
+  }
+</style>

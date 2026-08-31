@@ -1,0 +1,252 @@
+/*
+ * Discobox brand tokens.
+ *
+ * The palette is the CLI's, which is where the product is actually used: the
+ * mark's magenta (256-color 13) as the accent, gold, salmon and green kept for
+ * the same jobs the TUI gives them — attention, removal, running. The page is
+ * dark because a terminal is, and the mark only reads on a dark ground.
+ *
+ * --brand is the mark's own purple from assets/brand, and --magenta is the
+ * same hue two degrees away (294° against 296°) carried to full saturation and
+ * a lightness that survives on a near-black ground. They are one color family,
+ * not two: the mark is the deep end of the accent, which is why the art is
+ * used untinted. --violet sits 21° bluer and is the deliberate second light.
+ */
+:root {
+  --ink: #0a0410;
+  --ink-raised: #150b1f;
+  --ink-sunken: #06020a;
+  --line: #2a1839;
+  --line-bright: #3d2352;
+
+  --text: #f4ecf9;
+  --text-muted: #b0a0bf;
+  --text-faint: #7c6a8c;
+
+  /* The mark's own purple. Brand surfaces use it as-is; the accent below is
+     the same hue brightened for type, rules and focus. */
+  --brand: #9e4aa7;
+
+  --magenta: #f45cff;
+  --violet: #8b2fd6;
+  --gold: #ffd75f;
+  --salmon: #ffaf87;
+  --green: #87ff87;
+
+  --glow: color-mix(in oklab, var(--magenta) 35%, transparent);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'DejaVu Sans Mono', monospace;
+
+  --page: 68rem;
+  --radius: 14px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  /* Two lights on a dark floor: the mark's magenta and its shadow violet. */
+  background-image:
+    radial-gradient(60rem 40rem at 15% -10%, color-mix(in oklab, var(--violet) 22%, transparent), transparent 70%),
+    radial-gradient(50rem 35rem at 90% 0%, color-mix(in oklab, var(--magenta) 12%, transparent), transparent 65%);
+  background-repeat: no-repeat;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--text);
+  text-decoration-color: color-mix(in oklab, var(--magenta) 50%, transparent);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--magenta);
+}
+
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* Layout primitives ------------------------------------------------------- */
+
+.page {
+  width: min(100% - 2.5rem, var(--page));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: clamp(3.5rem, 9vw, 6.5rem);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  margin: 0 0 1rem;
+}
+
+.lede {
+  color: var(--text-muted);
+  font-size: 1.06rem;
+  max-width: 46ch;
+}
+
+/* Buttons ----------------------------------------------------------------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-bright);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+}
+
+.button--primary {
+  background: linear-gradient(180deg, var(--magenta), var(--violet));
+  border-color: transparent;
+  color: var(--ink);
+  box-shadow: 0 12px 30px -14px var(--glow);
+}
+
+.button--primary:hover {
+  color: var(--ink);
+}
+
+.button--ghost {
+  background: color-mix(in oklab, var(--ink-raised) 80%, transparent);
+}
+
+.button--ghost:hover {
+  border-color: var(--magenta);
+}
+
+/* Cards ------------------------------------------------------------------- */
+
+.card {
+  background: linear-gradient(180deg, var(--ink-raised), color-mix(in oklab, var(--ink-raised) 60%, var(--ink)));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Status tags -------------------------------------------------------------
+ * Every capability claim on this site carries one. The project is in
+ * development and the difference between what runs and what is designed is
+ * part of the pitch, not a disclaimer hidden at the bottom.
+ */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-bright);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-faint);
+}
+
+.tag::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tag--shipped {
+  color: var(--green);
+  border-color: color-mix(in oklab, var(--green) 35%, transparent);
+}
+
+.tag--partial {
+  color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 35%, transparent);
+}
+
+.tag--designed {
+  color: var(--text-faint);
+  border-color: var(--line-bright);
+}
+
+/* Section headings -------------------------------------------------------- */
+
+.section__title {
+  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+  max-width: 20ch;
+}
+
+.section__lede {
+  margin-top: 1rem;
+}
+
+/* A pair of lines where the first is the hook and the second is what keeps it
+   honest. Used wherever the brand voice makes a claim the architecture has to
+   immediately qualify. */
+.couplet__hook {
+  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.couplet__turn {
+  margin-top: 0.9rem;
+  color: var(--text-muted);
+  font-size: 1.06rem;
+  max-width: 54ch;
+}

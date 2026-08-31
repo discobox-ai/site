@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Hero from '../components/Hero.astro';
+import Problem from '../components/Problem.astro';
+import Boundary from '../components/Boundary.astro';
+import Chain from '../components/Chain.astro';
+import Credentials from '../components/Credentials.astro';
+import Local from '../components/Local.astro';
+import Concepts from '../components/Concepts.astro';
+import Status from '../components/Status.astro';
+import CallToAction from '../components/CallToAction.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+
+<BaseLayout
+  title="Discobox — give your agents root, not your keys"
+  description="Discobox runs coding agents in disposable, network-isolated boxes with root and no credentials. Everything inside is unconstrained; everything that crosses the boundary goes through one door you control."
+>
+  <SiteHeader />
+  <main>
+    <Hero />
+    <Problem />
+    <Boundary />
+    <Chain />
+    <Credentials />
+    <Local />
+    <Concepts />
+    <Status />
+    <CallToAction />
+  </main>
+  <SiteFooter />
+</BaseLayout>

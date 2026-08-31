@@ -1,0 +1,4 @@
+# Not a workspace — this file carries the build allowlist pnpm reads from the
+# project root. esbuild is Astro's bundler and has to run its install script.
+allowBuilds:
+  esbuild: true

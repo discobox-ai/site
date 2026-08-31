@@ -1,0 +1,80 @@
+---
+const concepts = [
+  {
+    name: 'Discobox',
+    tag: 'the box',
+    body:
+      'A disposable environment with your source already in it. Every discobox has one default terminal — the harness, or a shell — and its own git remote, so work leaves as commits rather than as a diff you have to trust.',
+  },
+  {
+    name: 'Pool',
+    tag: 'the floor',
+    body:
+      'The host discoboxes are scheduled onto and the boundary they share. Boxes in a pool share a cache volume, a resource envelope, and a kernel: on Linux a local pool is a libkrun microVM, on macOS a Virtualization.framework VM.',
+  },
+  {
+    name: 'Harness',
+    tag: 'the act',
+    body:
+      'The agent a discobox runs. Claude Code and Codex ship built in, and because a harness is just an image carrying a label, any terminal coding agent you can install becomes one. Configure it once and every box gets it; the built-in shell is a harness too.',
+  },
+];
+---
+
+<section class="section" id="concepts">
+  <div class="page">
+    <p class="eyebrow">Concepts</p>
+    <h2 class="section__title">Three primitives, and no fourth.</h2>
+
+    <div class="concepts">
+      {
+        concepts.map((concept, index) => (
+          <div class="card concept">
+            <span class="concept__index">{String(index + 1).padStart(2, '0')}</span>
+            <h3 class="concept__name">{concept.name}</h3>
+            <p class="concept__tag">{concept.tag}</p>
+            <p class="concept__body">{concept.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .concepts {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 54rem) {
+    .concepts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .concept__index {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  .concept__name {
+    margin-top: 0.5rem;
+    font-size: 1.15rem;
+  }
+
+  .concept__tag {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--magenta);
+  }
+
+  .concept__body {
+    margin-top: 0.8rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+</style>

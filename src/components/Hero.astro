@@ -1,0 +1,168 @@
+---
+import InstallCommand from './InstallCommand.astro';
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+const session: Line[] = [
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox run "add rate limiting to the proxy"', tone: 'command' },
+  ],
+  [
+    { text: 'creating discobox ', tone: 'dim' },
+    { text: 'purple-mongoose', tone: 'warn' },
+  ],
+  [
+    { text: 'pool ', tone: 'dim' },
+    { text: 'local' },
+    { text: ' · harness ', tone: 'dim' },
+    { text: 'claude-code' },
+    { text: ' · source ', tone: 'dim' },
+    { text: '~/src/discobox' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' discobox running     ' },
+    { text: '3.1s', tone: 'dim' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' agent attached       ' },
+    { text: 'root · no approvals', tone: 'dim' },
+  ],
+  '',
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox apply purple-mongoose', tone: 'command' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' cherry-picked 3 commits onto ' },
+    { text: 'main', tone: 'warn' },
+  ],
+  [{ text: '$ ', tone: 'prompt' }, { tone: 'cursor' }],
+];
+---
+
+<section class="hero">
+  <div class="page hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow">Autonomy without the blast radius</p>
+
+      <h1 class="hero__title">
+        Give your agent its own <span class="hero__accent">disco</span>.
+      </h1>
+
+      <p class="hero__sub">
+        A whole computer it can do anything to — and no way to reach your keys.
+      </p>
+
+      <p class="lede hero__lede">
+        Root, any software it wants, no approval prompts. Discobox runs coding
+        agents in disposable boxes whose only way out is a proxy that holds your
+        credentials, so the agent works without ever holding them itself.
+      </p>
+
+      <div class="hero__actions">
+        <a class="button button--primary" href="#boundary">How it works</a>
+        <a class="button button--ghost" href="https://github.com/discobox-ai/discobox">
+          View on GitHub
+        </a>
+      </div>
+
+      <InstallCommand class="hero__install" />
+
+      <p class="hero__note">
+        Runs <strong>Claude Code</strong> and <strong>Codex</strong> today, and any
+        terminal coding agent you can put in an image
+      </p>
+      <p class="hero__note hero__note--quiet">
+        Open source · macOS, Linux, Windows · <a href="#status">In development</a>
+      </p>
+    </div>
+
+    <div class="hero__demo">
+      <TerminalWindow lines={session} title="discobox" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(3rem, 8vw, 5.5rem) clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+  }
+
+  @media (min-width: 62rem) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    }
+  }
+
+  .hero__title {
+    font-size: clamp(2.4rem, 6vw, 3.9rem);
+    max-width: 15ch;
+  }
+
+  .hero__accent {
+    background: linear-gradient(100deg, var(--magenta), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* The turn: the headline is a promise, and this is what it costs. */
+  .hero__sub {
+    margin-top: 1.15rem;
+    font-size: clamp(1.15rem, 2.1vw, 1.4rem);
+    color: var(--text);
+    max-width: 34ch;
+  }
+
+  .hero__lede {
+    margin-top: 1.1rem;
+    max-width: 52ch;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .hero :global(.hero__install) {
+    margin-top: 1.25rem;
+  }
+
+  .hero__note {
+    margin-top: 1.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .hero__note strong {
+    color: var(--magenta);
+    font-weight: 600;
+  }
+
+  .hero__note--quiet {
+    margin-top: 0.5rem;
+    color: var(--text-faint);
+  }
+
+  .hero__note a {
+    color: var(--text-faint);
+  }
+
+  .hero__demo {
+    min-width: 0;
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+import Wordmark from './Wordmark.astro';
+
+const links = [
+  { label: 'How it works', href: '/#how-it-works' },
+  { label: 'Security', href: '/security' },
+  { label: 'Status', href: '/#status' },
+];
+---
+
+<header class="header">
+  <div class="page header__inner">
+    <a class="brand" href="/" aria-label="Discobox">
+      <Wordmark variant="gradient" size="1.85rem" />
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+      <a class="button button--ghost nav__cta" href="https://github.com/discobox-ai/discobox">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(14px);
+    background: color-mix(in oklab, var(--ink) 78%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.85rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.94rem;
+  }
+
+  .nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+  }
+
+  .nav a:hover {
+    color: var(--text);
+  }
+
+  .nav__cta {
+    color: var(--text);
+  }
+
+  @media (max-width: 46rem) {
+    .nav a:not(.nav__cta) {
+      display: none;
+    }
+  }
+</style>
