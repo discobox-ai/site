@@ -37,12 +37,13 @@ const { variant = 'gradient', size = '1.9rem', class: className } = Astro.props;
 <style>
   /* The art carries a viewBox and no width/height, so an <img> has no
      intrinsic size to derive a width from: it paints once and then collapses.
-     The viewBox ratio is restated here so the box is deterministic. */
+     The viewBox ratio is restated here so the box is deterministic — keep it
+     in step with the art, or the wordmark renders stretched. */
   .wordmark {
     display: block;
     height: var(--wordmark-size);
     width: auto;
-    aspect-ratio: 962.7 / 178.2;
+    aspect-ratio: 993.18 / 178.1;
     filter: drop-shadow(0 0 14px color-mix(in oklab, var(--magenta) 28%, transparent));
   }
 </style>
