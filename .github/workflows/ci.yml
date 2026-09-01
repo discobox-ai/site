@@ -1,0 +1,41 @@
+name: CI
+
+# Cloudflare builds and deploys the site itself through the Workers & Pages
+# GitHub App, so nothing here deploys. This is the check Cloudflare does not
+# run: `astro check`, which Cloudflare's build command skips.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Type-check and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+
+      # .node-version is the single source of truth: Cloudflare's build image
+      # reads the same file, so CI and the deploy build stay on one version.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm check
+
+      - run: pnpm build
