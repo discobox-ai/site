@@ -7,11 +7,22 @@ interface Props {
 
 const { class: className } = Astro.props;
 const install = 'brew install discobox-ai/tap/discobox';
+
+// Where the command may break when it has to wrap. Only the space before the
+// package is a break the reader can follow: left to itself the line would also
+// break after the hyphen in `discobox-ai`, mid-name.
+const split = install.lastIndexOf(' ');
+const command = install.slice(0, split);
+const target = install.slice(split + 1);
 ---
 
 <div class:list={['install', className]}>
-  <code class="install__code"><span class="install__prompt">$</span> {install}</code>
-  <button class="install__copy" type="button" data-install={install}>Copy</button>
+  <div class="install__pill">
+    <code class="install__code"
+      ><span class="install__prompt">$</span> {command} <span class="install__target">{target}</span></code
+    >
+    <button class="install__copy" type="button" data-install={install}>Copy</button>
+  </div>
 </div>
 
 <script>
@@ -34,7 +45,24 @@ const install = 'brew install discobox-ai/tap/discobox';
 </script>
 
 <style>
+  /* The component carries its own query container, so a placement does not have
+     to declare one and there is no second rule keyed to the viewport to keep in
+     step with this one. The outer element is a plain block — it fills whatever
+     it is put in and measures that — and the pill inside it is what shrinks to
+     its contents. A container may not query itself, which is why these are two
+     elements rather than one. */
   .install {
+    container-type: inline-size;
+    /* Inline-size containment makes an element's width independent of its
+       contents, so a placement that sizes this one by them — a centred flex
+       column, say — resolves it to zero. It fills its placement instead, and
+       the pill inside keeps the shrink-to-fit that containment took away.
+       Alignment is the placement's: the pill is inline-flex, so it follows
+       whatever text-align it inherits. */
+    width: 100%;
+  }
+
+  .install__pill {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -56,7 +84,18 @@ const install = 'brew install discobox-ai/tap/discobox';
     margin-right: 0.45rem;
   }
 
+  .install__target {
+    white-space: nowrap;
+  }
+
+  /* Just above the width where the pill gives up there is a band where it fits
+     but only just. The command scrolls there, and the button is the point of
+     it, so it stays put while the command moves under it — inside a ring of the
+     pill's own background, so a glyph never shows in the padding beside it. */
   .install__copy {
+    position: sticky;
+    right: 0;
+    box-shadow: 0 0 0 0.45rem var(--ink-sunken);
     flex: none;
     border: 0;
     border-radius: 999px;
@@ -67,5 +106,40 @@ const install = 'brew install discobox-ai/tap/discobox';
     color: var(--ink);
     background: var(--magenta);
     cursor: pointer;
+  }
+
+  /* The command is 37 characters of monospace and the button is the width of
+     its label; under about 26rem the two cannot share a line without the
+     command being scrolled out of sight. So the pill becomes a card: the whole
+     command over two lines, and the button below it at a full tap target. */
+  /* 27rem is also Hero.astro's --pill: it places the screenshot past whatever
+     the pill can grow to, and a container query cannot read a custom property,
+     so the two carry the number separately. Change one and change the other. */
+  @container (max-width: 27rem) {
+    .install__pill {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.7rem;
+      width: 100%;
+      padding: 0.9rem;
+      border-radius: var(--radius);
+      overflow-x: visible;
+    }
+
+    /* The package is one nowrap token, so the only break left is the space
+       before it: `brew install` over `discobox-ai/tap/discobox`. */
+    .install__code {
+      white-space: normal;
+      word-break: keep-all;
+      line-height: 1.5;
+    }
+
+    .install__copy {
+      position: static;
+      box-shadow: none;
+      padding-block: 0.6rem;
+      font-size: 0.85rem;
+    }
   }
 </style>

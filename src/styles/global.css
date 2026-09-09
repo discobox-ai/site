@@ -180,9 +180,8 @@ kbd {
 }
 
 /* Status tags -------------------------------------------------------------
- * Every capability claim on this site carries one. The project is in
- * development and the difference between what runs and what is designed is
- * part of the pitch, not a disclaimer hidden at the bottom.
+ * A claim that is not yet true carries one, so the architecture page can say
+ * what runs and what is only designed without a disclaimer at the bottom.
  */
 
 .tag {
@@ -208,7 +207,7 @@ kbd {
   background: currentColor;
 }
 
-.tag--shipped {
+.tag--strong {
   color: var(--green);
   border-color: color-mix(in oklab, var(--green) 35%, transparent);
 }
@@ -218,20 +217,14 @@ kbd {
   border-color: color-mix(in oklab, var(--gold) 35%, transparent);
 }
 
+.tag--weak {
+  color: var(--salmon);
+  border-color: color-mix(in oklab, var(--salmon) 35%, transparent);
+}
+
 .tag--designed {
   color: var(--text-faint);
   border-color: var(--line-bright);
-}
-
-/* Section headings -------------------------------------------------------- */
-
-.section__title {
-  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
-  max-width: 20ch;
-}
-
-.section__lede {
-  margin-top: 1rem;
 }
 
 /* A pair of lines where the first is the hook and the second is what keeps it

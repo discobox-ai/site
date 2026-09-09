@@ -1,0 +1,87 @@
+---
+// The three claims the rest of the page argues, stated once, up front. Order
+// matters: autonomy is the product, safety is what makes it affordable, and
+// the experience is why you would use it every day.
+
+const pillars = [
+  {
+    name: 'Full autonomy',
+    href: '#autonomy',
+    body: 'A whole computer with sudo, a desktop and a browser. The more you give an agent, the better it works.',
+  },
+  {
+    name: 'Safe by construction',
+    href: '#safety',
+    body: 'VM and container isolation, one proxy out, no raw secrets inside, and every privileged use judged and on record.',
+  },
+  {
+    name: 'Feels like your laptop',
+    href: '#experience',
+    body: 'ssh, shell, your IDE, the desktop over VNC, and git — all a command away.',
+  },
+];
+---
+
+<section class="pillars-band">
+  <div class="page pillars">
+    {
+      pillars.map((pillar, index) => (
+        <a class="pillar" href={pillar.href}>
+          <span class="pillar__index">{String(index + 1).padStart(2, '0')}</span>
+          <h2 class="pillar__name">{pillar.name}</h2>
+          <span class="pillar__body">{pillar.body}</span>
+        </a>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .pillars-band {
+    border-block: 1px solid var(--line);
+    background: color-mix(in oklab, var(--ink-raised) 45%, transparent);
+    padding-block: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .pillars {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 54rem) {
+    .pillars {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+
+  .pillar {
+    display: grid;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .pillar__index {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--magenta);
+  }
+
+  .pillar__name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  .pillar:hover .pillar__name {
+    color: var(--magenta);
+  }
+
+  .pillar__body {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+</style>

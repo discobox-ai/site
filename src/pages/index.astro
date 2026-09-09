@@ -2,31 +2,25 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import Hero from '../components/Hero.astro';
-import Problem from '../components/Problem.astro';
-import Boundary from '../components/Boundary.astro';
-import Chain from '../components/Chain.astro';
-import Credentials from '../components/Credentials.astro';
-import Local from '../components/Local.astro';
-import Concepts from '../components/Concepts.astro';
-import Status from '../components/Status.astro';
+import Pillars from '../components/Pillars.astro';
+import Autonomy from '../components/Autonomy.astro';
+import Safety from '../components/Safety.astro';
+import Experience from '../components/Experience.astro';
 import CallToAction from '../components/CallToAction.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 ---
 
 <BaseLayout
-  title="Discobox — give your agents root, not your keys"
-  description="Discobox runs coding agents in disposable, network-isolated boxes with root and no credentials. Everything inside is unconstrained; everything that crosses the boundary goes through one door you control."
+  title="Discobox — give your agents a computer of their own"
+  description="Discobox gives coding agents full autonomy on a disposable machine: sudo, a desktop, a browser, no approval prompts. Your secrets never enter the box, and it still works like it is on your desk."
 >
   <SiteHeader />
   <main>
     <Hero />
-    <Problem />
-    <Boundary />
-    <Chain />
-    <Credentials />
-    <Local />
-    <Concepts />
-    <Status />
+    <Pillars />
+    <Autonomy />
+    <Safety />
+    <Experience />
     <CallToAction />
   </main>
   <SiteFooter />

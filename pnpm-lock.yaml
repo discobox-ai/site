@@ -18,6 +18,9 @@ importers:
       '@types/node':
         specifier: ^26.4.0
         version: 26.4.0
+      sharp:
+        specifier: ^0.35.4
+        version: 0.35.4(@types/node@26.4.0)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -3725,7 +3728,6 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.4
       '@img/sharp-win32-x64': 0.35.4
       '@types/node': 26.4.0
-    optional: true
 
   shiki@4.4.3:
     dependencies:

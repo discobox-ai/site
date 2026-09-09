@@ -1,0 +1,158 @@
+---
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+// What the agent actually gets. This is the product; everything after it
+// exists so that this can be true.
+
+const freedoms = [
+  {
+    name: 'A whole computer, and sudo on it',
+    body: 'Passwordless sudo, so nothing on the machine is out of reach. No tool allowlists, no command approvals, no permission prompts — if the job needs a package manager, a compiler, a database or nested Docker, the agent goes and gets it.',
+  },
+  {
+    name: 'A desktop and a browser',
+    body: 'Not just a shell. There is a graphical session in the box and a real browser in it, so the agent can click through the app it just built, read a page that will not curl, and use anything that expects a screen.',
+  },
+  {
+    name: 'It can ask for more',
+    body: 'When it needs access it does not have, it asks for it and says what for. You grant it — scoped to a host, with an expiry. The agent is not stuck at whatever you thought to give it up front.',
+  },
+  {
+    name: 'Disposable, and cheap to run many',
+    body: 'A wrecked environment is a box you throw away, not an afternoon you lose. Boxes are independent, so several agents can work the same source at once without standing on each other.',
+  },
+];
+
+const session: Line[] = [
+  [{ text: '# inside the box, nothing is off limits', tone: 'dim' }],
+  [
+    { text: 'agent@purple-mongoose:~$ ', tone: 'prompt' },
+    { text: 'sudo -n true && echo ok', tone: 'command' },
+  ],
+  [{ text: 'ok' }],
+  [
+    { text: 'agent@purple-mongoose:~$ ', tone: 'prompt' },
+    { text: 'sudo apt-get install -y postgresql', tone: 'command' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' installed  ' },
+    { text: 'no approval asked', tone: 'dim' },
+  ],
+  [
+    { text: 'agent@purple-mongoose:~$ ', tone: 'prompt' },
+    { text: 'docker run -d redis', tone: 'command' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' running   ' },
+    { text: 'nested docker', tone: 'dim' },
+  ],
+  [
+    { text: 'agent@purple-mongoose:~$ ', tone: 'prompt' },
+    { text: 'chromium http://localhost:3000', tone: 'command' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' window on  ' },
+    { text: ':1  desktop session', tone: 'dim' },
+  ],
+  [{ text: 'agent@purple-mongoose:~$ ', tone: 'prompt' }, { tone: 'cursor' }],
+];
+---
+
+<section class="section" id="autonomy">
+  <div class="page">
+    <p class="eyebrow">Autonomy</p>
+    <h2 class="couplet__hook">The more you give an agent, the better it works.</h2>
+    <p class="couplet__turn">
+      Every capability you withhold is work the agent cannot do — and every prompt it
+      has to stop and ask is a task it does not finish. So a discobox withholds
+      nothing. It is a full computer, and the agent owns it.
+    </p>
+
+    <div class="autonomy">
+      <ul class="freedoms">
+        {
+          freedoms.map((freedom) => (
+            <li class="freedom">
+              <p class="freedom__name">{freedom.name}</p>
+              <p class="freedom__body">{freedom.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="autonomy__demo">
+        <TerminalWindow lines={session} title="inside the box" />
+      </div>
+    </div>
+
+    <p class="turn">
+      There have only ever been two ways to run an agent: lock it down until it cannot
+      work, or let it loose on the machine holding your keys. Discobox refuses both.
+      The limit does not belong on what an agent <em>can do</em> — that part is
+      infinite, and it is the part you want. It belongs on what
+      it <em>can reach</em>, which is finite, and which is exactly one thing.
+    </p>
+  </div>
+</section>
+
+<style>
+  .autonomy {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    margin-top: 2.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    /* Tops aligned rather than centres: the terminal is much shorter than the
+       list beside it, and centring leaves it hanging in the middle of the
+       column with space above and below. */
+    align-items: start;
+  }
+
+  @media (min-width: 62rem) {
+    .autonomy {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .freedoms {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .freedom {
+    border-left: 2px solid var(--magenta);
+    padding-left: 1rem;
+  }
+
+  .freedom__name {
+    font-weight: 650;
+  }
+
+  .freedom__body {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .autonomy__demo {
+    min-width: 0;
+  }
+
+  .turn {
+    margin-top: 2.75rem;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    max-width: 60ch;
+    color: var(--text);
+  }
+
+  .turn em {
+    font-style: normal;
+    color: var(--magenta);
+  }
+</style>

@@ -1,0 +1,143 @@
+---
+// A screenshot of the running application, sized wider than the text column
+// because these are 132-column terminal captures and the type in them is only
+// legible with the room. Each one links to the full-resolution file, since no
+// responsive width makes a terminal readable on a phone.
+//
+// The captures arrive with their own flat border cropped off by
+// `scripts/sync-assets.mjs`, so nothing here has to know how much of one a
+// given shot was published with.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  /** Omitted for the hero, where the copy above it is the caption. */
+  caption?: string;
+  /**
+   * What the browser should assume this placement measures, in the form the
+   * `sizes` attribute takes. Required: the widths below are meaningless
+   * without it, and every placement here is narrower than the 100vw a browser
+   * assumes in its absence.
+   */
+  sizes: string;
+  /** Above the fold: load it eagerly rather than when it scrolls into view. */
+  priority?: boolean;
+  /**
+   * Show the left of the capture and fade the rest out. For a placement with
+   * less width than the shot needs to stay legible: shrinking it to fit costs
+   * the type, and a hard edge reads as a mistake.
+   */
+  fade?: boolean;
+  class?: string;
+}
+
+const { src, alt, caption, sizes, priority = false, fade = false, class: className } = Astro.props;
+
+// The capture's own width is always a candidate; the fixed steps are dropped
+// once they come within a tenth of it, so a shot that happens to be 1705 wide
+// does not ship a 1680 beside it for the sake of 25 pixels.
+const widths = [...[720, 1120, 1680].filter((width) => width < src.width * 0.9), src.width];
+---
+
+<figure class:list={['shot', className]}>
+  <a
+    class:list={['shot__frame', fade && 'shot__frame--fade']}
+    href={src.src}
+    aria-label={`${alt} — open the full-size image`}
+  >
+    <Image
+      src={src}
+      alt={alt}
+      widths={widths}
+      sizes={sizes}
+      quality={92}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+    />
+  </a>
+  {caption && <figcaption class="shot__caption">{caption}</figcaption>}
+  <p class="shot__hint">Tap to open it full size</p>
+</figure>
+
+<style>
+  .shot {
+    margin: clamp(2rem, 5vw, 3rem) 0 0;
+  }
+
+  .shot__frame {
+    display: block;
+    border-radius: var(--radius);
+    overflow: hidden;
+    line-height: 0;
+    box-shadow: 0 40px 80px -50px var(--glow);
+    /* The image is the whole target, so the pointer is the only thing saying
+       what a click does. */
+    cursor: zoom-in;
+    outline-offset: 3px;
+  }
+
+  .shot__frame img {
+    width: 100%;
+    height: auto;
+    transition: opacity 140ms ease;
+  }
+
+  .shot__frame:hover img,
+  .shot__frame:focus-visible img {
+    opacity: 0.86;
+  }
+
+  .shot__frame:focus-visible {
+    outline: 2px solid var(--magenta);
+  }
+
+  /* The fade is a mask rather than a gradient laid over the image, so it works
+     whatever is behind the figure. It applies only where the placement is wide
+     enough to be showing part of a shot: stacked on a narrow screen the whole
+     capture is in view, and masking half of it away would be a bug. How much
+     is kept is the placement's call, through --fade-start / --fade-end, since
+     only it knows how much of the shot its space actually shows. The
+     breakpoint is the one the hero splits into two columns at — they have to
+     be the same number, or there is a band where the shot is in a column and
+     not faded. */
+  @media (min-width: 56rem) {
+    .shot__frame--fade {
+      border-radius: var(--radius) 0 0 var(--radius);
+      box-shadow: none;
+      -webkit-mask-image: linear-gradient(
+        to right,
+        #000 var(--fade-start, 42%),
+        transparent var(--fade-end, 76%)
+      );
+      mask-image: linear-gradient(
+        to right,
+        #000 var(--fade-start, 42%),
+        transparent var(--fade-end, 76%)
+      );
+    }
+  }
+
+  .shot__caption {
+    margin-top: 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text-faint);
+  }
+
+  /* Small screens render the whole capture at a size nothing in it can be read
+     at, so they get the one thing that helps: the fact that it opens. Wider
+     ones have the cursor and the hover state instead. */
+  .shot__hint {
+    display: none;
+  }
+
+  @media (max-width: 48rem) {
+    .shot__hint {
+      display: block;
+      margin: 0.35rem 0 0;
+      font-size: 0.9rem;
+      color: var(--magenta);
+    }
+  }
+</style>

@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "gen:logo": "node scripts/gen-logo.mjs"
+    "sync:assets": "node scripts/sync-assets.mjs"
   },
   "dependencies": {
     "astro": "^7.2.4"
@@ -16,6 +16,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
     "@types/node": "^26.4.0",
+    "sharp": "^0.35.4",
     "typescript": "^5.9.3",
     "wrangler": "^4.128.0"
   },

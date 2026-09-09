@@ -1,0 +1,4 @@
+# /security was the page's URL before it was rewritten as /architecture.
+# Cloudflare Pages serves this file as real redirects; it is copied verbatim
+# from public/ into the build output.
+/security /architecture 301

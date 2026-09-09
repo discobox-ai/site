@@ -1,0 +1,294 @@
+---
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+// The diagram is built from elements rather than an SVG so it reflows to a
+// stacked column on narrow screens instead of shrinking its labels to nothing.
+
+const beats = [
+  {
+    name: 'VM and container isolation',
+    body: 'Every environment is a container nested inside a VM — libkrun on Linux, the Apple Virtualization framework on macOS, and the Windows Host Compute Service, which is what WSL itself runs on, so Windows Home too. Two technologies rather than one, on all three platforms, and the box is disposable either way.',
+  },
+  {
+    name: 'Everything leaves through the proxy',
+    body: 'All traffic goes through a MITM proxy carrying a per-box mTLS identity. Destinations are policy, not the internet, and every request is audited and attributable to a single box.',
+  },
+  {
+    name: 'Agents never hold raw secrets',
+    body: 'What sits in the environment is a sentinel — a placeholder that means nothing anywhere else. The real value is swapped in at the door, only for the domain that credential is bound to.',
+  },
+  {
+    name: 'Privileged actions go to a judge',
+    body: 'Anything privileged is read by an LLM judge against grants you wrote in English, so one grant covers a class of requests instead of a prompt per call, and no credential is issued without that verdict on record. The judge runs in the box today, which makes it a guardrail against an agent that drifts rather than a fourth boundary — the three above it are what hold against one that lies.',
+  },
+];
+
+const session: Line[] = [
+  [{ text: '# the agent asks, and says what for', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox secret request ls', tone: 'command' },
+  ],
+  [
+    { text: 'req_8fk2  ', tone: 'warn' },
+    { text: 'gh-token  api.github.com  pending', tone: 'dim' },
+  ],
+  [{ text: '          "publish a release for this repo"' }],
+  '',
+  [{ text: '# you decide', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox secret approve req_8fk2 --secret-id gh-token', tone: 'command' },
+  ],
+  [
+    { text: '✓', tone: 'ok' },
+    { text: ' granted · host ' },
+    { text: 'api.github.com', tone: 'warn' },
+    { text: ' · expires ' },
+    { text: '2h', tone: 'warn' },
+  ],
+  '',
+  [{ text: '# the box only ever holds this', tone: 'dim' }],
+  [
+    { text: 'GITHUB_TOKEN=', tone: 'dim' },
+    { text: 'dbx-sentinel-01J8F…', tone: 'warn' },
+  ],
+];
+---
+
+<section class="section" id="safety">
+  <div class="page">
+    <p class="eyebrow">Safety</p>
+    <h2 class="couplet__hook">The agent gets the machine. Your credentials never enter it.</h2>
+    <p class="couplet__turn">
+      That freedom is only affordable because it stops at the edge of the box. What
+      the agent does inside is unobserved, by design — it only becomes risk when it
+      leaves or when it causes an effect, and both go through the same door.
+    </p>
+
+    <div class="diagram" role="img"
+      aria-label="A discobox on one side, the world on the other, and a single door between them holding your credentials.">
+      <div class="zone zone--box">
+        <p class="zone__label">the discobox</p>
+        <p class="zone__lead">sudo · desktop · browser · nested docker</p>
+        <p class="zone__note">Unconstrained, by design</p>
+      </div>
+
+      <div class="door" aria-hidden="true">
+        <div class="door__line"></div>
+        <div class="door__badge">
+          <span class="door__badge-title">the door</span>
+          <span class="door__badge-sub">proxy · mTLS · judge · audit</span>
+          <span class="door__keys">your credentials live here</span>
+        </div>
+        <div class="door__line"></div>
+      </div>
+
+      <div class="zone zone--world">
+        <p class="zone__label">everything else</p>
+        <p class="zone__lead">npm · github · your APIs · the internet</p>
+        <p class="zone__note">Reached only through the door</p>
+      </div>
+    </div>
+
+    <div class="proof">
+      <div class="proof__copy">
+        <ul class="beats">
+          {
+            beats.map((beat) => (
+              <li class="beat">
+                <p class="beat__name">{beat.name}</p>
+                <p class="beat__body">{beat.body}</p>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="proof__note">
+          A fully compromised agent has no secret to steal, no second route out, and
+          nothing it can reach that a human did not grant it.
+        </p>
+
+        <a class="button button--ghost" href="/architecture">
+          Read the architecture
+        </a>
+      </div>
+
+      <div class="proof__demo">
+        <TerminalWindow lines={session} title="credential grant" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .diagram {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2.75rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  @media (min-width: 56rem) {
+    .diagram {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 0;
+    }
+  }
+
+  .zone {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.4rem;
+    background: linear-gradient(180deg, var(--ink-raised), color-mix(in oklab, var(--ink-raised) 55%, var(--ink)));
+  }
+
+  .zone--box {
+    border-color: color-mix(in oklab, var(--magenta) 40%, var(--line));
+    box-shadow: inset 0 0 60px -30px var(--glow);
+  }
+
+  .zone__label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .zone--box .zone__label {
+    color: var(--magenta);
+  }
+
+  .zone__lead {
+    margin-top: 0.6rem;
+    font-size: 1.02rem;
+    color: var(--text);
+  }
+
+  .zone__note {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-faint);
+  }
+
+  /* The door is a full-height rule with the badge sitting in it, so the two
+     sides read as separated by something rather than merely adjacent. */
+  .door {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding-block: 0.5rem;
+  }
+
+  @media (min-width: 56rem) {
+    .door {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .door__line {
+    flex: 1;
+    width: 100%;
+    min-height: 1.25rem;
+    border-top: 1px dashed var(--line-bright);
+  }
+
+  @media (min-width: 56rem) {
+    .door__line {
+      width: 0;
+      min-height: 0;
+      border-top: 0;
+      border-left: 1px dashed var(--line-bright);
+    }
+  }
+
+  .door__badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    text-align: center;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--gold);
+    background: var(--ink-sunken);
+    box-shadow: 0 0 40px -20px var(--gold);
+  }
+
+  .door__badge-title {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .door__badge-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .door__keys {
+    margin-top: 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.82rem;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .proof {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    grid-template-columns: minmax(0, 1fr);
+    /* As in Autonomy: the terminal is the shorter column, so it hangs off the
+       top of the beats rather than floating in the middle of them. */
+    align-items: start;
+  }
+
+  @media (min-width: 62rem) {
+    .proof {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .beats {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.3rem;
+  }
+
+  .beat {
+    border-top: 2px solid var(--magenta);
+    padding-top: 0.85rem;
+  }
+
+  .beat__name {
+    font-weight: 650;
+  }
+
+  .beat__body {
+    margin-top: 0.45rem;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+  }
+
+  .proof__note {
+    margin: 1.75rem 0 1.5rem;
+    color: var(--text);
+    max-width: 52ch;
+  }
+
+  .proof__demo {
+    min-width: 0;
+  }
+</style>
