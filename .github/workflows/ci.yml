@@ -1,12 +1,10 @@
 name: CI
 
-# Cloudflare builds and deploys the site itself through the Workers & Pages
-# GitHub App, so nothing here deploys. This is the check Cloudflare does not
-# run: `astro check`, which Cloudflare's build command skips.
+# Type-check and build every pull request. Pushes to main and preview are
+# covered by deploy.yml, which runs the same `pnpm check` and `pnpm build`
+# before it deploys, so they are deliberately not duplicated here.
 on:
   pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -27,8 +25,9 @@ jobs:
 
       - uses: pnpm/action-setup@v6
 
-      # .node-version is the single source of truth: Cloudflare's build image
-      # reads the same file, so CI and the deploy build stay on one version.
+      # .node-version is the single source of truth: deploy.yml reads the
+      # same file, so the checked build and the deployed build stay on one
+      # version.
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version

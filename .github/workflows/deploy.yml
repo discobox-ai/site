@@ -1,0 +1,57 @@
+name: Deploy
+
+# main -> discobox.ai, preview -> preview.discobox.ai.
+# Both are Workers deploys driven from this repo, so the deployed commit is
+# always one that passed CI here. The two targets are the top-level and the
+# `preview` environment in wrangler.jsonc.
+on:
+  push:
+    branches: [main, preview]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two deploys to the same branch overlap, and never cancel one
+# midway: a half-finished asset upload would leave the site inconsistent.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm check
+
+      - run: pnpm build
+
+      # wrangler comes from devDependencies, so the deploy uses the same
+      # pinned version as a local `pnpm exec wrangler deploy`.
+      - name: Deploy to discobox.ai
+        if: github.ref_name == 'main'
+        run: pnpm exec wrangler deploy --env=""
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy to preview.discobox.ai
+        if: github.ref_name == 'preview'
+        run: pnpm exec wrangler deploy --env preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

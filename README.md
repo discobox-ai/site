@@ -100,95 +100,68 @@ Two things about the cell data, and one about the wordmarks:
 
 ## Deployment
 
-The site is deployed by Cloudflare's **Workers & Pages GitHub App**, the same
-way [docs.obot.ai](https://docs.obot.ai) is deployed from `obot-platform/obot`.
-Cloudflare watches the repository, runs the build on its own infrastructure and
-publishes the result. There is no deploy workflow here and no API token stored
-anywhere — the only workflow, `ci.yml`, runs `astro check`, which Cloudflare's
-build does not.
+The site is a **Cloudflare Worker serving static assets** — `wrangler.jsonc`
+points `assets.directory` at `dist/` and there is no `main`, so no Worker code
+runs. GitHub Actions builds and deploys it; Cloudflare does not watch the
+repository. That keeps one build image (`.node-version` + `packageManager`) for
+both the checked build and the deployed one.
 
-| Push | Result |
-| --- | --- |
-| `main` | Production → [discobox.ai](https://discobox.ai) |
-| any other branch | Preview → `https://<branch>.discobox-site.pages.dev` |
-
-`public/_redirects` is part of that deploy: Cloudflare reads it from the build
-output and serves it as real redirects. It currently holds one line, keeping
-`/security` — the URL the architecture page shipped under first, and the one the
-upstream README still links — alive as a 301 to `/architecture`. Nothing on this
-site links `/security` any more, and neither `pnpm dev` nor `pnpm preview` reads
-the file, so it is only ever exercised in production: a mistake in it shows up
-as an external link 404ing and nowhere else. Check it against a preview deploy
-rather than locally.
-
-Open the pull request from a branch **on this repository**, not from a fork.
-Cloudflare does not build previews for pull requests from forks — it is a
-documented [known issue](https://developers.cloudflare.com/pages/platform/known-issues/):
-*"Commits/PRs from forked repositories will not create a preview."* A fork PR
-still gets `ci.yml`, so it is checked and built, just without a preview URL. If
-you need a preview for one, push the branch here and reopen the PR against it.
-
-### Connecting the project
-
-In the Cloudflare dashboard: *Workers & Pages → Create → Pages → Connect to
-Git*, pick this repository, and set:
-
-| Setting | Value |
-| --- | --- |
-| Production branch | `main` |
-| Framework preset | Astro |
-| Build command | `pnpm build` |
-| Build output directory | `dist` |
-| Root directory | *(leave empty)* |
-
-Then add these under *Settings → Variables and secrets*, for **both** the
-production and preview environments:
-
-| Variable | Value | Why |
+| Push | Worker | URL |
 | --- | --- | --- |
-| `PNPM_VERSION` | `11.9.0` | Required. See below. |
-| `NODE_VERSION` | `24.20.0` | Belt and braces alongside `.node-version`. |
+| `main` | `discobox-ai` | [discobox.ai](https://discobox.ai) |
+| `preview` | `discobox-ai-preview` | [preview.discobox.ai](https://preview.discobox.ai) |
 
-Finally, *Custom domains → Set up a custom domain* → `discobox.ai`, after the
-first production deploy has something to serve.
+The two targets are the top-level config and the `preview` environment in
+`wrangler.jsonc`. Wrangler derives the preview Worker's name by appending the
+environment, which is why it is `discobox-ai-preview` and not something set by
+hand. Both set `workers_dev: false`, so neither is reachable at a
+`*.workers.dev` URL — the custom domain is the only way in.
 
-### The two version pins are not optional
+`public/_redirects` is part of the deploy too: Workers static assets reads it
+from the build output and serves it as real redirects. It currently holds one
+line, keeping `/security` — the URL the architecture page shipped under first,
+and the one the upstream README still links — alive as a 301 to
+`/architecture`. Nothing on this site links `/security` any more, and neither
+`pnpm dev` nor `pnpm preview` reads the file, so it is only ever exercised in a
+real deploy: a mistake in it shows up as an external link 404ing and nowhere
+else. Push to `preview` and check it against preview.discobox.ai rather than
+locally.
 
-Both defaults in Cloudflare's
-[v3 build image](https://developers.cloudflare.com/pages/configuration/build-image/)
-are too old for this project, and one of them fails in a way that does not
-obviously point at the cause:
+Any other branch deploys nowhere. Open a pull request and `ci.yml` type-checks
+and builds it; to see it served, push to `preview`.
 
-- **pnpm.** The documented default is pnpm 10.11.1 (still 10.11.1 as of
-  September 2026, on both the Pages and Workers build image pages).
-  `pnpm-workspace.yaml` uses `allowBuilds`, which is
-  [pnpm 11 syntax](https://pnpm.io/blog/releases/11.0) — it replaced
-  `onlyBuiltDependencies`. pnpm 10 does not recognise the key, so it silently
-  declines to run esbuild's install script, and the build then fails somewhere
-  inside Astro looking for a binary that was never downloaded.
-- **Node.** The Pages image defaults to Node 22.16.0 and `package.json`
-  requires `>=24.18.0`. The v3 build system explicitly does **not** read
-  `engines` from `package.json`, so the version has to come from
-  `.node-version` (committed, and also what `ci.yml` reads) or `NODE_VERSION`.
+### What the deploy needs
 
-Do not treat those default versions as fixed. The v3 image is the last one —
-there will be no v4 — and it now takes *rolling* updates instead: minor
-versions can move without notice, major versions with three months' notice via
-the [changelog](https://developers.cloudflare.com/changelog/). So the reason to
-pin is not only that today's defaults are too old, but that they are a moving
-target. Cloudflare's own advice is the same: *"we also recommend pinning all
-critical tools and languages that your project relies on."*
+`deploy.yml` reads two repository secrets:
 
-If a Cloudflare build fails after a dependency change, check these two first.
+| Secret | Value |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Token with *Workers Scripts:Edit* on the account, plus *Zone:Read*, *Workers Routes:Edit* and *DNS:Edit* on `discobox.ai` |
+| `CLOUDFLARE_ACCOUNT_ID` | `27da65de69e2c4d905c1849912684b76` (Obot AI) |
 
-### If we ever need previews for fork pull requests
+The zone permissions matter only when a custom domain is being attached or
+changed; a deploy that touches no routes needs just the Workers scope. There is
+no OIDC for Cloudflare, so that token is copied by hand and has to be rotated
+the same way.
 
-That is the one thing this setup cannot do, and it is a one-way door:
-*"If you deploy using the Git integration, you cannot switch to Direct Upload
-later."* Moving to the GitHub Actions approach means deleting the Pages project
-and recreating it as a Direct Upload project, which drops the custom domain
-until it is reattached. The Actions version needs a `pull_request_target`
-workflow that builds the PR in a job with no secrets and deploys the artifact
-from a second job gated on a GitHub Environment with required reviewers, plus a
-Cloudflare API token stored as an environment secret — Cloudflare has no OIDC,
-so that token would have to be copied and rotated by hand.
+Fork pull requests never deploy: `deploy.yml` runs on `push`, and secrets are
+withheld from fork PRs regardless. A fork PR still gets `ci.yml`.
+
+### The pnpm pin is not optional
+
+`pnpm-workspace.yaml` uses `allowBuilds`, which is
+[pnpm 11 syntax](https://pnpm.io/blog/releases/11.0) — it replaced
+`onlyBuiltDependencies`. pnpm 10 does not recognise the key, so it silently
+declines to run esbuild's install script and the build then fails somewhere
+inside Astro looking for a binary that was never downloaded. In CI this is
+handled by `pnpm/action-setup`, which reads `packageManager` from
+`package.json`; keep that field and `.node-version` in step with `engines`.
+
+### History
+
+The Worker was first created in the dashboard as **`discobot-ai`** — a typo,
+made easier by `discobot.ai` being a real zone on the same account — and
+`wrangler.jsonc` was then written to match it, so the site served from
+`discobot-ai.acorn-io.workers.dev` with no custom domain attached. The rename
+to `discobox-ai` created a new Worker; the old one is a separate script and has
+to be deleted in the dashboard.

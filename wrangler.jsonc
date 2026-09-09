@@ -1,8 +1,22 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "discobot-ai",
+  "name": "discobox-ai",
   "compatibility_date": "2026-09-01",
   "assets": {
     "directory": "./dist"
+  },
+  // main deploys here. workers_dev is off so the only public URL is the
+  // custom domain -- no stray *.workers.dev copy of the site.
+  "workers_dev": false,
+  "routes": [{ "pattern": "discobox.ai", "custom_domain": true }],
+  "env": {
+    // the `preview` branch deploys here, as the discobox-ai-preview Worker.
+    "preview": {
+      "assets": {
+        "directory": "./dist"
+      },
+      "workers_dev": false,
+      "routes": [{ "pattern": "preview.discobox.ai", "custom_domain": true }]
+    }
   }
 }
