@@ -9,37 +9,37 @@ const buckets = [
   {
     name: 'ssh, or a shell in one keystroke',
     body:
-      'ssh $DISCOBOX_ID works the moment you run discobox admin ssh-config --write, and discobox shell drops you straight into the box. It is a host you can reach, not a session you have to negotiate with.',
+      'Run discobox admin ssh-config --write once and ssh $DISCOBOX_ID works. discobox shell opens a shell in the box directly.',
     line: '$ ssh purple-mongoose',
   },
   {
     name: 'Your editor, attached',
     body:
-      'Because it is a real ssh host, VS Code, Cursor, JetBrains and anything else with a remote mode open the box directly — discobox tools vscode launches yours at the right folder. You read and edit what the agent is working on in the editor you already use.',
+      'The box is a normal ssh host, so VS Code, Cursor, JetBrains and any editor with a remote mode can open it. discobox tools vscode opens your editor at the project folder.',
     line: '$ discobox tools vscode',
   },
   {
     name: 'The desktop in your browser',
     body:
-      'The box runs a desktop with a real browser on it, served over VNC and noVNC. Forward the port and you can watch the agent click through the app it just built, take the mouse when it gets stuck, or open the page yourself.',
+      'The box desktop and browser are served over VNC and noVNC. Forward the port to watch the agent, take over the mouse, or use the browser yourself.',
     line: '$ discobox proxy --port 6080',
   },
   {
     name: 'git in, commits out',
     body:
-      'Your source is cloned in and every box has its own git remote. Commits are cherry-picked onto your working tree when you apply, so you review history in the tools you already use — not a diff you have to trust.',
+      'Your source is cloned into the box, and each box has its own git remote. discobox apply cherry-picks its commits onto your working tree, so you review real commits, not a raw diff.',
     line: '$ discobox apply purple-mongoose',
   },
   {
     name: 'Your toolchain comes along',
     body:
-      'direnv is wired up, so nix, mise, or whatever your project already declares pulls your toolchain into the box on entry. Nothing to re-describe in a Dockerfile, and boxes launch in seconds with the agent ready to go.',
+      'direnv runs on entry, so nix, mise or whatever your project declares sets up the toolchain. No Dockerfile to write. Boxes start in seconds.',
     line: 'direnv: loading .envrc · nix develop',
   },
   {
     name: 'Drive it or script it',
     body:
-      'A TUI when you want to watch, a full OpenAPI surface and a scriptable CLI when you do not. Anything the interface does a shell script can do: create boxes, grant secrets, collect the results.',
+      'A TUI for interactive use, plus a scriptable CLI and a full OpenAPI API. Anything the TUI does can be scripted: create boxes, grant secrets, collect results.',
     line: '$ discobox ls --output json',
   },
 ];
@@ -50,12 +50,9 @@ const buckets = [
     <p class="eyebrow">Experience</p>
     <h2 class="couplet__hook">The box is somewhere else. It should never feel like it.</h2>
     <p class="couplet__turn">
-      The reason you work on your laptop is that everything is already there. A remote
-      machine gives that up, and most sandboxes stop caring at that point. Most of
-      Discobox is spent giving it back: ssh, a shell, your editor, the desktop over
-      VNC, git — every one of them a command away. And it is the same architecture
-      doing it, because every crossing already goes through a channel Discobox
-      controls, which can just as well make the box feel local on the way in.
+      The box is isolated from your machine, but you work with it as if it were
+      local: ssh, a shell, your editor, the desktop over VNC and git, each one command
+      away.
     </p>
 
     <Screenshot

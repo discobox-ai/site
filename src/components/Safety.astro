@@ -8,19 +8,19 @@ import type { Line } from './TerminalWindow.astro';
 const beats = [
   {
     name: 'VM and container isolation',
-    body: 'Every environment is a container nested inside a VM — libkrun on Linux, the Apple Virtualization framework on macOS, and the Windows Host Compute Service, which is what WSL itself runs on, so Windows Home too. Two technologies rather than one, on all three platforms, and the box is disposable either way.',
+    body: 'Each environment is a container inside a VM: libkrun on Linux, the Apple Virtualization framework on macOS, and the Windows Host Compute Service on Windows (the layer WSL uses, so Windows Home works). Two layers of isolation on every platform.',
   },
   {
     name: 'Everything leaves through the proxy',
-    body: 'All traffic goes through a MITM proxy carrying a per-box mTLS identity. Destinations are policy, not the internet, and every request is audited and attributable to a single box.',
+    body: 'All traffic goes through a MITM proxy using a per-box mTLS identity. Allowed destinations are set by policy. Every request is logged and tied to one box.',
   },
   {
     name: 'Agents never hold raw secrets',
-    body: 'What sits in the environment is a sentinel — a placeholder that means nothing anywhere else. The real value is swapped in at the door, only for the domain that credential is bound to.',
+    body: 'The environment holds a placeholder, not the secret. The proxy swaps in the real value only on requests to the domain the credential is bound to.',
   },
   {
     name: 'Privileged actions go to a judge',
-    body: 'Anything privileged is read by an LLM judge against grants you wrote in English, so one grant covers a class of requests instead of a prompt per call, and no credential is issued without that verdict on record. The judge runs in the box today, which makes it a guardrail against an agent that drifts rather than a fourth boundary — the three above it are what hold against one that lies.',
+    body: 'An LLM judge checks privileged requests against grants you write in plain English. One grant covers a class of requests, so you do not approve each call. No credential is issued without a logged verdict. The judge currently runs inside the box, so it catches an agent that drifts, not one that is hostile; the three layers above handle that.',
   },
 ];
 
@@ -62,9 +62,9 @@ const session: Line[] = [
     <p class="eyebrow">Safety</p>
     <h2 class="couplet__hook">The agent gets the machine. Your credentials never enter it.</h2>
     <p class="couplet__turn">
-      That freedom is only affordable because it stops at the edge of the box. What
-      the agent does inside is unobserved, by design — it only becomes risk when it
-      leaves or when it causes an effect, and both go through the same door.
+      Inside the box the agent is unrestricted. Anything that leaves it, network
+      traffic or credential use, goes through one proxy, and that is where the
+      controls are.
     </p>
 
     <div class="diagram" role="img"
@@ -106,8 +106,8 @@ const session: Line[] = [
         </ul>
 
         <p class="proof__note">
-          A fully compromised agent has no secret to steal, no second route out, and
-          nothing it can reach that a human did not grant it.
+          A compromised agent has no secrets to steal, no other way out, and can reach
+          only what you granted.
         </p>
 
         <a class="button button--ghost" href="/architecture">
