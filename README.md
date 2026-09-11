@@ -13,6 +13,26 @@ pnpm check       # astro check (TypeScript + template diagnostics)
 pnpm sync:assets # re-sync the brand art and screenshots from the discobox repository
 ```
 
+## The install scripts
+
+`curl -sSfL https://discobox.ai | sh` and `irm https://discobox.ai/install.ps1 |
+iex` are served by the one piece of code here, [`worker/index.ts`](worker/index.ts):
+a Worker in front of the static assets that `wrangler.jsonc` runs for `/`,
+`/install.sh`, and `/install.ps1` only. On `/` it answers curl, wget, and
+PowerShell with a script and everyone else with the site.
+
+The scripts are not in this repository. Each discobox release uploads its own,
+stamped with the release it installs, and the Worker fetches them through the
+asset mirror at `assets.discobox.ai`:
+
+| Host | Serves |
+| --- | --- |
+| `discobox.ai` | the newest stable release's installer (the mirror's `latest` alias) |
+| `edge.discobox.ai` | the newest release's installer, prereleases included: the newer of the mirror's `latest` and `prerelease` aliases |
+
+Why it is shaped this way — and why the rules for `edge` must match the scripts'
+own — is discobox's ADR 0109.
+
 ## Brand assets and screenshots
 
 The brand art and the screenshots are committed here so the site builds and
