@@ -39,8 +39,8 @@ import launcher from '../assets/screens/launcher.png';
     </div>
 
     <p class="hero__note">
-      Claude Code and Codex today, or any terminal agent in an image · macOS, Linux,
-      Windows · Open source, in development
+      Claude Code and Codex today, or any terminal agent in an image · Open source, in
+      development
     </p>
   </div>
 </section>
@@ -76,10 +76,12 @@ import launcher from '../assets/screens/launcher.png';
        query cannot read a custom property, so the number lives there and this
        mirrors it. Both comments say so; change one and change the other.
 
-       The pill's drawn width is its content, not this — they agree to within a
-       pixel on the fonts to hand, and the slack in --copy-gap covers a font
-       that draws the command wider than the threshold it stacks at. */
-    --pill: 27rem;
+       The pill's drawn width is its content, not this: the widest of the four
+       commands a visitor can choose between is the PowerShell one, whose pill
+       measures 30.2rem on the fonts to hand. The number here is that rounded
+       up, so the shot is placed past a pill drawn a little wider than it is
+       here, and --copy-gap is the rest of the margin. */
+    --pill: 31rem;
   }
 
   .hero__lead,

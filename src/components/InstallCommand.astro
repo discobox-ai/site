@@ -1,31 +1,175 @@
 ---
-// The one command, wherever the page needs it. The copy button is wired once
-// here rather than per placement.
+// The install command, for whichever system the visitor is on. The commands
+// are discobox's own, spelled as installer/DESIGN.md and ADR 0110 spell them:
+// the sh line asks discobox.ai for nothing in particular, because the site
+// answers curl and wget with the stable release's install.sh, and the
+// PowerShell line names /install.ps1 outright. The bare host would answer
+// PowerShell too — it reads the user agent — but naming the script is the
+// form the script itself documents, and it is the one that says what it
+// fetches.
+import { uniqueName } from '../lib/element-id';
+
 interface Props {
   class?: string;
 }
 
 const { class: className } = Astro.props;
-const install = 'brew install discobox-ai/tap/discobox';
 
-// Where the command may break when it has to wrap. Only the space before the
-// package is a break the reader can follow: left to itself the line would also
-// break after the hyphen in `discobox-ai`, mid-name.
-const split = install.lastIndexOf(' ');
-const command = install.slice(0, split);
-const target = install.slice(split + 1);
+// The Homebrew tap covers Apple Silicon and Linux on both architectures, which
+// is every system here but Windows. It is the alternative rather than the
+// command because it is a second thing to install first, and the WSL note
+// leaves it out for room rather than for want of support.
+const brew = 'brew install discobox-ai/tap/discobox';
+const sh = 'curl -sSfL https://discobox.ai | sh';
+
+// The order is the order of the tabs. macOS leads because it is what most
+// visitors are on, and WSL comes last of the four because it is the one a
+// visitor picks deliberately rather than the one their machine is.
+const targets = [
+  {
+    id: 'macos',
+    label: 'macOS',
+    command: sh,
+    prompt: '$',
+    // Apple Silicon only: an Intel Mac is refused rather than installed and
+    // then failed at the first box (discobox ADR 0062).
+    note: 'Apple Silicon.',
+    alternative: brew,
+  },
+  {
+    id: 'linux',
+    label: 'Linux',
+    command: sh,
+    prompt: '$',
+    // The script refuses a musl system rather than install a binary whose
+    // loader is not there.
+    note: 'x86-64 or arm64, glibc.',
+    alternative: brew,
+  },
+  {
+    id: 'windows',
+    label: 'Windows',
+    command: 'irm https://discobox.ai/install.ps1 | iex',
+    // Not `$`, which is a sigil rather than a prompt in PowerShell: a visitor
+    // who selects the line by hand instead of using the button would paste the
+    // start of a variable name.
+    prompt: 'PS>',
+    note: 'Windows PowerShell 5.1 or PowerShell 7, x86-64 or arm64.',
+  },
+  {
+    id: 'wsl',
+    label: 'WSL',
+    command: sh,
+    prompt: '$',
+    // The distinction the tab exists for: a Windows visitor has two installs
+    // to choose between, and they are not the same one from two shells. No
+    // Homebrew line here, where the note has enough to say already.
+    note: 'In the distribution, not PowerShell: it installs the Linux build.',
+  },
+];
+
+// The choice is a radio group rather than a set of buttons, so the tabs work
+// with no script at all: the panels are switched by :has(:checked) below, and
+// script only picks the tab the visitor's own system starts on and keeps two
+// placements of this component in step. Each placement needs a group of its
+// own — one shared name would let a click in the hero uncheck the radio the
+// other placement's CSS is keyed to, leaving it with no panel showing.
+const group = uniqueName('install-os');
 ---
 
 <div class:list={['install', className]}>
-  <div class="install__pill">
-    <code class="install__code"
-      ><span class="install__prompt">$</span> {command} <span class="install__target">{target}</span></code
-    >
-    <button class="install__copy" type="button" data-install={install}>Copy</button>
-  </div>
+  <fieldset class="install__choice">
+    <legend class="install__legend">Operating system</legend>
+    {
+      targets.map((target, index) => (
+        <label class="install__tab">
+          <input
+            class="install__radio"
+            type="radio"
+            name={group}
+            value={target.id}
+            checked={index === 0}
+          />
+          <span>{target.label}</span>
+        </label>
+      ))
+    }
+  </fieldset>
+
+  {
+    targets.map((target) => (
+      <div class:list={['install__panel', `install__panel--${target.id}`]}>
+        <div class="install__pill">
+          <code class="install__code">
+            <span class="install__prompt">{target.prompt}</span> {target.command}
+          </code>
+          <button class="install__copy" type="button" data-install={target.command}>
+            Copy
+          </button>
+        </div>
+        <p class="install__note">
+          <span class="install__measure" data-label={target.label}>
+            {target.note}
+            {target.alternative && (
+              <>
+                {' '}
+                Or <code>{target.alternative}</code>.
+              </>
+            )}
+          </span>
+        </p>
+      </div>
+    ))
+  }
 </div>
 
+<script is:inline>
+  // Which tab a visitor lands on. Inline and in place rather than in the
+  // module below, because a deferred script runs after the page has been laid
+  // out: a visitor on Windows would see the sh command first and watch it
+  // change. This runs while the element above it is being parsed.
+  //
+  // The detection is once per page and the checking is once per placement:
+  // there are two on the home page, each emitting this, and the second run
+  // sets both. WSL is never guessed — a browser there reports the machine it
+  // is on, not the distribution — so it is the one tab that is only ever
+  // chosen by hand.
+  window.__discoboxInstallOs ??= (() => {
+    // userAgentData where a browser has it, and the user agent string itself
+    // where it does not: `navigator.platform` says the same thing and is
+    // deprecated. Each test matches both spellings at once, because only one
+    // of the two strings is ever read — 'macOS' and 'Macintosh', 'Windows' and
+    // 'Windows NT', 'Chrome OS' and 'CrOS'. A Chromebook is sent to the Linux
+    // tab, which is what its container runs.
+    const platform = navigator.userAgentData?.platform || navigator.userAgent || '';
+    if (/mac|iphone|ipad|ipod/i.test(platform)) return 'macos';
+    if (/win/i.test(platform)) return 'windows';
+    if (/linux|android|chrome ?os|bsd|x11/i.test(platform)) return 'linux';
+    return 'macos';
+  })();
+
+  for (const radio of document.querySelectorAll(
+    `.install__radio[value="${window.__discoboxInstallOs}"]`,
+  )) {
+    radio.checked = true;
+  }
+</script>
+
 <script>
+  // Both placements on a page are the one choice, so a click in either moves
+  // the other. The CSS switches on the checked property, which is what this
+  // sets, so nothing else has to happen for the other panel to appear.
+  for (const radio of document.querySelectorAll<HTMLInputElement>('.install__radio')) {
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+      for (const other of document.querySelectorAll<HTMLInputElement>(
+        `.install__radio[value="${radio.value}"]`,
+      )) {
+        other.checked = true;
+      }
+    });
+  }
+
   for (const button of document.querySelectorAll<HTMLButtonElement>('.install__copy')) {
     button.addEventListener('click', async () => {
       const command = button.dataset.install;
@@ -62,6 +206,147 @@ const target = install.slice(split + 1);
     width: 100%;
   }
 
+  /* The tabs are hidden and every panel shows, until the @supports branch
+     below turns that around. Nothing here but :has() can pair a radio with
+     the panel it belongs to, so a browser without it — or without the
+     @supports selector() that asks — would be shown four tabs and no command
+     at all. What it is shown instead is the four commands as a list, each
+     named by its note. Anything since 2023 takes the other branch. */
+  .install__choice {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    border: 0;
+  }
+
+  .install__measure::before {
+    content: attr(data-label) ' — ';
+  }
+
+  /* Only ever seen in the fallback list, where the panels stack. */
+  .install__panel + .install__panel {
+    margin-top: 1.1rem;
+  }
+
+  /* The group's name, for a screen reader announcing the radios. There is
+     nothing to show: the four labels say what the choice is. */
+  .install__legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .install__tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 0.3rem 0.72rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  }
+
+  /* The radio covers its label rather than being pushed off-screen: it stays
+     where the focus ring and the click both belong, and it is the label's own
+     box that is drawn. */
+  .install__radio {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .install__tab:hover {
+    color: var(--text);
+  }
+
+  .install__tab:has(:checked) {
+    color: var(--text);
+    border-color: var(--line-bright);
+    background: var(--ink-raised);
+  }
+
+  .install__tab:has(:focus-visible) {
+    outline: 2px solid var(--magenta);
+    outline-offset: 2px;
+  }
+
+  /* Forced colors paints from the system's palette rather than this one, and
+     the checked tab is drawn in nothing but colors: its text, its border and
+     its background all come out as the unchecked ones', and the transparent
+     border above turns opaque on all four. So the control goes back to being
+     what it is — a radio the system draws, beside its label — rather than a
+     pill whose one state cannot be seen. */
+  @media (forced-colors: active) {
+    .install__tab {
+      border-color: transparent;
+      padding-inline: 0.35rem;
+      gap: 0.3rem;
+    }
+
+    .install__radio {
+      position: static;
+      appearance: auto;
+      cursor: pointer;
+    }
+
+    .install__tab:has(:checked) {
+      background: none;
+    }
+  }
+
+  /* The tabs, and one panel at a time: what the component is, where the
+     browser can select on a radio the panel is not inside of.
+
+     Inline-flex for the same reason as the pill: a flex box ignores the
+     text-align it inherits, and an inline-level one is placed by it. So the
+     tabs sit at the left of the hero column and centred in the call to action,
+     with nothing said here about either.
+
+     The pairing is written out four times because CSS cannot match one
+     element's attribute against another's: a value against a class is the rule
+     itself. */
+  @supports selector(:has(*)) {
+    .install__choice {
+      display: inline-flex;
+    }
+
+    .install__measure::before {
+      content: none;
+    }
+
+    .install__panel {
+      display: none;
+    }
+
+    /* The gap between panels is the fallback list's; one panel at a time
+       leaves no gap to set. Same specificity as the rule it answers and after
+       it, since @supports adds none of its own. */
+    .install__panel + .install__panel {
+      margin-top: 0;
+    }
+
+    .install:has(.install__radio[value='macos']:checked) .install__panel--macos,
+    .install:has(.install__radio[value='linux']:checked) .install__panel--linux,
+    .install:has(.install__radio[value='windows']:checked) .install__panel--windows,
+    .install:has(.install__radio[value='wsl']:checked) .install__panel--wsl {
+      display: block;
+    }
+  }
+
   .install__pill {
     display: inline-flex;
     align-items: center;
@@ -84,10 +369,6 @@ const target = install.slice(split + 1);
     margin-right: 0.45rem;
   }
 
-  .install__target {
-    white-space: nowrap;
-  }
-
   /* Just above the width where the pill gives up there is a band where it fits
      but only just. The command scrolls there, and the button is the point of
      it, so it stays put while the command moves under it — inside a ring of the
@@ -108,14 +389,61 @@ const target = install.slice(split + 1);
     cursor: pointer;
   }
 
-  /* The command is 37 characters of monospace and the button is the width of
-     its label; under about 26rem the two cannot share a line without the
-     command being scrolled out of sight. So the pill becomes a card: the whole
-     command over two lines, and the button below it at a full tap target. */
-  /* 27rem is also Hero.astro's --pill: it places the screenshot past whatever
+  /* What the command needs of the machine, and the other way to get it. */
+  .install__note {
+    margin-top: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    line-height: 1.7;
+    color: var(--text-faint);
+  }
+
+  /* The note takes a measure of its own rather than the width of its
+     placement: a placement that leaves the pill room to grow leaves this room
+     to grow too, and small print set to 60-odd characters of monospace is both
+     hard to read and — in the hero, where the block is the width of the page —
+     long enough to run under the screenshot.
+
+     Inline-block inside the paragraph rather than a max-width on the paragraph
+     itself, for the third time in this file: a box that is placed by the
+     text-align it inherits sits at the left of the hero column and centred in
+     the call to action, with nothing said here about either. */
+  .install__measure {
+    display: inline-block;
+    /* The longest of the notes is Linux's, at 65 characters; 65ch is the width
+       it draws at to the pixel, which rounds the wrong way. 68ch leaves it a
+       few characters of room and is still, at 498px, inside the 536px the hero
+       leaves between the start of its column and the left edge of the
+       screenshot at 56rem — the narrowest width the two stand side by side at,
+       and the mask over that edge means the last of those pixels are a fade
+       rather than a picture. That 536px is measured with --pill at 31rem and
+       moves with it, since the shot is placed past whichever of the pill and
+       the copy measure is wider. One line each is what keeps the page from
+       shifting as the tabs are changed. The fallback list is the exception:
+       the system name it prepends to every note takes the longer two onto a
+       second line, and nothing there is holding still anyway — the four are
+       stacked. */
+    max-width: 68ch;
+  }
+
+  .install__note code {
+    font-size: 1em;
+    color: var(--text-muted);
+  }
+
+  /* The longest command is PowerShell's — 41 characters of monospace, a `PS>`
+     prompt, and the button at the width of its label — and its pill draws at
+     30.2rem on the fonts to hand. A container any narrower than that is one
+     the pill has to scroll inside, with the tail of the command under the
+     sticky button, so 31rem is where it gives up and becomes a card instead:
+     the whole command over two lines, and the button below it at a full tap
+     target. The threshold is above the drawn width rather than level with it,
+     and the slack is for a font that draws the command wider than these
+     numbers assume. */
+  /* 31rem is also Hero.astro's --pill: it places the screenshot past whatever
      the pill can grow to, and a container query cannot read a custom property,
      so the two carry the number separately. Change one and change the other. */
-  @container (max-width: 27rem) {
+  @container (max-width: 31rem) {
     .install__pill {
       display: flex;
       flex-direction: column;
@@ -127,12 +455,24 @@ const target = install.slice(split + 1);
       overflow-x: visible;
     }
 
-    /* The package is one nowrap token, so the only break left is the space
-       before it: `brew install` over `discobox-ai/tap/discobox`. */
+    /* Breaks at the spaces in the command and nowhere else: left to itself a
+       line would also break after the hyphen in `-sSfL`, or inside a URL.
+       break-word is the floor under that — a phone narrow enough that a word
+       does not fit on a line of its own breaks it rather than pushing the
+       card out of the page. */
     .install__code {
       white-space: normal;
       word-break: keep-all;
+      overflow-wrap: break-word;
       line-height: 1.5;
+      /* Below about a 344px screen the longest single token — PowerShell's
+         URL — no longer fits on a line of its own at the size above, and
+         break-word would split it mid-word. The type shrinks with the card
+         instead, and stops at 0.78rem, which it reaches at about a 310px
+         screen: a command has to stay readable, and below about 300px no size
+         keeps that URL on a line anyway. There break-word takes over, as it
+         does for a font that draws wider than these numbers assume. */
+      font-size: clamp(0.78rem, 4.6cqi, 0.88rem);
     }
 
     .install__copy {
