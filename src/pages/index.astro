@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import Hero from '../components/Hero.astro';
 import Pillars from '../components/Pillars.astro';
 import Autonomy from '../components/Autonomy.astro';
+import Parallel from '../components/Parallel.astro';
 import Safety from '../components/Safety.astro';
 import Experience from '../components/Experience.astro';
 import CallToAction from '../components/CallToAction.astro';
@@ -12,13 +13,14 @@ import SiteFooter from '../components/SiteFooter.astro';
 
 <BaseLayout
   title="Discobox — give your agents a computer of their own"
-  description="Discobox gives coding agents a disposable machine with sudo, a desktop and a browser, and no approval prompts. Your secrets never enter the box, and you reach it over ssh, your editor or VNC."
+  description="Discobox gives coding agents a disposable machine with sudo, a desktop and a browser, and no approval prompts. Run one per task side by side, and bring each one's commits back with git. Your secrets never enter the box."
 >
   <SiteHeader />
   <main>
     <Hero />
     <Pillars />
     <Autonomy />
+    <Parallel />
     <Safety />
     <Experience />
     <CallToAction />

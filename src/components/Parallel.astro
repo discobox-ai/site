@@ -1,0 +1,228 @@
+---
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+// What a box is for, day to day: several sessions at once, and their work back
+// in your repository. The steps come first and are deliberately ordinary — the
+// point is that source moves the way git already moves it, with nothing to
+// learn in between — and the details after them are what makes that safe to do
+// many times over.
+
+const steps = [
+  {
+    name: 'Clone',
+    body: 'A box clones your repository at the commit you have checked out, and brings your uncommitted changes if you want them. Its origin is your repository, read-only.',
+    line: "$ discobox -p 'fix the flaky retry test'",
+  },
+  {
+    name: 'Change',
+    body: 'The agent works and commits in its own copy, with its own services and Docker. Your checkout, and every other box, is untouched.',
+    line: 'agent@purple-mongoose:~$ git commit',
+  },
+  {
+    name: 'Merge back, or open a PR',
+    body: 'Cherry-pick the commits onto your branch with one command, or have the agent push a branch and open a pull request, as you would from your laptop.',
+    line: '$ discobox apply purple-mongoose',
+  },
+];
+
+const details = [
+  {
+    name: 'Side by side, never in your way',
+    body: 'One agent in your checkout means waiting for it, and two means they edit the same files and fight over the same ports. Start a fix, a feature and an experiment you may throw away, each in its own box, and keep working while they run.',
+  },
+  {
+    name: 'Real commits, not a patch',
+    body: 'Apply keeps each commit’s message, author and boundaries, so what lands is ordinary history: read it with git log, amend or reorder it, and push it like anything else.',
+  },
+  {
+    name: 'Nothing lands half-applied',
+    body: 'The cherry-pick runs in a scratch worktree, and your branch moves only if every commit applies. Uncommitted work in a box is never applied, and applying again brings only what is new.',
+  },
+  {
+    name: 'Boxes build on each other',
+    body: 'Their work meets in your repository. Once one box is applied, another rebases onto it from inside its own box, so overlapping changes are resolved there rather than in your checkout.',
+  },
+];
+
+const session: Line[] = [
+  [{ text: '# three tasks, three boxes, one repository', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: "discobox -d -p 'fix the flaky retry test'", tone: 'command' },
+  ],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: "discobox -d -p 'add pagination to /users'", tone: 'command' },
+  ],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: "discobox -d -p 'try sqlc instead of the ORM'", tone: 'command' },
+  ],
+  '',
+  [{ text: '# one is done: merge it back', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox apply purple-mongoose', tone: 'command' },
+  ],
+  [{ text: '  2 commits to apply' }],
+  [
+    { text: '    9c1d2e3f4a5b', tone: 'warn' },
+    { text: '  Fix retry test racing the clock' },
+  ],
+  [
+    { text: '    4e5f6a7b8c9d', tone: 'warn' },
+    { text: '  Reset backoff after a success' },
+  ],
+  [
+    { text: '  ✓ APPLIED', tone: 'ok' },
+    { text: ' 2 commits to local main' },
+  ],
+  '',
+  [{ text: '# the next box builds on it', tone: 'dim' }],
+  [
+    { text: 'agent@teal-heron:~$ ', tone: 'prompt' },
+    { text: 'git fetch origin', tone: 'command' },
+  ],
+  [
+    { text: 'agent@teal-heron:~$ ', tone: 'prompt' },
+    { text: 'git rebase origin/main', tone: 'command' },
+  ],
+];
+---
+
+<section class="section" id="parallel">
+  <div class="page">
+    <p class="eyebrow">Parallel work</p>
+    <h2 class="couplet__hook">Many agents, one repository. It is just git.</h2>
+    <p class="couplet__turn">
+      Give an agent a computer of its own and it needs the source the way you would on a
+      new machine: clone, change, then merge back or open a pull request. A box does
+      exactly that, once per session, so you can run as many as you have work for.
+    </p>
+
+    <ol class="flow">
+      {
+        steps.map((step, index) => (
+          <li class="card step">
+            <span class="step__index">{String(index + 1).padStart(2, '0')}</span>
+            <h3 class="step__name">{step.name}</h3>
+            <p class="step__body">{step.body}</p>
+            <p class="step__line">{step.line}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="parallel">
+      <ul class="details">
+        {
+          details.map((detail) => (
+            <li class="detail">
+              <p class="detail__name">{detail.name}</p>
+              <p class="detail__body">{detail.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="parallel__demo">
+        <TerminalWindow lines={session} title="three boxes" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .flow {
+    list-style: none;
+    padding: 0;
+    margin: 2.5rem 0 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 56rem) {
+    .flow {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step__index {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--magenta);
+  }
+
+  .step__name {
+    margin-top: 0.35rem;
+    font-size: 1.1rem;
+  }
+
+  .step__body {
+    margin-top: 0.7rem;
+    color: var(--text-muted);
+    font-size: 0.96rem;
+    flex: 1;
+  }
+
+  .step__line {
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--magenta);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .parallel {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    grid-template-columns: minmax(0, 1fr);
+    /* As in Autonomy: the terminal hangs off the top of the list beside it
+       rather than floating in the middle of it. */
+    align-items: start;
+  }
+
+  @media (min-width: 62rem) {
+    .parallel {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .details {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .detail {
+    border-left: 2px solid var(--magenta);
+    padding-left: 1rem;
+  }
+
+  .detail__name {
+    font-weight: 650;
+  }
+
+  .detail__body {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .parallel__demo {
+    min-width: 0;
+  }
+</style>
