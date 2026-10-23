@@ -1,3 +1,10 @@
+# Review notes
+
+- When a homepage section's story changes, check its card in
+  `src/components/Pillars.astro` too. Each pillar restates its section in one
+  line and links to it, so it never shows up in that section's diff and goes
+  stale silently (it still described `discobox apply` after Parallel stopped).
+
 - Give blog entries path-based IDs. Astro's default glob loader uses the
   frontmatter slug as the ID, so duplicate permalinks can overwrite content
   before validation and edit links can lose the source filename.
