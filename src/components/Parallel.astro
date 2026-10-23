@@ -2,16 +2,16 @@
 import TerminalWindow from './TerminalWindow.astro';
 import type { Line } from './TerminalWindow.astro';
 
-// What a box is for, day to day: several sessions at once, and their work back
-// in your repository. The steps come first and are deliberately ordinary — the
-// point is that source moves the way git already moves it, with nothing to
-// learn in between — and the details after them are what makes that safe to do
-// many times over.
+// What a box is for, day to day: several sessions at once, each pushing its
+// work like any other clone would. The steps come first and are deliberately
+// ordinary — the point is that source moves the way git already moves it, with
+// nothing to learn in between — and the details after them are why that holds
+// up with many boxes at once.
 
 const steps = [
   {
     name: 'Clone',
-    body: 'A box clones your repository at the commit you have checked out, and brings your uncommitted changes if you want them. Its origin is your repository, read-only.',
+    body: 'A box clones your repository at the commit you have checked out, and brings your uncommitted changes if you want them. Its origin is the remote your checkout came from, such as GitHub.',
     line: "$ discobox new 'fix the flaky retry test'",
   },
   {
@@ -20,9 +20,9 @@ const steps = [
     line: 'agent@purple-mongoose:~$ git commit',
   },
   {
-    name: 'Merge back, or open a PR',
-    body: 'Cherry-pick the commits onto your branch with one command, or have the agent push a branch and open a pull request, as you would from your laptop.',
-    line: '$ discobox apply purple-mongoose',
+    name: 'Push, or open a PR',
+    body: 'The agent pushes a branch wherever you want it, or opens a pull request, as you would from your laptop. From there it is a branch like any other.',
+    line: 'agent@purple-mongoose:~$ gh pr create',
   },
 ];
 
@@ -33,15 +33,15 @@ const details = [
   },
   {
     name: 'Real commits, not a patch',
-    body: 'Apply keeps each commit’s message, author and boundaries, so what lands is ordinary history: read it with git log, amend or reorder it, and push it like anything else.',
+    body: 'What leaves a box is ordinary history, each commit with its message, author and boundaries: review it in a pull request, read it with git log, amend or reorder it like anything else.',
   },
   {
-    name: 'Nothing lands half-applied',
-    body: 'The cherry-pick runs in a scratch worktree, and your branch moves only if every commit applies. Uncommitted work in a box is never applied, and applying again brings only what is new.',
+    name: 'Nothing new to learn',
+    body: 'There is no sync step and no special merge command. A box is a clone with a remote, so push, pull, branch and rebase do what they always do, and your usual review and CI take it from there.',
   },
   {
     name: 'Boxes build on each other',
-    body: 'Their work meets in your repository. Once one box is applied, another rebases onto it from inside its own box, so overlapping changes are resolved there rather than in your checkout.',
+    body: 'Their work meets where it is pushed. Once one box’s pull request is merged, another rebases onto it from inside its own box, so overlapping changes are resolved there rather than in your checkout.',
   },
 ];
 
@@ -60,26 +60,21 @@ const session: Line[] = [
     { text: "discobox new -d 'try sqlc instead of the ORM'", tone: 'command' },
   ],
   '',
-  [{ text: '# one is done: merge it back', tone: 'dim' }],
+  [{ text: '# one is done: push it and open a PR', tone: 'dim' }],
   [
-    { text: '$ ', tone: 'prompt' },
-    { text: 'discobox apply purple-mongoose', tone: 'command' },
-  ],
-  [{ text: '  2 commits to apply' }],
-  [
-    { text: '    9c1d2e3f4a5b', tone: 'warn' },
-    { text: '  Fix retry test racing the clock' },
+    { text: 'agent@purple-mongoose:~$ ', tone: 'prompt' },
+    { text: 'git push -u origin fix-retry-test', tone: 'command' },
   ],
   [
-    { text: '    4e5f6a7b8c9d', tone: 'warn' },
-    { text: '  Reset backoff after a success' },
+    { text: 'agent@purple-mongoose:~$ ', tone: 'prompt' },
+    { text: 'gh pr create --fill', tone: 'command' },
   ],
   [
-    { text: '  ✓ APPLIED', tone: 'ok' },
-    { text: ' 2 commits to local main' },
+    { text: '  ✓ ', tone: 'ok' },
+    { text: 'https://github.com/acme/api/pull/412' },
   ],
   '',
-  [{ text: '# the next box builds on it', tone: 'dim' }],
+  [{ text: '# once it merges, the next box builds on it', tone: 'dim' }],
   [
     { text: 'agent@teal-heron:~$ ', tone: 'prompt' },
     { text: 'git fetch origin', tone: 'command' },
@@ -97,7 +92,7 @@ const session: Line[] = [
     <h2 class="couplet__hook">Many agents, one repository. It is just git.</h2>
     <p class="couplet__turn">
       Give an agent a computer of its own and it needs the source the way you would on a
-      new machine: clone, change, then merge back or open a pull request. A box does
+      new machine: clone, change, then push a branch or open a pull request. A box does
       exactly that, once per session, so you can run as many as you have work for.
     </p>
 
