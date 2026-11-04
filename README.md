@@ -185,3 +185,22 @@ made easier by `discobot.ai` being a real zone on the same account — and
 `discobot-ai.acorn-io.workers.dev` with no custom domain attached. The rename
 to `discobox-ai` created a new Worker; the old one is a separate script and has
 to be deleted in the dashboard.
+
+## Versioned product documentation
+
+The public manual lives at `/docs/`, with the v0.19 development snapshot under
+`/docs/v0.19/`. It is explicitly prerelease and has no matching published tag.
+The product repository owns the prose and generated CLI reference; edit links
+on imported pages point to the pinned upstream source.
+
+To refresh a snapshot, review the upstream `docs/public` changes and update
+its commit/tag/status in `src/data/docs-versions.json`. In a clean product
+checkout at that commit, run `go tool task docs:generate` and `docs:check`,
+commit any generated updates upstream, then pin that resulting clean revision.
+Run `pnpm import:docs /path/to/discobox v0.19` here, review the import and
+manifest, and open a PR. Normal site builds use only committed inputs.
+
+`pnpm check:docs` validates snapshot hashes and metadata. `pnpm build` also
+validates built manual links/anchors, canonical URLs, search metadata and
+index output. `SITE_PREVIEW=true pnpm build` checks preview indexing rules.
+See [the docs design](docs/DESIGN.md) for release promotion and rollback.

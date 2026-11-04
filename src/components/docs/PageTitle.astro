@@ -1,0 +1,36 @@
+---
+import PageTitle from '@astrojs/starlight/components/PageTitle.astro';
+import manifest from '../../data/docs-versions.json';
+const id = Astro.locals.starlightRoute.entry.id;
+const version = manifest.versions.find(v => id.startsWith(`docs/${v.line}/`) || id === `docs/${v.line}`);
+const slug = id.replace(`docs/${version?.line}`, '').replace(/^\//, '').replace(/\/index$/, '');
+---
+<PageTitle />
+{version && <>
+<p class="release" data-pagefind-filter={`version:${version.line}`}>
+  {version.line} · {version.status} · {version.version}
+  {' '}(<a href={`https://github.com/discobox-ai/discobox/tree/${version.commit}`}>{version.commit.slice(0, 12)}</a>)
+</p>
+{!version.tag && <p>Unreleased source snapshot: no published installer tag matches this revision. Stable and edge installers may provide a different CLI.</p>}
+<label>Documentation version
+  <select id="docs-version" aria-label="Documentation version">
+    {manifest.versions.map(v => <option selected={v.line === version.line} value={`/docs/${v.line}/${v.files.some(f => f.slug === slug) && slug ? slug + '/' : ''}`}>{v.line} · {v.status}</option>)}
+  </select>
+</label>
+<details><summary>Source and license</summary>
+<p><a href="/">Discobox home</a> · Imported from the product manual; links rewritten for this site.{' '}
+  <a href={`/docs-attribution/${version.line}/LICENSE`}>Apache 2.0 license</a> · <a href={`/docs-attribution/${version.line}/NOTICE`}>Notice</a>
+</p>
+</details>
+</>}
+<script>
+  document.querySelector('#docs-version')?.addEventListener('change', (event) => {
+    window.location.assign((event.target as HTMLSelectElement).value);
+  });
+</script>
+<style>
+  .release { font-size: 0.9rem; color: var(--sl-color-gray-2); }
+  a { color: var(--sl-color-text-accent); }
+  details { margin-top: 1rem; font-size: .85rem; }
+  select { padding: .3rem; margin-inline-start: .5rem; color: var(--sl-color-white); background: var(--sl-color-black); }
+</style>
