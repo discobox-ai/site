@@ -35,6 +35,8 @@ jobs:
 
       - run: pnpm check
 
+      - run: pnpm test:blog
+
       - run: pnpm build
         env:
           SITE_PREVIEW: true

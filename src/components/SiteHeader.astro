@@ -2,6 +2,7 @@
 import Wordmark from './Wordmark.astro';
 
 const links = [
+  { label: 'Blog', href: '/blog/' },
   { label: 'Docs', href: '/docs/' },
   { label: 'Autonomy', href: '/#autonomy' },
   { label: 'Parallel', href: '/#parallel' },
@@ -70,7 +71,9 @@ const links = [
   }
 
   @media (max-width: 46rem) {
-    .nav a:not(.nav__cta):not([href="/docs/"]) {
+    .header__inner { flex-wrap: wrap; }
+    .nav { gap: 1rem; }
+    .nav a:not(.nav__cta):not([href="/docs/"]):not([href="/blog/"]) {
       display: none;
     }
   }

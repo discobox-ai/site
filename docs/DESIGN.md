@@ -42,3 +42,13 @@ flag too. Main and preview use the existing Worker static-assets deployment;
 installer routing is unchanged. No production deployment is possible from a
 fork PR. After a human merges into preview, exercise its deployed URLs before
 promotion to main; this worker never pushes either base branch.
+
+The native Astro blog uses its own Markdown collection. `publishedPosts()`
+is the shared inclusion rule for static post paths, the listing and RSS:
+explicit drafts and future dates never produce public output, even in preview.
+The schema requires editorial metadata and a stable URL slug; duplicate slugs
+fail the build. RSS uses the production origin and the same stable permalinks.
+BlogLayout exposes RSS discovery and inherits production canonical URLs,
+preview noindex and exclusion from the docs search index from BaseLayout.
+Starlight generates the site sitemap from built routes; excluded posts have
+no routes to expose. Authoring and release promotion are described in README.

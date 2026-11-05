@@ -199,3 +199,23 @@ manifest, and open a PR. Normal site builds use only committed inputs.
 validates built manual links/anchors, canonical URLs, search metadata and
 index output. `SITE_PREVIEW=true pnpm build` checks preview indexing rules.
 See [the docs design](docs/DESIGN.md) for release promotion and rollback.
+
+## Blog
+
+Blog posts live in `src/content/blog/*.md` and are reviewed through site PRs.
+Required frontmatter: `title`, `description`, `author`, `slug`, `published`
+(an ISO date) and `draft` (a boolean). `updated` is optional and cannot precede
+`published`. Slugs use lowercase words separated by hyphens and must be
+unique, including among drafts. Keep slugs stable after publication.
+
+The listing is `/blog/`, posts use `/blog/<slug>/`, and the RSS feed is
+`/blog/rss.xml`. Drafts and future-dated posts are omitted from every public
+route and the feed, including preview builds. There is no private draft URL;
+review drafts in the PR. A future date requires a new main build at or after
+that date; it does not schedule a deploy. Dates display in UTC.
+
+To publish, verify the release and versioned docs links, finish the release
+copy, set the publication date and `draft: false`, then open a PR. Preview
+publishes after a human merges to preview; promotion to main publishes to
+production through Cloudflare Workers Builds. The initial v0.19 post stays
+a draft until that release is available and the manual matches it.

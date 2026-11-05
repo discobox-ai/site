@@ -1,0 +1,17 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { publishedPosts, postURL, formatDate } from '../../lib/blog';
+const posts = await publishedPosts();
+---
+<BlogLayout title="Blog — Discobox" description="News and release notes from Discobox.">
+  <p class="eyebrow">Discobox</p>
+  <h1>From the box</h1>
+  <p>News and release notes from the Discobox team. <a href="/blog/rss.xml">Subscribe via RSS</a>.</p>
+  {posts.length === 0 ? <p>Our first post is on its way.</p> : <ul class="posts">
+    {posts.map(post => <li>
+      <h2><a href={postURL(post.data.slug)}>{post.data.title}</a></h2>
+      <p class="meta"><time datetime={post.data.published.toISOString()}>{formatDate(post.data.published)}</time> · {post.data.author}</p>
+      <p>{post.data.description}</p>
+    </li>)}
+  </ul>}
+</BlogLayout>
