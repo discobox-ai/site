@@ -24,9 +24,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
+    {import.meta.env.SITE_PREVIEW === 'true' && <meta name="robots" content="noindex, nofollow" />}
     <meta name="generator" content={Astro.generator} />
   </head>
-  <body>
+  <body data-pagefind-ignore="all">
     <slot />
   </body>
 </html>

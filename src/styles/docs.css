@@ -1,0 +1,20 @@
+@import './brand.css';
+
+:root {
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
+  --sl-color-accent-low: var(--line);
+  --sl-color-accent: var(--brand);
+  --sl-color-accent-high: var(--magenta);
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg: var(--ink);
+  --sl-color-bg-nav: var(--ink-raised);
+  --sl-color-bg-sidebar: var(--ink-raised);
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: var(--text);
+  --sl-color-accent-high: var(--brand);
+}

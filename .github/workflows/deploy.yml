@@ -39,6 +39,8 @@ jobs:
       - run: pnpm check
 
       - run: pnpm build
+        env:
+          SITE_PREVIEW: ${{ github.ref_name == 'preview' }}
 
       # wrangler comes from devDependencies, so the deploy uses the same
       # pinned version as a local `pnpm exec wrangler deploy`.

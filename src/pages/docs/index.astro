@@ -1,0 +1,14 @@
+---
+import manifest from '../../data/docs-versions.json';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const stable = manifest.currentStable;
+if (stable) return Astro.redirect(`/docs/${stable}/`, 302);
+---
+<BaseLayout title="Discobox documentation" description="Versioned Discobox manuals and command reference.">
+  <main class="page" style="padding-block: 4rem">
+    <h1>Discobox documentation</h1>
+    <p>No stable manual has been published yet. The v0.19 manual describes a development revision.</p>
+    <ul>{manifest.versions.map(v => <li><a href={`/docs/${v.line}/`}>{v.line} · {v.status}</a></li>)}</ul>
+    <p><a href="/">Discobox home</a></p>
+  </main>
+</BaseLayout>
