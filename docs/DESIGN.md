@@ -34,6 +34,8 @@ default; “all versions” supplies all published lines. Each result labels its
 version. Marketing pages opt out of the index.
 
 Starlight owns docs CSS; marketing CSS is imported only by BaseLayout.
+Both import `src/styles/brand.css`; docs maps its palette and fonts to
+Starlight tokens for both themes without importing marketing element styles.
 Canonical links always use discobox.ai. The preview deployment sets
 `SITE_PREVIEW=true` to exclude all HTML from indexing. CI builds with this
 flag too. Main and preview use the existing Worker static-assets deployment;

@@ -7,6 +7,7 @@ export default defineConfig({
   devToolbar: { enabled: false },
   integrations: [starlight({
     title: 'Discobox docs',
+    customCss: ['./src/styles/docs.css'],
     logo: { src: './public/favicon.svg', replacesTitle: false },
     components: {
       PageTitle: './src/components/docs/PageTitle.astro',

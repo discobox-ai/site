@@ -1,0 +1,45 @@
+/*
+ * Discobox brand tokens.
+ *
+ * The palette is the CLI's, which is where the product is actually used: the
+ * mark's magenta (256-color 13) as the accent, gold, salmon and green kept for
+ * the same jobs the TUI gives them — attention, removal, running. The page is
+ * dark because a terminal is, and the mark only reads on a dark ground.
+ *
+ * --brand is the mark's own purple from assets/brand, and --magenta is the
+ * same hue two degrees away (294° against 296°) carried to full saturation and
+ * a lightness that survives on a near-black ground. They are one color family,
+ * not two: the mark is the deep end of the accent, which is why the art is
+ * used untinted. --violet sits 21° bluer and is the deliberate second light.
+ */
+:root {
+  --ink: #0a0410;
+  --ink-raised: #150b1f;
+  --ink-sunken: #06020a;
+  --line: #2a1839;
+  --line-bright: #3d2352;
+
+  --text: #f4ecf9;
+  --text-muted: #b0a0bf;
+  --text-faint: #7c6a8c;
+
+  /* The mark's own purple. Brand surfaces use it as-is; the accent below is
+     the same hue brightened for type, rules and focus. */
+  --brand: #9e4aa7;
+
+  --magenta: #f45cff;
+  --violet: #8b2fd6;
+  --gold: #ffd75f;
+  --salmon: #ffaf87;
+  --green: #87ff87;
+
+  --glow: color-mix(in oklab, var(--magenta) 35%, transparent);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'DejaVu Sans Mono', monospace;
+
+  --page: 68rem;
+  --radius: 14px;
+
+}
+
