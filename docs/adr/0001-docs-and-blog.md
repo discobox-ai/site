@@ -15,8 +15,9 @@ serves `dist/`; only `/`, `/install.sh`, and `/install.ps1` run the installer
 Worker (`wrangler.jsonc`, `worker/index.ts`). The same static site is also
 served on `edge.discobox.ai`. `preview.discobox.ai` is a branch deployment.
 
-`.github/workflows/ci.yml` checks and builds PRs. `deploy.yml` checks, builds,
-and deploys `main` and `preview`. Builds currently need no product checkout;
+`.github/workflows/ci.yml` checks and builds PRs. Cloudflare Workers Builds
+builds and deploys `main` and `preview` through its git integration. Builds
+currently need no product checkout;
 brand assets are committed copies synced explicitly from discobox
 (`README.md`, `scripts/sync-assets.mjs`). There is no ADR directory, index,
 or numbering process in this repository; this record starts a four-digit

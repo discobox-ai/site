@@ -15,8 +15,9 @@ imports**, **Release versioning and URLs**, **Search**, and the corresponding
 
 At preview commit `70bebda`, `src/pages/` contains only the home and
 architecture pages. `package.json` has no docs framework or import command;
-`.github/workflows/ci.yml` checks and builds PRs, and `deploy.yml` deploys
-pushes to `main` and `preview`. There is no scheduled docs importer. ADR 0001
+`.github/workflows/ci.yml` checks and builds PRs. Cloudflare Workers Builds
+builds and deploys pushes to `main` and `preview` through its git integration.
+There is no scheduled docs importer. ADR 0001
 and its index are present on `main` but absent from this preview baseline;
 this proposal links the accepted record rather than copying unrelated history.
 
