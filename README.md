@@ -120,11 +120,12 @@ Two things about the cell data, and one about the wordmarks:
 
 ## Deployment
 
-The site is a **Cloudflare Worker serving static assets** — `wrangler.jsonc`
-points `assets.directory` at `dist/` and there is no `main`, so no Worker code
-runs. GitHub Actions builds and deploys it; Cloudflare does not watch the
-repository. That keeps one build image (`.node-version` + `packageManager`) for
-both the checked build and the deployed one.
+The site is a **Cloudflare Worker serving static assets**. `wrangler.jsonc`
+points `assets.directory` at `dist/`; `worker/index.ts` serves the install
+scripts on the paths described above. Cloudflare Workers Builds watches the
+repository through its git integration and builds and deploys pushes to
+`main` and `preview`. GitHub Actions checks and builds pull requests through
+`ci.yml`.
 
 | Push | Worker | URL |
 | --- | --- | --- |
@@ -150,22 +151,16 @@ locally.
 Any other branch deploys nowhere. Open a pull request and `ci.yml` type-checks
 and builds it; to see it served, push to `preview`.
 
-### What the deploy needs
+### Deployment configuration
 
-`deploy.yml` reads two repository secrets:
+Build settings and deployment credentials are managed in Cloudflare Workers
+Builds, rather than GitHub repository secrets. Keep the Cloudflare build
+settings aligned with `.node-version` and `packageManager` in `package.json`,
+and use `SITE_PREVIEW=true` for preview builds so they stay out of search
+indexes.
 
-| Secret | Value |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Token with *Workers Scripts:Edit* on the account, plus *Zone:Read*, *Workers Routes:Edit* and *DNS:Edit* on `discobox.ai` |
-| `CLOUDFLARE_ACCOUNT_ID` | `27da65de69e2c4d905c1849912684b76` (Obot AI) |
-
-The zone permissions matter only when a custom domain is being attached or
-changed; a deploy that touches no routes needs just the Workers scope. There is
-no OIDC for Cloudflare, so that token is copied by hand and has to be rotated
-the same way.
-
-Fork pull requests never deploy: `deploy.yml` runs on `push`, and secrets are
-withheld from fork PRs regardless. A fork PR still gets `ci.yml`.
+Fork pull requests get `ci.yml`; deployment happens when changes land on
+`main` or `preview`.
 
 ### The pnpm pin is not optional
 

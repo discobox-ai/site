@@ -1,8 +1,7 @@
 name: CI
 
-# Type-check and build every pull request. Pushes to main and preview are
-# covered by deploy.yml, which runs the same `pnpm check` and `pnpm build`
-# before it deploys, so they are deliberately not duplicated here.
+# Type-check and build every pull request. Cloudflare Workers Builds handles
+# builds and deployments for pushes to main and preview through its git integration.
 on:
   pull_request:
   workflow_dispatch:
@@ -25,9 +24,8 @@ jobs:
 
       - uses: pnpm/action-setup@v6
 
-      # .node-version is the single source of truth: deploy.yml reads the
-      # same file, so the checked build and the deployed build stay on one
-      # version.
+      # Keep Cloudflare Workers Builds settings aligned with .node-version
+      # and packageManager in package.json.
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
