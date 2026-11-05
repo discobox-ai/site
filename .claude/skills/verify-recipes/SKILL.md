@@ -21,3 +21,11 @@ and architecture still render, production canonical URLs and preview noindex.
 For installer behavior, serve the built assets through Wrangler and send curl
 requests to `/`, `/install.sh`, `/install.ps1` and browser requests to docs.
 No external deploy should be attempted from a fork PR.
+
+For blog changes, add temporary published, draft and future Markdown posts,
+build, and drive `/blog/` to the published post in Chromium. Check feed
+discovery and RSS items, production canonicals, preview noindex, rendered
+Markdown and mobile navigation at 390px. Direct draft/future URLs must be
+404 and absent from listing, feed, sitemap and docs search. Remove the
+fixtures and rebuild before committing. `pnpm test:blog` supplies build-level
+publication regression coverage; browser observation is still required.
