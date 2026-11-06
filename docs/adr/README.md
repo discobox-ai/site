@@ -9,3 +9,4 @@ change records acceptance and delivers the decision.
 | --- | --- |
 | [0001: Docs and blog on discobox.ai](0001-docs-and-blog.md) | Accepted |
 | [0002: Main documentation line](0002-main-docs-line.md) | Proposed |
+| [0003: Complete site on Remix 3](0003-remix-site.md) | Proposed |
