@@ -8,9 +8,9 @@
  * document. What that buys is a build that emits the same markup twice, which
  * a random suffix would not.
  */
-let count = 0;
+let count = 0
 
 export function uniqueName(prefix: string): string {
-  count += 1;
-  return `${prefix}-${count}`;
+  count += 1
+  return `${prefix}-${count}`
 }

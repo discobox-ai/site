@@ -12,3 +12,8 @@
   only imported manuals, so it cannot catch a broken release-post link.
 - Exercise shared navigation at 390px after adding a link. Keeping another
   link visible on mobile can push the wordmark and actions outside the viewport.
+
+- Snapshot symlinks with lstat/readlink when checking generated-file drift.
+  Repostd requires `.claude/skills` to link to a directory; dereferencing it
+  made verify fail with EISDIR during #15. Include executable bits and names
+  as well as file contents so tooling changes cannot pass unnoticed.

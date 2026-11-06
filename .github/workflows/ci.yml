@@ -1,42 +1,77 @@
+# Every job body is one package.json script; what it does lives in
+# package.json and runs the same way in a terminal.
 name: CI
 
-# Type-check and build every pull request. Cloudflare Workers Builds handles
-# builds and deployments for pushes to main and preview through its git integration.
 on:
   pull_request:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - preview
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
-    name: Type-check and build
-    runs-on: ubuntu-latest
+  verify:
+    runs-on: depot-ubuntu-24.04-4
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - uses: pnpm/action-setup@v6
-
-      # Keep Cloudflare Workers Builds settings aligned with .node-version
-      # and packageManager in package.json.
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/pnpm
         with:
-          node-version-file: .node-version
-          cache: pnpm
+          script: verify
 
-      - run: pnpm install --frozen-lockfile
+  check:
+    runs-on: depot-ubuntu-24.04-4
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/pnpm
+        with:
+          script: check
 
-      - run: pnpm check
+  test:
+    runs-on: depot-ubuntu-24.04-4
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/pnpm
+        with:
+          script: test
 
-      - run: pnpm test:blog
+  # repocheck is a Go program: this job, and only this one, uses Go
+  # (repostd ADR 0002).
+  repocheck:
+    runs-on: depot-ubuntu-24.04-4
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/repocheck
+        with:
+          version: 03b594feef8f250c4ba27a5457719067a3d336e8
 
-      - run: pnpm build
+  build:
+    runs-on: depot-ubuntu-24.04-4
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/pnpm
+        with:
+          script: build
         env:
           SITE_PREVIEW: true
