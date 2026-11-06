@@ -1,7 +1,7 @@
-# ADR 0001: Docs and blog on discobox.ai
+# 0001 — Docs and blog on discobox.ai
 
-- Status: Accepted
-- Date: 2026-11-04
+- **Status**: Accepted
+- **Date**: 2026-11-04
 - Accepted by the owner by merging #5, 2026-11-04
 - Scope: [site #2](https://github.com/discobox-ai/site/issues/2) and
   [site #3](https://github.com/discobox-ai/site/issues/3), for v0.19
@@ -34,20 +34,7 @@ reference that follows the product, and a low-friction reviewed blog. The
 v0.19 deadline favors reusing the existing delivery path and avoiding a
 second website service.
 
-## Options
-
-| Option | Benefits | Costs and reasons to pass over it |
-| --- | --- | --- |
-| **Starlight docs plus native Astro blog in this site (recommended)** | Reuses Astro, domains, styles, and Cloudflare deployment; docs navigation and static search come from Starlight; blog remains a small content collection. | Version selection and release imports need explicit site code; integration with this repo's Astro version must be checked. |
-| Custom Astro docs and blog | One stack and complete layout control; no docs framework integration. | We would build and maintain docs navigation, table of contents, search UI, accessibility, and version selection ourselves. That is unnecessary work for v0.19. |
-| Docusaurus for docs and blog, alongside or replacing Astro | Docs version snapshots and a blog are established framework features. | A separate build adds routing and deployment seams; replacing Astro rewrites the marketing site. Prefer this if versioning requirements grow beyond the modest scheme below. |
-| Separate Starlight site at docs.discobox.ai, Astro blog here | Independent docs dependencies and releases; a useful fallback if integration is incompatible. | Additional build/deploy configuration and cross-site navigation without a present need for independent ownership. |
-| Hosted docs/CMS and hosted blog | Editorial tooling and managed publishing can reduce custom work. | Adds service ownership, cost, and a separate publishing workflow. There is no requirement for non-Git authors, accounts, or a CMS in these issues. |
-
-This recommendation is a proposed choice for owner acceptance, not an
-assertion that Starlight has already been integrated or benchmarked.
-
-## Proposed decision
+## Decision
 
 ### Stack, placement, and hosting
 
@@ -180,7 +167,20 @@ Before considering #2 and #3 delivered, exercise the built site and observe:
 - A main deployment contains both docs and blog from the checked commit;
   reverting a site commit can restore a prior snapshot without upstream fetches.
 
-## Consequences and implementation gates
+## Alternatives rejected
+
+| Option                                                               | Benefits                                                                                                                                                  | Costs and reasons to pass over it                                                                                                                                            |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Starlight docs plus native Astro blog in this site (recommended)** | Reuses Astro, domains, styles, and Cloudflare deployment; docs navigation and static search come from Starlight; blog remains a small content collection. | Version selection and release imports need explicit site code; integration with this repo's Astro version must be checked.                                                   |
+| Custom Astro docs and blog                                           | One stack and complete layout control; no docs framework integration.                                                                                     | We would build and maintain docs navigation, table of contents, search UI, accessibility, and version selection ourselves. That is unnecessary work for v0.19.               |
+| Docusaurus for docs and blog, alongside or replacing Astro           | Docs version snapshots and a blog are established framework features.                                                                                     | A separate build adds routing and deployment seams; replacing Astro rewrites the marketing site. Prefer this if versioning requirements grow beyond the modest scheme below. |
+| Separate Starlight site at docs.discobox.ai, Astro blog here         | Independent docs dependencies and releases; a useful fallback if integration is incompatible.                                                             | Additional build/deploy configuration and cross-site navigation without a present need for independent ownership.                                                            |
+| Hosted docs/CMS and hosted blog                                      | Editorial tooling and managed publishing can reduce custom work.                                                                                          | Adds service ownership, cost, and a separate publishing workflow. There is no requirement for non-Git authors, accounts, or a CMS in these issues.                           |
+
+This recommendation is a proposed choice for owner acceptance, not an
+assertion that Starlight has already been integrated or benchmarked.
+
+## Consequences
 
 The site can build reproducibly and docs changes can be reviewed independently
 of deployment. Product authors keep responsibility for product accuracy;
@@ -203,7 +203,7 @@ ownership, versioning, URL, and publication contracts above. This record adds
 no exporter, content migration, dependencies, routes, automation, or release
 post. It was accepted by the owner by merging #5.
 
-## References
+### References
 
 - [Starlight manual setup](https://starlight.astro.build/manual-setup/): integration into an existing Astro project.
 - [Starlight content authoring](https://starlight.astro.build/guides/authoring-content/): Markdown and MDX support.

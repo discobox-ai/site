@@ -1,6 +1,8 @@
 @import './brand.css';
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+}
 
 *,
 *::before,
@@ -18,8 +20,16 @@ body {
   -webkit-font-smoothing: antialiased;
   /* Two lights on a dark floor: the mark's magenta and its shadow violet. */
   background-image:
-    radial-gradient(60rem 40rem at 15% -10%, color-mix(in oklab, var(--violet) 22%, transparent), transparent 70%),
-    radial-gradient(50rem 35rem at 90% 0%, color-mix(in oklab, var(--magenta) 12%, transparent), transparent 65%);
+    radial-gradient(
+      60rem 40rem at 15% -10%,
+      color-mix(in oklab, var(--violet) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50rem 35rem at 90% 0%,
+      color-mix(in oklab, var(--magenta) 12%, transparent),
+      transparent 65%
+    );
   background-repeat: no-repeat;
 }
 
@@ -91,7 +101,10 @@ kbd {
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease;
 }
 
 .button:hover {
@@ -121,7 +134,11 @@ kbd {
 /* Cards ------------------------------------------------------------------- */
 
 .card {
-  background: linear-gradient(180deg, var(--ink-raised), color-mix(in oklab, var(--ink-raised) 60%, var(--ink)));
+  background: linear-gradient(
+    180deg,
+    var(--ink-raised),
+    color-mix(in oklab, var(--ink-raised) 60%, var(--ink))
+  );
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 1.4rem;
