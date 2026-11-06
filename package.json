@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "pnpm check:docs && astro build && node scripts/check-docs-build.mjs && node scripts/check-blog-build.mjs",
     "preview": "astro preview",
-    "check": "oxlint --type-aware && oxfmt --check && tsc --noEmit && astro check",
+    "check": "pnpm run generate && oxlint --type-aware && oxfmt --check && tsc --noEmit && astro check",
     "sync:assets": "node scripts/sync-assets.mjs",
     "import:docs": "node scripts/import-docs.mjs",
     "check:docs": "node --test scripts/docs-check.test.mjs && node scripts/import-docs.mjs --check",
