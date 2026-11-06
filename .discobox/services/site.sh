@@ -23,4 +23,4 @@ export ASTRO_DEV_BACKGROUND=1
 
 # --host binds every interface, so the forward reaches it however localhost
 # resolves.
-exec pnpm dev --host
+exec pnpm run dev --host

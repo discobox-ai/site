@@ -34,3 +34,8 @@
   check cannot see the two disagree. The fix is upstream and a new import, never
   an edit to the imported pages. v0.19.0 shipped with such wording
   (discobox-ai/discobox#856).
+
+- Snapshot symlinks with lstat/readlink when checking generated-file drift.
+  Repostd requires `.claude/skills` to link to a directory; dereferencing it
+  made verify fail with EISDIR during #15. Include executable bits and names
+  as well as file contents so tooling changes cannot pass unnoticed.
