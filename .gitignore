@@ -4,3 +4,5 @@ dist/
 
 # wrangler dev's local state
 .wrangler/
+
+.env
