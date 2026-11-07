@@ -1,14 +1,165 @@
 ---
 import manifest from '../../data/docs-versions.json';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+// The way into the versioned manuals. Once a stable line is published this
+// page only redirects to it; until then it says what the manual covers and
+// which line it describes, in the same words as the home page.
 const stable = manifest.currentStable;
 if (stable) return Astro.redirect(`/docs/${stable}/`, 302);
+
+const line = manifest.versions.find((v) => v.line === manifest.defaultVersion) ?? manifest.versions[0];
+
+// What each page is for, so the list is a map rather than a table of titles.
+const about: Record<string, string> = {
+  '': 'What Discobox is, and where to start.',
+  'getting-started': 'Install, choose a harness, run a task, and bring the work home.',
+  // Says skills and lead boxes once the import carries discobox's concepts.md with them.
+  concepts: 'Boxes and sources, harnesses, providers, lifecycle and credentials.',
+  console: 'The console: workflows, navigation and keys.',
+  cli: 'Every public command and flag, generated from the CLI.',
+};
 ---
-<BaseLayout title="Discobox documentation" description="Versioned Discobox manuals and command reference.">
-  <main class="page" style="padding-block: 4rem">
-    <h1>Discobox documentation</h1>
-    <p>No stable manual has been published yet. The v0.19 manual describes a development revision.</p>
-    <ul>{manifest.versions.map(v => <li><a href={`/docs/${v.line}/`}>{v.line} · {v.status}</a></li>)}</ul>
-    <p><a href="/">Discobox home</a></p>
+
+<BaseLayout
+  title="Discobox documentation"
+  description="The Discobox manual: run any agent harness in its own sandbox, with skills, lead boxes, providers and credentials explained, and the full command reference."
+>
+  <SiteHeader />
+
+  <main class="page docs">
+    <header class="docs__head">
+      <p class="eyebrow">Documentation</p>
+      <h1 class="docs__title">The Discobox manual</h1>
+      <p class="lede docs__lede">
+        Discobox is a harness runtime: it runs any agent harness in its own sandbox,
+        with its own copy of your code, and keeps your secrets outside it. The manual
+        covers running it, the ideas behind it, and every command.
+      </p>
+    </header>
+
+    <section class="docs__line" aria-label={`The ${line.line} manual`}>
+      <div class="docs__band">
+        <span class="docs__name">{line.line} manual</span>
+        <span class="tag tag--partial">{line.status}</span>
+      </div>
+      <p class="docs__note">
+        No stable manual has been published yet. This one describes the {line.version}{' '}
+        revision, so a command here may differ from the release you installed.
+      </p>
+
+      <ul class="docs__pages">
+        {
+          line.files.map((file) => (
+            <li>
+              <a class="docs__page" href={`/docs/${line.line}/${file.slug ? `${file.slug}/` : ''}`}>
+                <span class="docs__page-title">{file.title}</span>
+                <span class="docs__page-about">{about[file.slug] ?? ''}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    {
+      manifest.versions.length > 1 && (
+        <p class="docs__others">
+          Other lines:{' '}
+          {manifest.versions
+            .filter((v) => v.line !== line.line)
+            .map((v) => <a href={`/docs/${v.line}/`}>{v.line} · {v.status}</a>)}
+        </p>
+      )
+    }
   </main>
+
+  <SiteFooter />
 </BaseLayout>
+
+<style>
+  .docs {
+    padding-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 7vw, 5rem);
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+  }
+
+  .docs__head {
+    max-width: 62ch;
+  }
+
+  .docs__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .docs__lede {
+    margin-top: 1.2rem;
+    max-width: 60ch;
+  }
+
+  .docs__line {
+    max-width: 52rem;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  /* A section band heads the line's pages, as the console heads a list. */
+  .docs__band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: var(--radius-row);
+    background: var(--line);
+  }
+
+  .docs__name {
+    font: 700 0.95rem / 1.2 var(--font-mono);
+    color: var(--text);
+  }
+
+  .docs__note {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    max-width: 62ch;
+  }
+
+  .docs__pages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+  }
+
+  .docs__page {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.9rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    border-radius: var(--radius-row);
+  }
+
+  .docs__page:hover,
+  .docs__page:focus-visible {
+    background: var(--selection);
+  }
+
+  .docs__page-title {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--magenta);
+  }
+
+  .docs__page-about {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .docs__others {
+    color: var(--text-muted);
+  }
+</style>
