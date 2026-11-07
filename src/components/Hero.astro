@@ -1,38 +1,51 @@
 ---
 import InstallCommand from './InstallCommand.astro';
-import Screenshot from './Screenshot.astro';
-import launcher from '../assets/screens/launcher.png';
+import TerminalMark from './TerminalMark.astro';
 
-// Copy on the left, the shot beside it. The column had seven blocks before —
-// two buttons, two mono notes, and a GitHub link the header already carries —
-// which left nothing dominant and no rhythm to the gaps. What is left is the
-// claim, the one command, and the small print, at one spacing step.
+// The claim, the command, and the install. The command is the picture: the
+// whole product is one line with three arguments, and labelling each part
+// under it says what discobox is faster than any screenshot can.
+
+const parts = [
+  { text: 'discobox run', tone: 'verb' },
+  { text: '-H codex', label: 'harness' },
+  { text: 'acme/api', label: 'source' },
+  { text: '-p "fix the flaky retry test"', label: 'task' },
+];
 ---
 
 <section class="hero">
   <div class="page hero__inner">
-    <div class="hero__lead">
-      <p class="eyebrow">Full autonomy for coding agents</p>
+    <div class="hero__top">
+      <div class="hero__lead">
+        <p class="eyebrow">The harness runtime</p>
 
-      <h1 class="hero__title">
-        Give your agent its own <span class="hero__accent">disco</span>.
-      </h1>
+        <h1 class="hero__title">
+          Run any agent harness, <span class="hero__accent">isolated</span>.
+        </h1>
 
-      <p class="lede hero__lede">
-        Your agent gets a disposable machine with sudo, a desktop and a browser, and
-        never waits for approval. Run one per task, side by side, and get each one's
-        commits back as a branch or pull request. Your secrets never enter the box.
-      </p>
+        <p class="lede hero__lede">
+          Discobox is a harness runtime. Give it a harness, a repository and a task, and it
+          runs the harness in a box of its own with its own copy of the code. The agent has
+          full control inside the box. Your secrets stay outside it. Add your team’s skills
+          and it becomes a software factory.
+        </p>
+      </div>
+
+      <TerminalMark cell={14} class="hero__mark" label="The discobox mark" />
     </div>
 
-    <Screenshot
-      class="hero__shot"
-      src={launcher}
-      alt="The Discobox launcher: three running discoboxes listed with their harness, branch and resource use, above the prompt a new one starts from."
-      priority
-      fade
-      sizes="(min-width: 56rem) min(92vw, 118vh), calc(100vw - 2.5rem)"
-    />
+    <figure class="runline" aria-label='discobox run -H codex acme/api -p "fix the flaky retry test"'>
+      <span class="runline__prompt" aria-hidden="true">$</span>
+      {
+        parts.map((part, index) => (
+          <span class={`runline__part${part.label ? ' runline__part--arg' : ''}`} aria-hidden="true">
+            <code class="runline__code">{part.text}{index < parts.length - 1 && <span class="runline__cont"> \</span>}</code>
+            {part.label && <span class="runline__label">{part.label}</span>}
+          </span>
+        ))
+      }
+    </figure>
 
     <div class="hero__cta">
       <InstallCommand class="hero__install" />
@@ -54,44 +67,40 @@ import launcher from '../assets/screens/launcher.png';
 <style>
   .hero {
     padding-block: clamp(3.5rem, 9vw, 5.5rem) clamp(3rem, 7vw, 4.5rem);
-    /* The shot runs past the page's right edge; nothing may scroll sideways. */
-    overflow-x: clip;
   }
 
-  /* One column of copy. On a phone the shot sits in it, between the claim and
-     the command; from 56rem it comes out of flow and stands beside the whole
-     column. Out of flow rather than in a second grid track, because a tall
-     item spanning the copy's rows pushes its excess height into the gaps
-     between them — which is what made the spacing look arbitrary. */
   .hero__inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* The prose measure, and it is used twice: the copy is capped at it, and the
-     shot beside it starts one gap past whichever is wider, it or --pill.
-     Written as a percentage as well as a ch so a cap and an offset resolve
-     against the same containing block — they are not comparable otherwise, and
-     on a wide-figured system font the copy would run under the opaque left of
-     the capture. */
-  .hero__inner {
-    --copy: min(44ch, 46%);
-    --copy-gap: 2.5rem;
-    /* The width the install command stops fitting on one line at, which is
-       InstallCommand.astro's container-query threshold restated: a container
-       query cannot read a custom property, so the number lives there and this
-       mirrors it. Both comments say so; change one and change the other.
+  /* The copy, with the mark beside it on a wide screen. The mark is the one
+     the CLI draws, so it stands for the product as a terminal shows it. */
+  .hero__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: 2.5rem;
+  }
 
-       The pill's drawn width is its content, not this: the widest of the four
-       commands a visitor can choose between is the PowerShell one, whose pill
-       measures 30.2rem on the fonts to hand. The number here is that rounded
-       up, so the shot is placed past a pill drawn a little wider than it is
-       here, and --copy-gap is the rest of the margin. */
-    --pill: 31rem;
+  .hero :global(.hero__mark) {
+    display: none;
+  }
+
+  @media (min-width: 56rem) {
+    .hero__top {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .hero :global(.hero__mark) {
+      display: block;
+      width: clamp(14rem, 26vw, 21rem);
+      height: auto;
+      margin-right: clamp(0rem, 3vw, 2.5rem);
+    }
   }
 
   .hero__lead,
-  .hero__cta,
   .hero__note {
     max-width: 52ch;
   }
@@ -101,25 +110,133 @@ import launcher from '../assets/screens/launcher.png';
     max-width: 48ch;
     font-size: 0.875rem;
     line-height: 1.7;
-    color: var(--text-faint);
+    color: var(--text-muted);
   }
 
   .hero__title {
     font-size: clamp(2.4rem, 6vw, 3.9rem);
-    max-width: 15ch;
+    max-width: 16ch;
   }
 
+  /* The wordmark's own run, magenta into gold, on the dark ground. On light
+     ground gold is too faint for type, so it runs into violet instead. */
   .hero__accent {
-    background: linear-gradient(100deg, var(--magenta), var(--gold));
+    --accent-end: var(--gold);
+    background: linear-gradient(100deg, var(--magenta), var(--accent-end));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
+  @media (prefers-color-scheme: light) {
+    :global(:root:not([data-theme='dark'])) .hero__accent {
+      --accent-end: var(--violet);
+    }
+  }
+
+  :global(:root[data-theme='light']) .hero__accent {
+    --accent-end: var(--violet);
+  }
+
   .hero__lede {
     margin-top: 1.5rem;
     font-size: clamp(1.06rem, 1.6vw, 1.18rem);
-    max-width: 50ch;
+    max-width: 52ch;
+  }
+
+  /* The command, drawn as a line of tokens with a bracket and a name under each
+     argument. The tokens wrap as whole units, so on a phone the task drops to
+     its own line with its label still under it. */
+  .runline {
+    margin: clamp(2.25rem, 5vw, 3rem) 0 0;
+    padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 2rem) clamp(1rem, 2.5vw, 1.4rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: 0.85em;
+    row-gap: 0.9rem;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius);
+    background: var(--ink-sunken);
+    font-family: var(--font-mono);
+    font-size: clamp(0.95rem, 2.1vw, 1.35rem);
+  }
+
+  .runline__prompt {
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  .runline__part {
+    display: grid;
+    gap: 0.45rem;
+    justify-items: start;
+  }
+
+  .runline__code {
+    font-size: 1em;
+    line-height: 1.5;
+    white-space: pre;
+    color: var(--text);
+  }
+
+  .runline__part--arg .runline__code {
+    color: var(--magenta);
+  }
+
+  .runline__label {
+    justify-self: stretch;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--line-bright);
+    font-size: 0.72rem;
+    font-size: max(0.72rem, 0.5em);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  /* The continuation backslash only shows when the command is broken over
+     lines, as a shell would need it. */
+  .runline__cont {
+    display: none;
+    color: var(--text-faint);
+  }
+
+  /* On a phone the parts can't share a line, and wrapping them wherever they
+     fall strands a label from its argument. So the command is written the way
+     you would type it over several lines: one argument per line, continued
+     with a backslash, each label beside its argument. */
+  @media (max-width: 40rem) {
+    .runline {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      column-gap: 0.6em;
+      row-gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .runline__part {
+      grid-column: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 1rem;
+      row-gap: 0.1rem;
+    }
+
+    .runline__part--arg {
+      padding-left: 1.2em;
+    }
+
+    .runline__cont {
+      display: inline;
+    }
+
+    .runline__label {
+      padding-top: 0;
+      border-top: 0;
+      font-size: 0.68rem;
+    }
   }
 
   .hero__cta {
@@ -132,55 +249,5 @@ import launcher from '../assets/screens/launcher.png';
     font-size: 0.78rem;
     line-height: 1.7;
     color: var(--text-faint);
-  }
-
-  .hero :global(.hero__shot) {
-    margin-top: clamp(2.5rem, 5vw, 3.25rem);
-  }
-
-  @media (min-width: 56rem) {
-    .hero__inner {
-      position: relative;
-    }
-
-    .hero__lead,
-    .hero__note {
-      max-width: var(--copy);
-    }
-
-    /* Not capped to the copy measure: that is for prose, and the install
-       command is a control. Capping it made its container exactly as wide as
-       the copy column, which is close enough to the width the command needs
-       that the pill flipped to its stacked card somewhere in the middle of the
-       laptop range — and always, on a system font with narrower figures. The
-       block is full width and invisible; the pill inside it is what shows, at
-       the left of the column, well clear of the shot. */
-    .hero__cta {
-      max-width: none;
-    }
-
-    /* Anchored just right of the copy and centred against it, running off the
-       edge of the page. Its width is capped against the viewport height as
-       well as its width, so the capture stays about as tall as the copy it
-       stands beside on any shape of screen. */
-    /* Past whichever of the two is wider: the prose measure, or the pill. The
-       pill is the one that moves — it is rem and em throughout, so it grows
-       with the visitor's default font size, while neither branch of --copy
-       does (ch resolves against an absolute body size, and 46% is a share of
-       the page). Bounding on the copy alone left the pill 2px clear at the
-       browser default and inside the capture one step up the font-size menu. */
-    .hero :global(.hero__shot) {
-      position: absolute;
-      top: 50%;
-      left: calc(max(var(--copy), var(--pill)) + var(--copy-gap));
-      translate: 0 -50%;
-      width: min(92vw, 118vh);
-      max-width: none;
-      margin: 0;
-      /* Where the mask has to be done by: the copy takes the left half, so a
-         little over half the capture is what any screen actually shows. */
-      --fade-start: 28%;
-      --fade-end: 56%;
-    }
   }
 </style>

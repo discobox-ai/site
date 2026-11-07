@@ -1,6 +1,10 @@
+/*
+ * The design language's tokens reach the site through brand.css, which the
+ * Starlight docs import too, so the site, the docs and the blog share one set
+ * of roles. The page follows the system's appearance: dark is canonical, light
+ * uses the same roles. Pictures of a terminal carry .theme-dark and stay dark.
+ */
 @import './brand.css';
-
-:root { color-scheme: dark; }
 
 *,
 *::before,
@@ -23,9 +27,13 @@ body {
   background-repeat: no-repeat;
 }
 
+/* Monospace is the voice: headings, navigation, labels, keys and data. Long
+   prose stays in the companion sans so paragraphs read comfortably. */
 h1,
 h2,
 h3 {
+  font-family: var(--font-mono);
+  font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin: 0;
@@ -53,6 +61,21 @@ kbd {
   font-size: 0.92em;
 }
 
+/* A shortcut, in its platform's spelling: ⌘T, Ctrl+Shift+T, ctrl+a s. */
+kbd {
+  border: 1px solid var(--line-bright);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-key);
+  padding: 0.05em 0.4em;
+  background: var(--ink-raised);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--magenta);
+  outline-offset: 2px;
+}
+
 /* Layout primitives ------------------------------------------------------- */
 
 .page {
@@ -66,8 +89,9 @@ kbd {
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--magenta);
   margin: 0 0 1rem;
@@ -86,16 +110,16 @@ kbd {
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.15rem;
-  border-radius: 999px;
+  border-radius: var(--radius-row);
   border: 1px solid var(--line-bright);
-  font-size: 0.95rem;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
-  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
 }
 
 .button:hover {
-  transform: translateY(-1px);
   color: var(--text);
 }
 
@@ -120,11 +144,67 @@ kbd {
 
 /* Cards ------------------------------------------------------------------- */
 
+/* Cards on the page are flat: a raised ground and a hairline. Only floating
+   things cast a shadow. */
 .card {
-  background: linear-gradient(180deg, var(--ink-raised), color-mix(in oklab, var(--ink-raised) 60%, var(--ink)));
+  background: var(--ink-raised);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-card);
   padding: 1.4rem;
+}
+
+/* The frame: a rounded box whose title rides its top border, as the console
+   draws a pane. On a page it holds the one thing that needs attention; at
+   most one focused frame per screen, the rest .frame--quiet. */
+.frame {
+  position: relative;
+  border: var(--stroke-focus) solid var(--magenta);
+  border-radius: var(--radius-frame);
+  background: var(--ink-raised);
+  padding: 1.5rem 1.3rem 1.2rem;
+}
+
+.frame--quiet {
+  border: var(--stroke-quiet) solid var(--line-bright);
+}
+
+.frame__title {
+  position: absolute;
+  top: -0.8em;
+  left: 1.1rem;
+  padding: 0 0.45rem;
+  background: var(--ink-raised);
+  font: 600 var(--step--1) / 1.5 var(--font-mono);
+  color: var(--text);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.frame__title::before {
+  content: '[ ';
+  color: var(--magenta);
+}
+
+.frame__title::after {
+  content: ' ]';
+  color: var(--magenta);
+}
+
+.frame--quiet .frame__title::before,
+.frame--quiet .frame__title::after {
+  color: var(--text-muted);
+}
+
+/* The gold band heads one list or table per view: its name, and its count. */
+.band {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-row);
+  background: var(--gold);
+  color: var(--on-gold);
+  font: 700 0.95rem / 1.2 var(--font-mono);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -146,11 +226,11 @@ kbd {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-key);
   border: 1px solid var(--line-bright);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -189,7 +269,9 @@ kbd {
    honest. Used wherever the brand voice makes a claim the architecture has to
    immediately qualify. */
 .couplet__hook {
-  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.3vw, 2.3rem);
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-wrap: balance;
