@@ -4,87 +4,135 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
 // This page is deliberately sober. The brand carries the concept on the index;
-// here the technical register carries the proof, and the two do not mix inside
-// a paragraph. Everything on it is written from the implementation — the
-// reference table at the end is the map back to it, and any claim that cannot
-// be traced there does not belong here.
+// here the technical register carries the proof. Everything on it is written
+// from the implementation: the reference table at the end is the map back to
+// it, and a claim that cannot be traced there does not belong here.
+//
+// Its argument, in order: the sandbox is one swappable layer (a provider);
+// Discobox is everything around it; and the proxy Discobox deploys beside
+// every pool's boxes is the one way out, which is where secrets and policy
+// are enforced.
 
 const repo = 'https://github.com/discobox-ai/discobox/blob/main';
 
-const platforms = [
+// The providers that ship, from server/providers. `pod` is the one the design
+// names as later; it carries a designed tag rather than a row of its own.
+// The providers Discobox ships today.
+const providers = [
   {
-    os: 'Linux',
-    vmm: 'libkrun microVM',
-    body:
-      'A KVM microVM per pool, launched by a small discobox-krun binary rather than linked into the server. No TAP, TUN, veth or bridge on the host and no forwarded port: outbound traffic leaves through passt as an unprivileged user process, and every byte of control traffic crosses on VSOCK. The root filesystem is an immutable QCOW2 image; durable data and disposable cache are separate disks.',
-    ref: 'ADR 0013',
-    href: `${repo}/docs/adr/0013-local-linux-pools-use-libkrun-microvms.md`,
+    type: 'libkrun · vz · wslc',
+    runs: 'Built in, for your desktop',
+    body: 'A VM per pool on your own machine: a libkrun microVM on Linux, the Apple Virtualization framework on macOS, and WSL Containers on Windows. Discobox ships and pins the guest image, and the VM publishes no port to your network.',
   },
   {
-    os: 'macOS',
-    vmm: 'Apple Virtualization framework',
-    body:
-      'The framework is part of the OS, so this backend ships no hypervisor library and installs no VM: a codesigned discobox-server and a network are the whole requirement, and no Docker Desktop. The guest image is released on its own line and pinned by digest.',
-    ref: 'ADR 0062',
-    href: `${repo}/docs/adr/0062-macos-pools-run-vz-vms-with-an-independently-released-guest-image.md`,
+    type: 'docker',
+    runs: 'Any Docker host',
+    body: 'A Docker daemon you point it at, on this machine or another one.',
   },
   {
-    os: 'Windows',
-    vmm: 'WSL Containers, on a Windows HCS VM',
-    body:
-      'A dedicated VM per pool on the Windows Host Compute Service, created through the WSL session manager rather than a CLI. Windows HCS is what WSL itself runs on, so this works on Windows Home — no Hyper-V edition requirement. The VM belongs to the process that created it and dies with it. WSL Containers currently ships in the prerelease channel, so the server refuses to start on a host without it rather than failing one pool at a time.',
-    ref: 'server/providers/DESIGN.md',
-    href: `${repo}/server/providers/DESIGN.md`,
+    type: 'digitalocean',
+    runs: 'A cloud VM per pool',
+    body: 'One droplet per pool, created and deleted for you, reached over SSH.',
+  },
+  {
+    type: 'exec',
+    runs: 'Anything a script can start',
+    body: 'Each operation runs your command as <command> <op> <pool-id>, so a pool can live on a server, another cloud or in-house infrastructure without Discobox knowing what it is.',
+  },
+];
+
+// disco-vm (discobox-ai/vm) is the framework infrastructure plugs into: one
+// driver seam, embedded in Discobox as its `vm` provider. Statuses are its
+// README's, as of 2026-11-07.
+const drivers = [
+  { name: 'vz', runs: 'macOS guests on Apple silicon', status: 'Working', tone: 'strong' },
+  { name: 'docker', runs: 'machines as containers, with systemd', status: 'Working', tone: 'strong' },
+  { name: 'Archil', runs: 'cloud sandboxes', status: 'Passes conformance', tone: 'partial' },
+  { name: 'boxd', runs: 'cloud microVMs', status: 'In progress', tone: 'partial' },
+  { name: 'hcs', runs: 'Windows guests on Windows', status: 'In progress', tone: 'partial' },
+  { name: 'exe.dev', runs: 'cloud VMs', status: 'Planned', tone: 'designed' },
+];
+
+// The kind of platform a disco-vm driver is designed for. None is supported
+// yet; the page says so.
+const platforms = ['Daytona', 'E2B', 'Modal', 'Fly Machines', 'Vercel Sandbox'];
+
+// What Discobox manages, whatever the provider.
+const managed = [
+  {
+    name: 'Harness',
+    body: 'Which agent a box runs: Claude Code, Codex, OpenCode or any terminal agent in an image. Its settings and logins are saved once and every new box starts with them.',
+  },
+  {
+    name: 'Source',
+    body: 'A box is cut from a repository or a directory at a commit. Git reaches it through the control plane, and work leaves as commits pushed to a remote.',
+  },
+  {
+    name: 'Secrets',
+    body: 'Stored encrypted on the control plane. A box holds only sentinels, placeholders shaped like the real key, and the proxy swaps in the value on the way out.',
+  },
+  {
+    name: 'Access control',
+    body: 'A secret is bound to a box, a harness or a project with routes: methods, hosts and paths. Agents ask for more while they work, and a person, or a lead box with delegated rights, answers.',
+  },
+  {
+    name: 'Network policy',
+    body: 'Egress allow lists and deny-by-default, set on the project, the pool, the harness or one box, enforced at the proxy.',
+  },
+  {
+    name: 'Audit',
+    body: 'Every request a box makes is recorded against that box, and kept after the box is gone.',
   },
 ];
 
 const swap = [
   {
     step: 'Detect',
-    body: 'The proxy holds a per-client set of sentinel strings and matches them exactly. It never parses sentinel structure, which is what lets a sentinel byte-mimic any provider key format. Values are scanned as themselves and through any base64 token carrying them, so a credential riding in Authorization: Basic is not invisible.',
+    body: 'The proxy holds a per-box set of sentinel strings and matches them exactly. It never parses sentinel structure, which is what lets a sentinel mimic any provider key format byte for byte. Values are scanned as themselves and through any base64 token carrying them, so a credential riding in Authorization: Basic is not invisible.',
   },
   {
     step: 'Authorize',
-    body: 'A sentinel carries no host. Each distinct destination triggers a resolution the control plane answers per (secret, host): a grant must be live, cover this discobox, and cover the host the proxy actually observed. A host scope covers itself and everything beneath it, never its parent.',
+    body: 'A sentinel carries no host. Each destination triggers a resolution the control plane answers per secret and host: a grant must be live, cover this box, and cover the host and route the proxy actually observed.',
   },
   {
     step: 'Substitute',
-    body: 'The real value is written into the header or query parameter on the way out and redacted from the audit row — for a query parameter the pre-swap URL is what gets recorded. It is cached per client, sentinel and host, bounded by the grant expiry, and never persisted.',
+    body: 'The real value is written into the header or query parameter on the way out and redacted from the audit row. It is cached per box, sentinel and host, bounded by the grant expiry, and never persisted.',
   },
   {
     step: 'Fail',
-    body: 'On denial, a pending approval or a resolver error the sentinel is left in place and the upstream rejects it. Fail closed on the secret, fail open on the request: the caller gets a 401, never the credential.',
+    body: 'On denial, a pending approval or a resolver error, the sentinel is left in place and the upstream rejects it. Fail closed on the secret, fail open on the request: the caller gets a 401, never the credential.',
   },
 ];
 
-// What each tone means in words, because the section's whole point is that the
-// rows are not equal and a left border in three colours is not a way to say so.
-const standing = {
-  strong: 'Structural',
-  partial: 'Guardrail',
-  weak: 'Caveat',
-};
+// The ledger is grouped under section bands (the design language's grouping
+// device) rather than coloured row by row: the standing is a heading the rows
+// share, said in words.
+const standings = [
+  { tone: 'strong', name: 'Structural', means: 'Holds against an agent that lies' },
+  { tone: 'partial', name: 'Guardrail', means: 'Holds against an agent that errs' },
+  { tone: 'weak', name: 'Caveat', means: 'Where the guarantee is narrower' },
+];
 
 const ledger = [
   {
     claim: 'The credential is not in the box',
     tone: 'strong',
-    body: 'Cleartext leaves the control plane through one function, called by the pool proxy for one sentinel and one destination. A fully compromised discobox holds no credential to take.',
+    body: 'Cleartext leaves the control plane through one call, made by the pool proxy for one sentinel and one destination. A fully compromised box holds no credential to take.',
   },
   {
     claim: 'There is no second way out',
     tone: 'strong',
-    body: 'The container joins the per-pool internal network and nothing else. That network has no route off-box, so the proxy is the only route rather than the default one.',
+    body: 'Boxes join their pool’s internal network and nothing else. That network has no route off the pool, so the proxy is the only route rather than the default one.',
   },
   {
     claim: 'A credential resolves for one destination',
     tone: 'strong',
-    body: 'Exfiltrating a sentinel gains nothing: sent anywhere else it simply fails to resolve, and the request carries a placeholder.',
+    body: 'Exfiltrating a sentinel gains nothing: sent anywhere else it fails to resolve, and the request carries a placeholder.',
   },
   {
     claim: 'Every use has a verdict on record',
     tone: 'strong',
-    body: 'The call that takes a value is the call that carries the verdict, and the control plane persists it before anything is minted. There is no path to a value that skips it.',
+    body: 'The call that takes a value is the call that carries the verdict, and the control plane persists it before anything is minted.',
   },
   {
     claim: 'The judge is a guardrail, not a boundary',
@@ -92,330 +140,254 @@ const ledger = [
     body: 'It runs inside the box, so an agent that does not want to be judged can call the protocol directly. It catches the honest failure: drift from the task, an over-broad command, a prompt injection. It does not catch an agent that means to deceive.',
   },
   {
-    claim: 'The declared command is a claim',
-    tone: 'partial',
-    body: 'A box can declare one command and run another. What that buys is a differently shaped request against the same approved host inside the same short window, never a wider credential.',
-  },
-  {
-    claim: 'The container is privileged inside the VM',
+    claim: 'A box is as isolated as its provider makes it',
     tone: 'weak',
-    body: 'A discobox container runs privileged today, for systemd and nested Docker. The VM is the boundary that counts; a rootless, user-namespaced profile is designed and not yet the default.',
+    body: 'The proxy and the internal network hold on every provider. The wall between a box and its host is the provider’s: a VM on the desktop providers, whatever the host gives on docker or exec. Box containers run privileged today, for systemd and nested Docker; a rootless profile is designed.',
   },
 ];
 
 const references = [
+  { what: 'Sandbox providers: the provider seam, drivers and pools', href: `${repo}/server/providers/DESIGN.md`, label: 'providers/DESIGN.md' },
+  { what: 'A pool is its own runtime host', href: `${repo}/docs/adr/0006-pool-is-the-runtime-host.md`, label: 'ADR 0006' },
+  { what: 'A remote pool reaches the control plane over a channel the server opens', href: `${repo}/docs/adr/26-10-30-875-a-remote-pool-reaches-its-control-plane-over-a-channel-the-server-opens.md`, label: 'ADR 26-10-30-875' },
+  { what: 'disco-vm: the driver seam, drivers and their status', href: 'https://github.com/discobox-ai/vm/blob/main/DESIGN.md', label: 'vm/DESIGN.md' },
+  { what: 'disco-vm as a pool runtime', href: `${repo}/docs/adr/26-10-09-106-disco-vm-is-a-pool-runtime-and-the-server-runs-its-machines.md`, label: 'ADR 26-10-09-106' },
   { what: 'The proxy: certificates, audit, cache, sentinel swapping', href: `${repo}/proxy/DESIGN.md`, label: 'proxy/DESIGN.md' },
   { what: 'Pool agent: proxy wiring, network topology, credential broker', href: `${repo}/pool-agent/DESIGN.md`, label: 'pool-agent/DESIGN.md' },
   { what: 'Secrets: grants, requests, hosts, sentinel shape', href: `${repo}/server/internal/resources/secrets/DESIGN.md`, label: 'secrets/DESIGN.md' },
   { what: 'The agent credentials protocol', href: `${repo}/docs/agent-credentials-protocol.md`, label: 'agent-credentials-protocol.md' },
-  { what: 'Ephemeral sentinels and the two clocks', href: `${repo}/docs/adr/0031-agent-credentials-are-a-portable-protocol-with-ephemeral-sentinels.md`, label: 'ADR 0031' },
-  { what: 'The judge in front of every wrapped use', href: `${repo}/docs/adr/0079-a-local-judge-gates-every-wrapped-credential-use.md`, label: 'ADR 0079' },
-  { what: 'What the judge is told, and denied', href: `${repo}/docs/adr/0090-the-judge-is-handed-facts-and-given-no-tools.md`, label: 'ADR 0090' },
   { what: 'No credential without a verdict on record', href: `${repo}/docs/adr/0091-a-credential-is-not-issued-without-a-verdict-on-record.md`, label: 'ADR 0091' },
-  { what: 'Nested Docker trust, injected by a runc wrapper', href: `${repo}/docs/adr/0020-nested-docker-trust-is-injected-by-a-runc-wrapper.md`, label: 'ADR 0020' },
+  { what: 'Linux desktop pools use libkrun microVMs', href: `${repo}/docs/adr/0013-local-linux-pools-use-libkrun-microvms.md`, label: 'ADR 0013' },
   { what: 'Rootless containers as the default isolation', href: `${repo}/docs/adr/0004-user-namespaces-are-the-default-isolation.md`, label: 'ADR 0004' },
 ];
 ---
 
 <BaseLayout
   title="Architecture — Discobox"
-  description="How a discobox is built: a VM per pool, a container per box with no route off it, one MITM proxy holding the credentials, and secrets that exist inside the box only as sentinels."
+  description="Discobox runs on any sandbox: a VM on your desktop, a Docker host, a cloud VM, or anything a script can start. It manages everything around the sandbox — harness, source, secrets, access control — and every box's traffic leaves through a proxy it deploys."
 >
   <SiteHeader />
 
   <main class="page doc">
     <header class="doc__head">
       <p class="eyebrow">Architecture</p>
-      <h1 class="doc__title">A VM, a container, one proxy, and no secrets inside.</h1>
+      <h1 class="doc__title">Bring any sandbox. Discobox runs everything around it.</h1>
       <p class="lede doc__lede">
-        A discobox gives an agent sudo on a machine with nothing to approve. This page
-        describes what that machine is, what sits between it and everything else, and
-        which of those controls hold against an agent that is compromised rather than
-        merely mistaken.
+        A box needs somewhere to run. On your desktop Discobox brings its own VM. In the
+        cloud and at scale, a box runs on what you already have: a Docker host, a cloud
+        VM, a server, a hosted sandbox, or anything a script can start. That sandbox layer is one part, and
+        it swaps. Discobox manages what surrounds it: the harness, the source, secrets,
+        access control, and the proxy every box's traffic goes through.
       </p>
     </header>
 
     <section class="doc__section doc__section--wide">
       <h2>Overview</h2>
       <p>
-        Four layers, from the outside in. Your machine runs the control plane, which
-        holds credentials in cleartext. Each pool is a virtual machine. Each discobox is
-        a container in that VM. The proxy runs in the VM beside the containers and is
-        the only process with a route out of it.
+        Three parts. The <strong>control plane</strong> runs on your machine or a server
+        you run, and holds what is yours: secrets, grants, policy, harness settings and
+        the routes to your source. A <strong>pool</strong> is a runtime host a provider
+        brings up. Discobox deploys its <strong>pool agent and proxy</strong> into every
+        pool, and the pool's boxes run beside them on a network whose only way out is
+        that proxy.
       </p>
 
-      <div class="stack" role="img"
-        aria-label="Nested layers: the host runs the control plane; a pool VM contains the pool agent and proxy plus one or more discobox containers; the containers reach the internet only through the proxy.">
-        <div class="stack__host">
-          <p class="stack__label">your machine</p>
-          <p class="stack__note">control plane · encrypted secrets · CLI</p>
+      <div class="arch" role="img"
+        aria-label="The control plane on your machine or server holds secrets, grants, policy and harness settings. It reaches a pool, brought up by any provider. In the pool, boxes sit on an internal network beside the pool agent and proxy, and the proxy is the only route from the boxes to the internet.">
+        <div class="arch__plane">
+          <p class="arch__label">control plane</p>
+          <p class="arch__lead">your machine, or a server you run</p>
+          <p class="arch__note">secrets · grants · policy · harnesses · source · audit</p>
+        </div>
 
-          <div class="stack__vm">
-            <p class="stack__label">pool — one VM</p>
-            <p class="stack__note">libkrun · Apple Virtualization · Windows HCS</p>
+        <div class="arch__link" aria-hidden="true">
+          <span>the server opens a channel to each pool</span>
+        </div>
 
-            <div class="stack__row">
-              <div class="stack__box">
-                <p class="stack__label stack__label--box">discobox</p>
-                <p class="stack__note">container · systemd · sudo · nested docker</p>
-                <p class="stack__wire">internal network — no route off-box</p>
-              </div>
-              <div class="stack__box stack__box--ghost">
-                <p class="stack__label stack__label--box">discobox</p>
-                <p class="stack__note">one per task, disposable</p>
-              </div>
+        <div class="arch__pool">
+          <div class="arch__pool-head">
+            <p class="arch__label">pool</p>
+            <span class="arch__swap">brought up by any provider</span>
+          </div>
+          <ul class="arch__providers" aria-hidden="true">
+            <li>desktop VM</li>
+            <li>docker</li>
+            <li>digitalocean</li>
+            <li>exec</li>
+            <li>disco-vm: Archil · boxd · exe.dev …</li>
+          </ul>
+
+          <div class="arch__boxes">
+            <div class="arch__box">
+              <p class="arch__label arch__label--box">box</p>
+              <p class="arch__note">harness · source · sudo · docker</p>
             </div>
-
-            <div class="stack__proxy">
-              <p class="stack__label stack__label--proxy">pool agent + proxy</p>
-              <p class="stack__note">mTLS in · MITM · policy · audit · secret swap</p>
+            <div class="arch__box">
+              <p class="arch__label arch__label--box">box</p>
+              <p class="arch__note">one per task, or one per agent</p>
             </div>
+          </div>
+          <p class="arch__wire">internal network, no route off the pool</p>
+
+          <div class="arch__proxy frame">
+            <span class="frame__title">pool agent + proxy</span>
+            <p class="arch__note">mTLS per box · TLS interception · policy · secret swap · audit</p>
           </div>
         </div>
 
-        <div class="stack__out" aria-hidden="true">
-          <span class="stack__arrow">↓ the only route out</span>
-          <span class="stack__world">npm · github · your APIs · the internet</span>
+        <div class="arch__out" aria-hidden="true">
+          <span class="arch__arrow">↓ the only route out</span>
+          <span class="arch__world">npm · github · your APIs · the internet</span>
         </div>
       </div>
+    </section>
 
-      <p class="doc__aside">
-        Two discoboxes in one pool are two containers sharing that VM's kernel. Two
-        discoboxes in different pools share only the host. The pool is the sharing
-        boundary between discoboxes.
+    <section class="doc__section">
+      <h2>The sandbox is a provider</h2>
+      <p>
+        A provider brings up a pool's host and gives Discobox a way to reach it. That
+        is all it does. The seam is small on purpose: start, stop and delete the host,
+        reach its container runtime, reach the pool agent, and read the host's log.
+        Everything above it, from placing a box to swapping a secret, is the same on
+        every provider.
+      </p>
+
+      <ul class="providers">
+        {
+          providers.map((provider) => (
+            <li class="provider">
+              <div class="provider__head">
+                <code class="provider__type">{provider.type}</code>
+                <span class="provider__runs">{provider.runs}</span>
+              </div>
+              <p class="provider__body">{provider.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="doc__sub">disco-vm: one seam for any infrastructure</h3>
+      <p>
+        The providers above each wrap their own backend. disco-vm is what comes next:
+        one engine that makes, runs, snapshots and removes machines through a single
+        driver interface, embedded in Discobox as its <code>vm</code> provider. A driver
+        covers create, exec, copy, stop and snapshot for one kind of infrastructure, and
+        passes a shared conformance suite. Adding infrastructure to Discobox becomes
+        writing a driver.
+      </p>
+
+      <ul class="drivers">
+        {
+          drivers.map((driver) => (
+            <li class="driver">
+              <code class="driver__name">{driver.name}</code>
+              <span class="driver__runs">{driver.runs}</span>
+              <span class:list={['tag', `tag--${driver.tone}`]}>{driver.status}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p>
+        Hosted sandbox platforms such as{' '}
+        {platforms.map((name, index) => (
+          <>
+            <strong>{name}</strong>
+            {index < platforms.length - 2 ? ', ' : index === platforms.length - 2 ? ' and ' : ''}
+          </>
+        ))}{' '}
+        offer the same shape: create a machine, run commands in it, copy files, stop
+        it, snapshot it. That is the shape a disco-vm driver plugs in. None of them is a
+        Discobox provider yet. With a driver, any of them can be the sandbox while
+        Discobox keeps the harness, the source, the secrets and the proxy.
+      </p>
+
+      <h3 class="doc__sub">Choosing a provider</h3>
+      <p>
+        You add a provider instance with <code>discobox admin provider create</code>,
+        bind pools to it, and choose a pool per box with <code>discobox run --pool</code>.
+        A remote pool needs no address back to you: the server opens a channel to the
+        pool agent and the agent reaches the control plane through it, so a control
+        plane on a laptop can run pools in the cloud.
       </p>
     </section>
 
     <section class="doc__section">
-      <h2>The VM</h2>
+      <h2>What Discobox manages</h2>
       <p>
-        Every platform runs containers nested inside a virtual machine, not one or the
-        other. The VM is the isolation boundary; the container is what makes a box cheap
-        to create and discard. One pool is one VM, and that VM boots an image Discobox
-        builds and pins by digest rather than whatever is installed on the host.
+        The provider supplies the machine. Discobox supplies everything that makes it a
+        place to run an agent safely, and none of it depends on which provider is
+        underneath.
       </p>
-
-      <div class="platforms">
+      <dl class="managed">
         {
-          platforms.map((platform) => (
-            <div class="card platform">
-              <div class="platform__head">
-                <h3 class="platform__os">{platform.os}</h3>
-                <span class="platform__vmm">{platform.vmm}</span>
-              </div>
-              <p class="platform__body">{platform.body}</p>
-              <a
-                class="platform__ref"
-                href={platform.href}
-                aria-label={`${platform.os} on ${platform.vmm} — ${platform.ref}`}
-              >
-                {platform.ref}
-              </a>
+          managed.map((item) => (
+            <div class="managed__item">
+              <dt class="managed__name">{item.name}</dt>
+              <dd class="managed__body">{item.body}</dd>
             </div>
           ))
         }
-      </div>
-
-      <p>
-        The Linux backend holds to four transport rules: no TAP, TUN, veth, bridge or
-        host network namespace is created; no guest TCP or UDP port is published to the
-        host or the LAN; guest egress leaves through unprivileged user-mode networking;
-        and both directions of Discobox's own HTTP cross the boundary on VSOCK,
-        terminating at Unix sockets only the server's user can open. On the host a pool
-        is two unprivileged processes — the launcher and passt — plus state files, Unix
-        sockets and <code>/dev/kvm</code>.
-      </p>
-    </section>
-
-    <section class="doc__section">
-      <h2>The container</h2>
-      <p>
-        A discobox is a container in the pool VM, running systemd, with your source
-        already checked out, a git remote on the control plane, and volumes for data, config, sources,
-        secrets and a pool-shared cache. Inside it the agent is an ordinary user with
-        passwordless sudo, a socket-activated desktop it can open windows on, and its
-        own Docker daemon.
-      </p>
-      <p>
-        The container is attached to one per-pool Docker network and no other, and that
-        network is <em>internal</em>: it has no route off-box. On it the container can
-        reach the proxy, resolved by name through Docker's embedded DNS, and nothing
-        else. The proxy is therefore not a setting the sandbox is asked to honour:
-        unsetting <code>HTTP_PROXY</code> removes the route to the network, not the
-        restriction on it.
-      </p>
-      <p>
-        Nested Docker is covered by the same rule rather than exempted from it. A runc
-        wrapper ahead of the real runc on <code>PATH</code> injects the MITM CA and
-        the proxy environment into every container the sandbox's own daemon starts
-        — <code>docker run</code> and BuildKit alike — and the daemon itself gets its proxy
-        environment from a file rendered at boot, because image pulls happen in the
-        daemon before any container exists. Even sudo keeps the proxy variables, by an
-        explicit <code>env_keep</code>, so a process under sudo uses the proxy and
-        trusts its CA like everything else.
-      </p>
-      <p class="doc__aside">
-        The container itself runs privileged today, because systemd and nested Docker
-        require it. The isolation boundary is therefore the VM rather than the container
-        runtime; this is listed again in the table below.{' '}
-        <span class="tag tag--designed">Rootless is designed</span>
-      </p>
-    </section>
-
-    <section class="doc__section">
-      <h2>The client</h2>
-      <p>
-        Nothing in a discobox listens where you can reach it: the container is on a
-        network with no route off it, and on Linux — where the rule is stated outright
-        above — the VM publishes no guest port to the host or the LAN either. So every
-        way you reach a box is the CLI opening something local and tunnelling it over
-        the one connection it already has to the control plane: a Unix socket or named
-        pipe when the server is on this machine, an HTTP or iroh endpoint when it is
-        not.
-      </p>
-      <ul class="client">
-        <li>
-          <p class="client__what">ssh, and everything built on it</p>
-          <p class="client__how">
-            <code>discobox admin ssh-config --write</code> emits stanzas whose{' '}
-            <code>ProxyCommand</code> is the CLI itself, splicing ssh's stdin and
-            stdout
-            onto a websocket on the API transport. There is no SSH port on the server to
-            open or firewall. Because it is an ordinary <code>ssh_config</code> host,{' '}
-            <code>scp</code>, <code>rsync</code>, VS Code Remote-SSH and JetBrains
-            Gateway all work with no further help: <code>discobox tools vscode</code>{' '}
-            launches the editor at the right folder.
-          </p>
-        </li>
-        <li>
-          <p class="client__what">Services the box is listening on</p>
-          <p class="client__how">
-            The box reports its own listening sockets, and{' '}
-            <code>discobox proxy</code> binds each of them on your loopback — at the
-            same number where it is free, the nearest above it where it is not, or just
-            the ones <code>--port</code> names, reported yet or not. Each accepted
-            connection opens its own tunnel, dialled from inside the box's network
-            namespace, so a dev server bound to <code>127.0.0.1</code> is reachable and
-            the desktop's noVNC port is forwarded like any other.
-          </p>
-        </li>
-        <li>
-          <p class="client__what">git</p>
-          <p class="client__how">
-            Fetch and push go through routes on the control plane rather than a git
-            daemon. When the endpoint is a socket, the CLI stands up a short-lived
-            loopback address for the duration of the command, because
-            the <code>git</code> binary speaks URLs and nothing else.
-          </p>
-        </li>
-      </ul>
-      <p>
-        The direction is worth noting: every one of these is dialled outward from your
-        machine and terminated locally. Ports are bound on <code>127.0.0.1</code> unless
-        you ask for otherwise, and they exist for as long as the command holds them.
-      </p>
+      </dl>
     </section>
 
     <section class="doc__section">
       <h2>The proxy</h2>
       <p>
-        Traffic leaves a discobox through a dependency-light forwarder on its own
-        loopback, which carries it to the pool proxy over mTLS using a client
-        certificate issued per box at creation. That certificate is the identity: its
-        common name is the discobox ID, and the proxy treats client identity as the
-        tenant boundary. Every audit row, policy decision, cache event and header
-        injection is attributed to one box, and audit reads are scoped the same way, so
-        one box's traffic cannot be retrieved by asking for another's.
+        The proxy is the essential part. Discobox deploys it into every pool, beside the
+        boxes, whatever the provider. Boxes join the pool's internal network and no
+        other, and that network has no route off the pool. The proxy is therefore not a
+        setting a box is asked to honour: unsetting <code>HTTP_PROXY</code> removes the
+        route, not the restriction. Nested Docker and processes under sudo are wired to
+        it too.
       </p>
       <p>
-        HTTPS is intercepted: the proxy signs per-host certificates from a MITM CA the
-        box's trust store is seeded with at boot. Destination policy and the credential
-        swap are both evaluated against the request as it appears on the wire, which is
-        what interception buys. SOCKS5 is available on the same mTLS listener for
-        traffic that is not HTTP; it records the connect, the destination, the verdict
-        and the client, and does not inspect the tunnelled payload.
+        Each box reaches the proxy over mTLS with a certificate issued when the box is
+        created, and that certificate is its identity. Every policy decision, audit row
+        and credential swap is attributed to one box. HTTPS is intercepted, so policy and
+        the swap are evaluated against the request as it appears on the wire.
       </p>
-      <p>
-        Audit is written asynchronously so the request path never blocks on it, with
-        bodies streamed to disk and only their metadata in SQLite. It is kept for a
-        retention window and reclaimed by age — deliberately <em>not</em> by deleting the
-        discobox, since what a box sent is usually asked about after the box is gone. A
-        response cache sits alongside it and admits only digest-addressed content, so it
-        can be shared across a pool without sharing an entitlement.
-      </p>
-    </section>
 
-    <section class="doc__section">
-      <h2>Secrets</h2>
+      <h3 class="doc__sub">How a secret is used without entering the box</h3>
       <p>
-        A discobox is provisioned with <strong>sentinels</strong>, not credentials. A
-        sentinel is minted from the secret's format so it is byte-shaped like the real
-        provider key — <code>sk-ant-…</code>, <code>ghp_…</code> — and it means nothing
-        anywhere. The real value lives encrypted on the control plane and leaves it
-        through exactly one call, made by the pool proxy, for one sentinel and one
-        destination host.
+        A box is given <strong>sentinels</strong>, not credentials. A sentinel is minted in
+        the shape of the real provider key, <code>sk-ant-…</code> or <code>ghp_…</code>,
+        and means nothing anywhere. The real value stays encrypted on the control plane
+        and leaves it through one call, made by the pool proxy, for one sentinel and one
+        destination.
       </p>
 
       <ol class="swap">
         {
-          swap.map((entry, index) => (
+          swap.map((entry) => (
             <li class="swap__item">
-              <span class="swap__index">{String(index + 1).padStart(2, '0')}</span>
-              <div>
-                <p class="swap__step">{entry.step}</p>
-                <p class="swap__body">{entry.body}</p>
-              </div>
+              <p class="swap__step">{entry.step}</p>
+              <p class="swap__body">{entry.body}</p>
             </li>
           ))
         }
       </ol>
 
       <p>
-        So prompt injection cannot steal a credential that is not there, an agent
-        cannot read one out of its own environment, and a leaked sentinel opens nothing.
-        What an attacker inside the box can still do is <em>use</em> the credential
-        within the grant: against the granted host, for as long as the grant lives. The
-        next section covers what narrows that.
+        So prompt injection cannot steal a credential that is not there, and a leaked
+        sentinel opens nothing. What an attacker inside the box can still do is{' '}
+        <em>use</em>{' '}the credential within its grant: on its routes, until it expires.
       </p>
     </section>
 
     <section class="doc__section">
-      <h2>Requesting access</h2>
+      <h2>Access on demand</h2>
       <p>
-        An agent that needs access it was not given asks for it, over a small protocol
-        served on its own loopback: <code>list</code> what I may use,
-        then <code>request</code> something new — naming the destination host, a
-        justification, and the uses it wants — and then take a value for one command.
-        A person approves, and approval mints a grant carrying a host, an expiry, and
-        use descriptions the approver may rewrite. Use IDs are always minted by the
-        approver, so an agent cannot name the use it will later present.
+        An agent that needs access it was not given asks for it while it works. It names
+        the credential, the exact routes it will send it on, and why. A person approves
+        or denies it, or narrows it, and sets how long it lasts. A box that leads other
+        boxes can be given a credential to delegate, and answers its workers' requests
+        within those routes itself. An approved grant reaches the running agent's next
+        command, with no restart.
       </p>
       <p>
-        A credential granted this way is never written into the environment or into a
-        file. Taking a value mints a <strong>second, ephemeral sentinel</strong>, alive
-        for minutes, registered with the proxy and injected into that one child process.
-        Two clocks run: the grant's expiry is the consent clock on the control plane, and
-        the activation is the use clock on the pool agent, which checks that the sentinel
-        is live, belongs to the box that presented it, and is aimed at the host the use
-        was approved for. A value dies at whichever clock runs out first, and a pool
-        agent restart simply kills the activation — the failure mode is a dead sentinel
-        and one fresh ask.
-      </p>
-      <p>
-        Before any of that, the wrapper judges. <code>discobox-access run</code> reads
-        the approved use, asks a model whether the argv it is about to
-        execute <em>is</em> that use, and runs nothing unless the answer is yes — judge first,
-        take second, so a refusal mints nothing. The judge is handed a bounded set of
-        facts and denied the ability to go and find more, there is no flag to skip it,
-        and every failure mode — no wrapper, bad output, a refusal — ends the same way:
-        the command does not run.
-      </p>
-      <p>
-        The verdict travels with the call that takes the value, and the control plane
-        persists it before anything is minted, so <strong>a credential cannot be issued
-        without a verdict attached to it</strong>. The row is stored outside the box it
-        describes, joined to the grant, the request and the discobox, and it outlives the
-        discobox.{' '}
+        Before a wrapped command runs, a judge checks it against the use that was
+        approved, and a credential is never issued without that verdict on record.{' '}
         <span class="tag tag--partial">Judging is in-box today</span>
       </p>
     </section>
@@ -423,32 +395,39 @@ const references = [
     <section class="doc__section">
       <h2>What each control holds against</h2>
       <p>
-        The controls above are not equally strong, and the difference is whether they
-        hold against an agent that errs or against one that lies.
+        The controls above are not equally strong. The difference is whether they hold
+        against an agent that errs or against one that lies.
       </p>
 
-      <ul class="ledger">
+      <div class="ledger">
         {
-          ledger.map((row) => (
-            <li class:list={['ledger__row', `ledger__row--${row.tone}`]}>
-              <div class="ledger__head">
-                <p class="ledger__claim">{row.claim}</p>
-                <span class:list={['tag', `tag--${row.tone}`]}>
-                  {standing[row.tone as keyof typeof standing]}
-                </span>
-              </div>
-              <p class="ledger__body">{row.body}</p>
-            </li>
-          ))
+          standings.map((standing) => {
+            const rows = ledger.filter((row) => row.tone === standing.tone);
+            return (
+              <section class="ledger__group" aria-label={standing.name}>
+                <div class="ledger__band">
+                  <span class="ledger__standing">{standing.name}</span>
+                  <span class="ledger__means">{standing.means}</span>
+                  <span class="ledger__count">{rows.length}</span>
+                </div>
+                <ul class="ledger__rows">
+                  {rows.map((row) => (
+                    <li class="ledger__row">
+                      <p class="ledger__claim">{row.claim}</p>
+                      <p class="ledger__body">{row.body}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })
         }
-      </ul>
+      </div>
 
       <p class="doc__aside">
-        The controls that hold against a hostile agent are the ones enforced outside the
-        box, and the advisory ones sit on top of them rather than beneath them. The judge
-        failing therefore exposes no credential: it narrows the guarantee from “this
-        command was the approved use” to “this credential was approved for this host, by
-        a person, and every use of it is on record”.
+        The controls that hold against a hostile agent are enforced outside the box, by
+        the proxy and the control plane, and they are the same on every provider. The
+        advisory ones sit on top of them.
       </p>
     </section>
 
@@ -456,29 +435,27 @@ const references = [
       <h2>What this does not defend against</h2>
       <ul class="limits">
         <li>
-          <strong>Covert channels through allowed destinations.</strong> Data smuggled
-          out in a commit message or an issue body, on a host you legitimately use. It is
-          bounded, attributable and logged — not prevented.
+          <strong>A weak sandbox.</strong> A box is only as separated from its host as the
+          provider makes it. Choose the provider for the trust you need: a VM per pool on
+          the desktop providers, and whatever your own infrastructure gives elsewhere.
+        </li>
+        <li>
+          <strong>Covert channels through allowed destinations.</strong> Data smuggled out
+          in a commit message or an issue body, on a host you legitimately use. It is
+          bounded, attributable and logged, not prevented.
         </li>
         <li>
           <strong>Payloads the proxy cannot read.</strong> An agent that encrypts before
-          sending defeats content inspection. Treating unintelligibility as a policy
-          input is designed and not built.
-        </li>
-        <li>
-          <strong>A determined human attacking the hypervisor.</strong> The isolation is
-          VM-backed on every platform, but the threat model is an autonomous agent that
-          errs or is hijacked, not an adversary going after libkrun.
+          sending defeats content inspection.
         </li>
         <li>
           <strong>Anything downstream of an approved action.</strong> If you grant a
-          credential that can delete production, the grant is the control. Scope it and
-          expire it accordingly.
+          credential that can delete production, the grant is the control. Scope its
+          routes and expire it accordingly.
         </li>
         <li>
           <strong>What a compromised control plane holds.</strong> Cleartext secrets live
-          there. It runs on your machine, outside the VM, and it is the thing worth
-          protecting once the boxes cannot be.
+          there. It is the thing worth protecting once the boxes cannot be.
         </li>
       </ul>
     </section>
@@ -574,105 +551,150 @@ const references = [
     color: var(--text);
   }
 
-  .doc__aside {
+  .doc__section .doc__aside {
     margin-top: 1.5rem;
-    padding-left: 0.9rem;
-    border-left: 2px solid var(--line-bright);
-    font-size: 0.95rem;
+    font-size: 0.93rem;
+    color: var(--text-faint);
   }
 
-  /* The nesting diagram ---------------------------------------------------- */
+  /* The architecture diagram --------------------------------------------- */
 
-  .stack {
+  .arch {
     margin-top: 1.75rem;
+    display: grid;
   }
 
-  .stack__host {
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 1.1rem;
-    background: color-mix(in oklab, var(--ink-raised) 45%, transparent);
-  }
-
-  .stack__vm {
-    margin-top: 1rem;
+  .arch__plane {
     border: 1px solid var(--line-bright);
-    border-radius: var(--radius);
-    padding: 1.1rem;
-    background: color-mix(in oklab, var(--ink-raised) 70%, transparent);
+    border-radius: var(--radius-card);
+    padding: 1rem 1.1rem;
+    background: var(--ink-raised);
   }
 
-  .stack__row {
-    margin-top: 1rem;
+  .arch__link {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-block: 0.9rem;
+  }
+
+  .arch__link::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 50%;
+    border-left: 1px dashed var(--line-bright);
+  }
+
+  .arch__link span {
+    position: relative;
+    padding: 0.1rem 0.6rem;
+    background: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--text-faint);
+  }
+
+  /* The pool's border is dashed: the provider that brings it up swaps. */
+  .arch__pool {
+    border: 1px dashed var(--line-bright);
+    border-radius: var(--radius-frame);
+    padding: 1.1rem;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .arch__pool-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.9rem;
+  }
+
+  .arch__swap {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .arch__providers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .arch__providers li {
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius-key);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .arch__boxes {
     display: grid;
     gap: 0.75rem;
     grid-template-columns: minmax(0, 1fr);
   }
 
-  @media (min-width: 48rem) {
-    .stack__row {
+  @media (min-width: 40rem) {
+    .arch__boxes {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  .stack__box {
-    border: 1px solid color-mix(in oklab, var(--magenta) 40%, var(--line));
+  .arch__box {
+    border: 1px solid var(--line);
     border-radius: var(--radius-card);
-    padding: 0.9rem 1rem;
+    padding: 0.85rem 1rem;
     background: var(--ink-sunken);
-    box-shadow: inset 0 0 60px -34px var(--glow);
   }
 
-  .stack__box--ghost {
-    border-style: dashed;
-    border-color: var(--line-bright);
-    box-shadow: none;
-    opacity: 0.72;
-  }
-
-  /* The proxy is the page's one focused frame: the door every request
-     leaves through. */
-  .stack__proxy {
-    margin-top: 0.75rem;
-    border: var(--stroke-focus) solid var(--magenta);
-    border-radius: var(--radius-card);
-    padding: 0.9rem 1rem;
-    background: var(--ink-sunken);
-    box-shadow: 0 0 40px -24px var(--glow);
-  }
-
-  .stack__label {
+  .arch__wire {
+    margin: 0;
     font-family: var(--font-mono);
-    font-size: 0.74rem;
+    font-size: var(--step--1);
+    color: var(--text-faint);
+    text-align: center;
+  }
+
+  /* The proxy is the page's one focused frame: the way out of every pool. */
+  .arch__proxy {
+    margin-top: 0.4rem;
+  }
+
+  .arch__label {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-faint);
-    margin: 0;
   }
 
-  .stack__label--box {
-    color: var(--magenta);
+  .arch__label--box {
+    color: var(--text);
   }
 
-  .stack__label--proxy {
-    color: var(--magenta);
+  .arch__lead {
+    margin-top: 0.35rem;
+    color: var(--text);
   }
 
-  .stack__note {
+  .arch .arch__note {
     margin-top: 0.3rem;
     font-size: 0.88rem;
     color: var(--text-muted);
   }
 
-  .stack__wire {
-    margin-top: 0.6rem;
-    padding-top: 0.5rem;
-    border-top: 1px dashed var(--line-bright);
-    font-size: 0.82rem;
-    color: var(--text-faint);
+  .arch__proxy .arch__note {
+    margin-top: 0;
   }
 
-  .stack__out {
+  .arch__out {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -681,88 +703,134 @@ const references = [
     text-align: center;
   }
 
-  .stack__arrow {
+  .arch__arrow {
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
   }
 
-  .stack__world {
+  .arch__world {
     font-size: 0.9rem;
     color: var(--text-faint);
   }
 
-  /* Platforms -------------------------------------------------------------- */
+  /* Providers, and what is managed around them ----------------------------- */
 
-  .platforms {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1.75rem;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .platform__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.6rem;
-  }
-
-  .platform__os {
-    font-size: 1.05rem;
-  }
-
-  .platform__vmm {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--magenta);
-  }
-
-  .platform__body {
-    margin-top: 0.6rem;
-    font-size: 0.93rem;
-    color: var(--text-muted);
-  }
-
-  .platform__ref {
-    display: inline-block;
-    margin-top: 0.8rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-faint);
-  }
-
-  /* Client reach ----------------------------------------------------------- */
-
-  .client {
+  .providers {
     list-style: none;
     padding: 0;
     margin: 1.5rem 0 0;
     display: grid;
-    gap: 0;
   }
 
-  .client li {
+  .provider {
     padding-block: 1rem;
     border-top: 1px solid var(--line);
   }
 
-  .client li:last-child {
+  .provider:last-child {
     border-bottom: 1px solid var(--line);
   }
 
-  .client__what {
-    margin: 0;
-    font-weight: 650;
+  .provider__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem 0.9rem;
+  }
+
+  .provider__type {
+    color: var(--magenta);
+    font-size: 0.9rem;
+  }
+
+  .provider__runs {
+    font-family: var(--font-mono);
+    font-weight: 600;
     color: var(--text);
   }
 
-  .client__how {
+  .doc__section .provider__body {
     margin-top: 0.4rem;
     font-size: 0.93rem;
+  }
+
+  .drivers {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: grid;
+  }
+
+  .driver {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    padding-block: 0.7rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .driver:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .driver__name {
+    color: var(--magenta);
+    font-size: 0.9rem;
+  }
+
+  .driver__runs {
     color: var(--text-muted);
+    font-size: 0.93rem;
+  }
+
+  @media (max-width: 30rem) {
+    .driver {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .driver__runs {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  .managed {
+    margin: 1.5rem 0 0;
+    display: grid;
+    gap: 1.25rem 2rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 40rem) {
+    .managed {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .managed__item {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line-bright);
+  }
+
+  .managed__name {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .managed__body {
+    margin: 0.35rem 0 0;
+    font-size: 0.93rem;
+    color: var(--text-muted);
+  }
+
+  .doc__sub {
+    margin-top: 2rem;
+    font-size: 1.1rem;
   }
 
   /* The swap --------------------------------------------------------------- */
@@ -777,8 +845,7 @@ const references = [
 
   .swap__item {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 1rem;
+    gap: 0.35rem;
     padding-block: 1.1rem;
     border-top: 1px solid var(--line);
   }
@@ -787,70 +854,80 @@ const references = [
     border-bottom: 1px solid var(--line);
   }
 
-  .swap__index {
+  .doc__section .swap__step {
+    margin-top: 0;
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--magenta);
-    padding-top: 0.2rem;
-  }
-
-  .swap__step {
-    font-weight: 650;
+    font-weight: 600;
     color: var(--text);
   }
 
-  .swap__body {
-    margin-top: 0.35rem;
+  .doc__section .swap__body {
+    margin-top: 0;
     font-size: 0.93rem;
     color: var(--text-muted);
   }
 
-  /* Ledger ----------------------------------------------------------------- */
+  /* Ledger: rows grouped under section bands --------------------------- */
 
   .ledger {
-    list-style: none;
-    padding: 0;
-    margin: 1.75rem 0 0;
+    margin-top: 1.75rem;
     display: grid;
-    gap: 0.75rem;
+    gap: 1.5rem;
   }
 
-  .ledger__row {
-    border: 1px solid var(--line);
-    border-left-width: 3px;
-    border-radius: var(--radius-card);
-    padding: 0.9rem 1rem;
-  }
-
-  .ledger__row--strong {
-    border-left-color: var(--green);
-  }
-
-  .ledger__row--partial {
-    border-left-color: var(--gold);
-  }
-
-  .ledger__row--weak {
-    border-left-color: var(--salmon);
-  }
-
-  .ledger__head {
+  .ledger__band {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 0.35rem 0.75rem;
+    gap: 0.25rem 0.9rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: var(--radius-row);
+    background: var(--line);
+    font-family: var(--font-mono);
   }
 
-  .ledger__claim {
-    font-weight: 650;
+  .ledger__standing {
+    font-weight: 700;
+    font-size: 0.92rem;
     color: var(--text);
   }
 
-  .ledger__body {
-    margin-top: 0.35rem;
-    font-size: 0.92rem;
+  .ledger__means {
+    flex: 1;
+    font-size: var(--step--1);
     color: var(--text-muted);
+  }
+
+  .ledger__count {
+    font-size: var(--step--1);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ledger__rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+  }
+
+  .ledger__row {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.9rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .doc__section .ledger__claim {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .doc__section .ledger__body {
+    margin: 0;
+    font-size: 0.93rem;
   }
 
   /* Limits and references -------------------------------------------------- */
