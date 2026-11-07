@@ -617,7 +617,7 @@ const references = [
 
   .stack__box {
     border: 1px solid color-mix(in oklab, var(--magenta) 40%, var(--line));
-    border-radius: 10px;
+    border-radius: var(--radius-card);
     padding: 0.9rem 1rem;
     background: var(--ink-sunken);
     box-shadow: inset 0 0 60px -34px var(--glow);
@@ -630,19 +630,21 @@ const references = [
     opacity: 0.72;
   }
 
+  /* The proxy is the page's one focused frame: the door every request
+     leaves through. */
   .stack__proxy {
     margin-top: 0.75rem;
-    border: 1px solid var(--gold);
-    border-radius: 10px;
+    border: var(--stroke-focus) solid var(--magenta);
+    border-radius: var(--radius-card);
     padding: 0.9rem 1rem;
     background: var(--ink-sunken);
-    box-shadow: 0 0 40px -24px var(--gold);
+    box-shadow: 0 0 40px -24px var(--glow);
   }
 
   .stack__label {
     font-family: var(--font-mono);
     font-size: 0.74rem;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-faint);
     margin: 0;
@@ -653,7 +655,7 @@ const references = [
   }
 
   .stack__label--proxy {
-    color: var(--gold);
+    color: var(--magenta);
   }
 
   .stack__note {
@@ -684,7 +686,7 @@ const references = [
     font-size: 0.78rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--text-muted);
   }
 
   .stack__world {
@@ -816,7 +818,7 @@ const references = [
   .ledger__row {
     border: 1px solid var(--line);
     border-left-width: 3px;
-    border-radius: 10px;
+    border-radius: var(--radius-card);
     padding: 0.9rem 1rem;
   }
 

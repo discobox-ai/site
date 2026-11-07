@@ -33,6 +33,15 @@ asset mirror at `assets.discobox.ai`:
 Why it is shaped this way — and why the rules for `edge` must match the scripts'
 own — is discobox's ADR 0109.
 
+## Design language
+
+The site follows discobox's design language, `assets/brand/LANGUAGE.md` in the
+discobox repository: its colour roles, JetBrains Mono as the voice with IBM
+Plex Sans for prose, the frame and band, and both themes. The tokens arrive as
+`src/styles/tokens.css` with the brand art below, and `global.css` imports
+them. Change a colour upstream in `tokens.json`, never here. Pictures of a
+terminal carry `.theme-dark` and stay dark in the light theme.
+
 ## Brand assets and screenshots
 
 The brand art and the screenshots are committed here so the site builds and
@@ -48,7 +57,9 @@ a real run. Do not hand-edit these files — change them upstream and re-sync.
 discobox: assets/brand/logo-purple.svg       -> src/assets/logo.svg
 discobox: assets/brand/wordmark-gradient.svg -> src/assets/wordmark-gradient.svg
 discobox: assets/brand/wordmark-white.svg    -> src/assets/wordmark-white.svg
+discobox: assets/brand/wordmark-black.svg    -> src/assets/wordmark-black.svg
 discobox: assets/brand/favicon.svg           -> public/favicon.svg
+discobox: assets/brand/tokens.css           -> src/styles/tokens.css
 discobox: cli/internal/tui/logo.json         -> src/data/logo.json
 discobox: assets/screens/launcher.png        -> src/assets/screens/launcher.png
 discobox: assets/screens/claude-code.png     -> src/assets/screens/claude-code.png

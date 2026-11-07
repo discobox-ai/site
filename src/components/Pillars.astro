@@ -31,9 +31,8 @@ const pillars = [
 <section class="pillars-band">
   <div class="page pillars">
     {
-      pillars.map((pillar, index) => (
+      pillars.map((pillar) => (
         <a class="pillar" href={pillar.href}>
-          <span class="pillar__index">{String(index + 1).padStart(2, '0')}</span>
           <h2 class="pillar__name">{pillar.name}</h2>
           <span class="pillar__body">{pillar.body}</span>
         </a>
@@ -75,11 +74,6 @@ const pillars = [
     color: inherit;
   }
 
-  .pillar__index {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--magenta);
-  }
 
   .pillar__name {
     margin: 0;

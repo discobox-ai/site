@@ -95,11 +95,24 @@ import launcher from '../assets/screens/launcher.png';
     max-width: 15ch;
   }
 
+  /* The wordmark's own run, magenta into gold, on the dark ground. On light
+     ground gold is too faint for type, so it runs into violet instead. */
   .hero__accent {
-    background: linear-gradient(100deg, var(--magenta), var(--gold));
+    --accent-end: var(--gold);
+    background: linear-gradient(100deg, var(--magenta), var(--accent-end));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :global(:root:not([data-theme='dark'])) .hero__accent {
+      --accent-end: var(--violet);
+    }
+  }
+
+  :global(:root[data-theme='light']) .hero__accent {
+    --accent-end: var(--violet);
   }
 
   .hero__lede {

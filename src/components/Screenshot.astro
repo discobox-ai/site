@@ -41,7 +41,7 @@ const { src, alt, caption, sizes, priority = false, fade = false, class: classNa
 const widths = [...[720, 1120, 1680].filter((width) => width < src.width * 0.9), src.width];
 ---
 
-<figure class:list={['shot', className]}>
+<figure class:list={['shot', 'theme-dark', className]}>
   <a
     class:list={['shot__frame', fade && 'shot__frame--fade']}
     href={src.src}
@@ -116,6 +116,25 @@ const widths = [...[720, 1120, 1680].filter((width) => width < src.width * 0.9),
         #000 var(--fade-start, 42%),
         transparent var(--fade-end, 76%)
       );
+    }
+  }
+
+  /* The fade melts a dark capture into a dark page. On a light page it would
+     wash the capture grey, so there the capture shows whole, as the dark
+     terminal window it is. */
+  @media (min-width: 56rem) and (prefers-color-scheme: light) {
+    :global(:root:not([data-theme='dark'])) .shot__frame--fade {
+      -webkit-mask-image: none;
+      mask-image: none;
+      border-radius: var(--radius);
+    }
+  }
+
+  @media (min-width: 56rem) {
+    :global(:root[data-theme='light']) .shot__frame--fade {
+      -webkit-mask-image: none;
+      mask-image: none;
+      border-radius: var(--radius);
     }
   }
 
