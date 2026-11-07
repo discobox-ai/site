@@ -5,15 +5,13 @@ import SiteFooter from '../components/SiteFooter.astro';
 
 // This page is deliberately sober. The brand carries the concept on the index;
 // here the technical register carries the proof. Everything on it is written
-// from the implementation: the reference table at the end is the map back to
-// it, and a claim that cannot be traced there does not belong here.
+// from the implementation, and a claim that cannot be traced there does not
+// belong here.
 //
 // Its argument, in order: the sandbox is one swappable layer (a provider);
 // Discobox is everything around it; and the proxy Discobox deploys beside
 // every pool's boxes is the one way out, which is where secrets and policy
 // are enforced.
-
-const repo = 'https://github.com/discobox-ai/discobox/blob/main';
 
 // What Discobox manages, whatever the provider.
 const managed = [
@@ -104,16 +102,6 @@ const ledger = [
   },
 ];
 
-const references = [
-  { what: 'Sandbox providers: the provider seam, drivers and pools', href: `${repo}/server/providers/DESIGN.md`, label: 'providers/DESIGN.md' },
-  { what: 'A pool is its own runtime host', href: `${repo}/docs/adr/0006-pool-is-the-runtime-host.md`, label: 'ADR 0006' },
-  { what: 'A remote pool reaches the control plane over a channel the server opens', href: `${repo}/docs/adr/26-10-30-875-a-remote-pool-reaches-its-control-plane-over-a-channel-the-server-opens.md`, label: 'ADR 26-10-30-875' },
-  { what: 'The proxy: certificates, audit, cache, sentinel swapping', href: `${repo}/proxy/DESIGN.md`, label: 'proxy/DESIGN.md' },
-  { what: 'Pool agent: proxy wiring, network topology, credential broker', href: `${repo}/pool-agent/DESIGN.md`, label: 'pool-agent/DESIGN.md' },
-  { what: 'Secrets: grants, requests, hosts, sentinel shape', href: `${repo}/server/internal/resources/secrets/DESIGN.md`, label: 'secrets/DESIGN.md' },
-  { what: 'The agent credentials protocol', href: `${repo}/docs/agent-credentials-protocol.md`, label: 'agent-credentials-protocol.md' },
-  { what: 'No credential without a verdict on record', href: `${repo}/docs/adr/0091-a-credential-is-not-issued-without-a-verdict-on-record.md`, label: 'ADR 0091' },
-];
 ---
 
 <BaseLayout
@@ -377,29 +365,6 @@ const references = [
       </ul>
     </section>
 
-    <section class="doc__section">
-      <h2>Read the source</h2>
-      <p>
-        Everything above is written from the implementation. These are the documents it
-        came from, in the repository they live in.
-      </p>
-      <ul class="refs">
-        {
-          references.map((reference) => (
-            <li class="ref">
-              <span class="ref__what">{reference.what}</span>
-              <a
-                class="ref__link"
-                href={reference.href}
-                aria-label={`${reference.what} — ${reference.label}`}
-              >
-                {reference.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
 
     <p class="doc__foot">
       Found something wrong here?{' '}
@@ -765,7 +730,7 @@ const references = [
     font-size: 0.93rem;
   }
 
-  /* Limits and references -------------------------------------------------- */
+  /* Limits -------------------------------------------------- */
 
   .limits {
     margin: 1.2rem 0 0;
@@ -775,38 +740,10 @@ const references = [
     gap: 0.85rem;
   }
 
-  .refs {
-    list-style: none;
-    padding: 0;
-    margin: 1.5rem 0 0;
-    display: grid;
-    gap: 0;
-  }
 
-  .ref {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
-    padding-block: 0.7rem;
-    border-top: 1px solid var(--line);
-  }
 
-  .ref:last-child {
-    border-bottom: 1px solid var(--line);
-  }
 
-  .ref__what {
-    color: var(--text-muted);
-    font-size: 0.94rem;
-  }
 
-  .ref__link {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    white-space: nowrap;
-  }
 
   .doc__foot {
     margin-top: 3rem;
