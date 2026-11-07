@@ -67,12 +67,13 @@ const session: Line[] = [
     <p class="eyebrow">Software factory</p>
     <h2 class="couplet__hook">Your skills plus discobox make a software factory.</h2>
     <p class="couplet__turn">
-      It is a control loop. GitHub holds the state, skills define each step, and a manager
-      box starts a box for whichever step is due. Each box moves one issue forward, writes
-      the result back to GitHub, and is done.
+      A factory is a control loop: shared state that records the work, a skill for each
+      step, and a lead box that starts a box for whichever step is due. Each box moves
+      one piece of work forward, records the result, and is done.
     </p>
 
-    <ol class="flow" aria-label="An issue's path through the factory">
+    <p class="flow__caption">One example: the flow we run ourselves</p>
+    <ol class="flow" aria-label="An example: an issue's path through the factory we run">
       {
         stages.map((stage) => (
           <li class={`flow__stage${stage.person ? ' flow__stage--person' : ''}`}>
@@ -111,6 +112,16 @@ const session: Line[] = [
         <TerminalWindow lines={session} title="the manager" />
       </div>
     </div>
+
+    <div class="factory__own">
+      <p class="factory__own-title">Build yours around your own systems</p>
+      <p class="factory__own-body">
+        This is one way to build a factory, not the only one. Keep the state in your own
+        tracker or database, write skills for the steps your team actually takes, and
+        decide what the lead box watches and when it acts. Discobox supplies the sandboxes,
+        the credentials and the proxy whichever design you choose.
+      </p>
+    </div>
   </div>
 </section>
 
@@ -118,10 +129,18 @@ const session: Line[] = [
   /* An issue's path, left to right: each stage is a status, and the edge into
      it names the skill (or the person) that moves the issue there. On a phone
      it runs top to bottom with the edges between. */
+  /* Says the diagram is one example, not the definition of a factory. */
+  .flow__caption {
+    margin-top: clamp(2.5rem, 6vw, 3.25rem);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
   .flow {
     list-style: none;
     padding: 0;
-    margin: clamp(2.5rem, 6vw, 3.25rem) 0 0;
+    margin: 0.9rem 0 0;
     display: grid;
     gap: 0.5rem;
     grid-template-columns: minmax(0, 1fr);
@@ -171,6 +190,7 @@ const session: Line[] = [
   /* The one place the loop waits on a person: the section's focused frame. */
   .flow__node.frame {
     padding: 0.9rem 1.1rem;
+    border: var(--stroke-focus) solid var(--magenta);
   }
 
   /* The edge: a rule with the skill's name riding on it. */
@@ -273,5 +293,27 @@ const session: Line[] = [
 
   .usecase__demo {
     min-width: 0;
+  }
+
+  /* The closing point: the factory above is an example. A quiet hairline
+     above it rather than a frame; the focused frame stays on the merge gate. */
+  .factory__own {
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line-bright);
+    max-width: 62ch;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .factory__own-title {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+
+  .factory__own-body {
+    color: var(--text-muted);
   }
 </style>
