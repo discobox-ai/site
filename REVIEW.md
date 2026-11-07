@@ -1,10 +1,18 @@
 # Review notes
 
-- When a homepage section's story changes, check its card in
-  `src/components/Pillars.astro` too. Each pillar restates its section in one
-  line and links to it, so it never shows up in that section's diff and goes
-  stale silently (it still described `discobox apply` after Parallel stopped).
-
+- Every command on the homepage is copied from the real CLI: the hero's
+  `discobox run` line, the cards in `HowRunsWork.astro`, and the terminals in
+  `Factory.astro` and `PersistentAgents.astro`. When a flag or verb changes in
+  discobox, check it against `discobox --help` here too. The hero restates How
+  it works in one line, so it goes stale without ever showing up in that
+  section's diff.
+- Colours, faces, radii and strokes come from `src/styles/tokens.css`, which is
+  synced from discobox's `assets/brand` and follows its `LANGUAGE.md`, and reach
+  the site, the docs and the blog through `src/styles/brand.css`. A literal hex
+  value in a component, or a new colour the tokens do not name, is a change to
+  make upstream first. Gold is only the one title band per view and in-between
+  states; a page's one decision gets the focused `.frame`. Check new pieces in
+  both themes; a picture of a terminal carries `.theme-dark`.
 - Give blog entries path-based IDs. Astro's default glob loader uses the
   frontmatter slug as the ID, so duplicate permalinks can overwrite content
   before validation and edit links can lose the source filename.

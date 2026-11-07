@@ -1,20 +1,73 @@
+/*
+ * The Starlight docs in discobox's design language. Starlight draws from its
+ * own variables; each is pointed here at a role from brand.css. The roles
+ * already change with the theme (tokens.css answers to the same data-theme
+ * Starlight sets), so one mapping serves both themes. It is repeated under
+ * Starlight's own theme selectors only because those set its defaults with
+ * more specificity than :root.
+ */
 @import './brand.css';
 
-:root {
-  --sl-font: var(--font-sans);
+:root,
+:root[data-theme='dark'],
+:root[data-theme='light'] {
+  --sl-font: var(--font-prose);
   --sl-font-mono: var(--font-mono);
-  --sl-color-accent-low: var(--line);
-  --sl-color-accent: var(--brand);
-  --sl-color-accent-high: var(--magenta);
-}
 
-:root[data-theme='dark'] {
+  /* One accent, for focus and links: the language's magenta, which tokens.css
+     already deepens on light ground to keep its contrast. */
+  --sl-color-accent-low: var(--selection);
+  --sl-color-accent: var(--magenta);
+  --sl-color-accent-high: var(--magenta);
+  --sl-color-text-accent: var(--magenta);
+  --sl-color-text-invert: var(--ink);
+
+  /* Starlight's grey ramp, from strongest text to the ground. */
+  --sl-color-white: var(--text);
+  --sl-color-gray-1: var(--text);
+  --sl-color-gray-2: var(--text-muted);
+  --sl-color-gray-3: var(--text-muted);
+  --sl-color-gray-4: var(--text-faint);
+  --sl-color-gray-5: var(--line-bright);
+  --sl-color-gray-6: var(--line);
+  --sl-color-gray-7: var(--ink-raised);
+  --sl-color-black: var(--ink);
+
   --sl-color-bg: var(--ink);
   --sl-color-bg-nav: var(--ink-raised);
-  --sl-color-bg-sidebar: var(--ink-raised);
+  --sl-color-bg-sidebar: var(--ink);
+  --sl-color-bg-inline-code: var(--ink-sunken);
+  --sl-color-hairline: var(--line);
+  --sl-color-hairline-light: var(--line);
+  --sl-color-hairline-shade: var(--line-bright);
 }
 
-:root[data-theme='light'] {
-  --sl-color-accent-low: var(--text);
-  --sl-color-accent-high: var(--brand);
+/* Monospace is the voice: the page title, headings and the sidebar's group
+   labels. Paragraphs stay in the prose face. */
+h1#_top,
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+.site-title,
+nav.sidebar .group-label {
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+/* Code blocks are wires: a sunken mono block. */
+.sl-markdown-content pre {
+  background: var(--ink-sunken);
+}
+
+/* The current page is the cursor row, as the console draws a selection: the
+   selection ground with the accent's text, never a fill of the accent. */
+nav.sidebar a[aria-current='page'],
+nav.sidebar a[aria-current='page']:hover,
+nav.sidebar a[aria-current='page']:focus {
+  background: var(--selection);
+  color: var(--magenta);
+  font-weight: 600;
+}
+
+/* The site's name is a title, not a focus: text colour, in mono. */
+.site-title {
+  color: var(--text);
 }

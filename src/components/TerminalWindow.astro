@@ -24,7 +24,7 @@ const { title = 'disco', lines } = Astro.props;
 const segments = (line: Line): Segment[] => (typeof line === 'string' ? [{ text: line }] : line);
 ---
 
-<div class="term">
+<div class="term theme-dark">
   <div class="term__bar">
     <span class="term__dot term__dot--red" aria-hidden="true"></span>
     <span class="term__dot term__dot--gold" aria-hidden="true"></span>

@@ -2,27 +2,25 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import Hero from '../components/Hero.astro';
-import Pillars from '../components/Pillars.astro';
-import Autonomy from '../components/Autonomy.astro';
-import Parallel from '../components/Parallel.astro';
+import HowRunsWork from '../components/HowRunsWork.astro';
+import Factory from '../components/Factory.astro';
+import PersistentAgents from '../components/PersistentAgents.astro';
 import Safety from '../components/Safety.astro';
-import Experience from '../components/Experience.astro';
 import CallToAction from '../components/CallToAction.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 ---
 
 <BaseLayout
-  title="Discobox — give your agents a computer of their own"
-  description="Discobox gives coding agents a disposable machine with sudo, a desktop and a browser, and no approval prompts. Run one per task side by side, and get each one's commits back as a branch or pull request. Your secrets never enter the box."
+  title="Discobox — the harness runtime"
+  description="Discobox is a harness runtime. Give it a harness like Claude Code or Codex, a repository and a task, and it runs the harness in an isolated box with full control inside and your secrets outside. Add your skills to build a software factory, or keep a named agent running for months."
 >
   <SiteHeader />
   <main>
     <Hero />
-    <Pillars />
-    <Autonomy />
-    <Parallel />
+    <HowRunsWork />
+    <Factory />
+    <PersistentAgents />
     <Safety />
-    <Experience />
     <CallToAction />
   </main>
   <SiteFooter />

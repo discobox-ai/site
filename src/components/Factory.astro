@@ -1,0 +1,277 @@
+---
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+// The headline use case, drawn from discobox-ai/manager, the factory we run
+// ourselves. The pattern is a control loop: GitHub is the shared state (one
+// status/* label per issue), a skill defines each step, and one long-lived
+// manager box watches that state and starts a box for whichever step is due.
+// Workers move one issue one step and write the result back; nobody waits on
+// anybody. The commands are the manager's own (its workers skill), with its
+// repositories swapped for acme's.
+
+const stages = [
+  { label: 'new', note: 'filed' },
+  { label: 'status/ready', skill: 'triage-issue', note: 'scoped and labelled' },
+  { label: 'status/in-review', skill: 'deliver-issue', note: 'a green PR' },
+  { label: 'merged', skill: 'you review', note: 'you merge; the issue closes', person: true },
+];
+
+const parts = [
+  {
+    name: 'GitHub is the database',
+    body: 'Every issue carries one status label, and every PR says which issue it closes. That is the shared state every box reads and writes. Nothing that matters lives in a session, so any box can stop and the system picks up where it was.',
+  },
+  {
+    name: 'A skill for each step',
+    body: 'Triage, design, deliver, fix CI, rebase. Each skill says how to pick up one job, do it, and leave the issue in its next state. They live in a Git repository and every worker gets them with --skills.',
+  },
+  {
+    name: 'A manager that reconciles',
+    body: 'One long-lived box watches GitHub and its workers. When the state calls for a step, such as a new issue with no label or a ready issue and a free slot, it starts a box with the skill for that step. It never writes code and never waits on a worker.',
+  },
+  {
+    name: 'You hold the gates',
+    body: 'The manager acts alone on anything mechanical and reversible. Product decisions, design approvals and merges come to you.',
+  },
+];
+
+const session: Line[] = [
+  [{ text: '# once: start the manager from its own repository', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: "discobox run -d --discobox-api acme/factory@main -p '/start'", tone: 'command' },
+  ],
+  '',
+  [{ text: '# acme/api#412 is status/ready and a slot is free', tone: 'dim' }],
+  [
+    { text: 'agent@manager:~$ ', tone: 'prompt' },
+    { text: 'discobox run -d --skills ./worker-skills \\', tone: 'command' },
+  ],
+  [{ text: "    --bind 'github:GH_TOKEN,policy=roles/deliver.json,repo=api' \\", tone: 'command' }],
+  [{ text: "    acme/api -p 'Deliver issue #412 in acme/api.'", tone: 'command' }],
+  [{ text: 'amber-lynx', tone: 'ok' }],
+  [
+    { text: 'agent@manager:~$ ', tone: 'prompt' },
+    { text: 'discobox tag amber-lynx issue=412 job=deliver', tone: 'command' },
+  ],
+  [
+    { text: 'agent@manager:~$ ', tone: 'prompt' },
+    { text: 'gh issue edit 412 --add-label status/in-progress', tone: 'command' },
+  ],
+];
+---
+
+<section class="section" id="factory">
+  <div class="page">
+    <p class="eyebrow">Software factory</p>
+    <h2 class="couplet__hook">Your skills plus discobox make a software factory.</h2>
+    <p class="couplet__turn">
+      It is a control loop. GitHub holds the state, skills define each step, and a manager
+      box starts a box for whichever step is due. Each box moves one issue forward, writes
+      the result back to GitHub, and is done.
+    </p>
+
+    <ol class="flow" aria-label="An issue's path through the factory">
+      {
+        stages.map((stage) => (
+          <li class={`flow__stage${stage.person ? ' flow__stage--person' : ''}`}>
+            {stage.skill && (
+              <span class="flow__edge">
+                <code class="flow__skill">{stage.skill}</code>
+              </span>
+            )}
+            <span class={`flow__node${stage.person ? ' frame' : ''}`}>
+              {stage.person && <span class="frame__title">your move</span>}
+              <code class="flow__label">{stage.label}</code>
+              <span class="flow__note">{stage.note}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="flow__aside">
+      Off the main path: <code>propose-adr</code> when the design is not obvious,{' '}
+      <code>fix-ci</code> when checks fail, and <code>rebase-pr</code> when a PR conflicts.
+    </p>
+
+    <div class="usecase">
+      <ul class="parts">
+        {
+          parts.map((part) => (
+            <li class="part">
+              <p class="part__name">{part.name}</p>
+              <p class="part__body">{part.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="usecase__demo">
+        <TerminalWindow lines={session} title="the manager" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* An issue's path, left to right: each stage is a status, and the edge into
+     it names the skill (or the person) that moves the issue there. On a phone
+     it runs top to bottom with the edges between. */
+  .flow {
+    list-style: none;
+    padding: 0;
+    margin: clamp(2.5rem, 6vw, 3.25rem) 0 0;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 56rem) {
+    .flow {
+      grid-template-columns: auto repeat(3, minmax(0, 1fr));
+      gap: 0;
+      align-items: stretch;
+    }
+  }
+
+  .flow__stage {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 56rem) {
+    .flow__stage {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0;
+      align-items: center;
+    }
+  }
+
+  .flow__node {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius);
+    background: var(--ink-sunken);
+  }
+
+  .flow__label {
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .flow__note {
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+
+  /* The one place the loop waits on a person: the section's focused frame. */
+  .flow__node.frame {
+    padding: 0.9rem 1.1rem;
+  }
+
+  /* The edge: a rule with the skill's name riding on it. */
+  .flow__edge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0.35rem 0;
+  }
+
+  .flow__edge::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed var(--line-bright);
+  }
+
+  @media (min-width: 56rem) {
+    .flow__edge {
+      padding: 0 0.6rem;
+      min-width: 8.5rem;
+    }
+
+    .flow__edge::before {
+      left: 0;
+      right: 0;
+      top: 50%;
+      bottom: auto;
+      border-left: 0;
+      border-top: 1px dashed var(--line-bright);
+    }
+  }
+
+  .flow__skill {
+    position: relative;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-key);
+    background: var(--ink);
+    color: var(--magenta);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .flow__stage--person .flow__skill {
+    color: var(--text-muted);
+  }
+
+  .flow__aside {
+    margin-top: 1rem;
+    color: var(--text-faint);
+    font-size: 0.88rem;
+  }
+
+  .flow__aside code {
+    color: var(--magenta);
+  }
+
+  .usecase {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @media (min-width: 62rem) {
+    .usecase {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+  }
+
+  .parts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .part {
+    border-left: 1px solid var(--line-bright);
+    padding-left: 1rem;
+  }
+
+  .part__name {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .part__body {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .usecase__demo {
+    min-width: 0;
+  }
+</style>
