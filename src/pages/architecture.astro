@@ -148,48 +148,61 @@ const references = [
       </p>
 
       <div class="arch" role="img"
-        aria-label="The control plane on your machine or server holds secrets, grants, policy and harness settings. It reaches a pool, brought up by any provider. In the pool, boxes sit on an internal network beside the pool agent and proxy, and the proxy is the only route from the boxes to the internet.">
-        <div class="arch__plane">
-          <p class="arch__label">control plane</p>
-          <p class="arch__lead">your machine, or a server you run</p>
-          <p class="arch__note">secrets · grants · policy · harnesses · source · audit</p>
-        </div>
-
-        <div class="arch__link" aria-hidden="true">
-          <span>the server opens a channel to each pool</span>
-        </div>
-
-        <div class="arch__pool">
-          <div class="arch__pool-head">
-            <p class="arch__label">pool</p>
-            <span class="arch__swap">brought up by any provider</span>
-          </div>
-          <ul class="arch__providers" aria-hidden="true">
-            <li>built in, on your desktop</li>
-            <li>third-party, in the cloud</li>
+        aria-label="The control plane holds secrets, grants, policy and harness settings, and opens a channel to each pool. A pool, brought up by any provider, holds one sandbox per harness. The sandboxes reach nothing but the pool agent and proxy, over an internal network. The proxy swaps secrets in per request and is the only route out to the internet.">
+        <div class="frame frame--quiet arch__plane">
+          <span class="frame__title">control plane</span>
+          <p class="arch__where">your machine, or a server you run</p>
+          <ul class="arch__chips">
+            <li>secrets</li><li>grants</li><li>policy</li><li>harnesses</li><li>source</li><li>audit</li>
           </ul>
+        </div>
+
+        <div class="arch__wire" aria-hidden="true">
+          <span class="arch__wire-label">channel to the pool · secrets resolved per request</span>
+        </div>
+
+        <div class="frame frame--quiet arch__pool">
+          <span class="frame__title">pool · any provider</span>
+          <p class="arch__where">built in on your desktop, or a third party in the cloud</p>
 
           <div class="arch__boxes">
-            <div class="arch__box">
-              <p class="arch__label arch__label--box">box</p>
-              <p class="arch__note">harness · source · sudo · docker</p>
-            </div>
-            <div class="arch__box">
-              <p class="arch__label arch__label--box">box</p>
-              <p class="arch__note">one per task, or one per agent</p>
-            </div>
+            {
+              [
+                { harness: 'claude-code', source: 'acme/api' },
+                { harness: 'codex', source: 'acme/web' },
+                { harness: 'opencode', source: 'acme/docs' },
+              ].map((box) => (
+                <div class="frame frame--quiet arch__box">
+                  <span class="frame__title">sandbox</span>
+                  <dl class="arch__kv">
+                    <dt>harness</dt><dd>{box.harness}</dd>
+                    <dt>source</dt><dd>{box.source}</dd>
+                    <dt>secrets</dt><dd>sentinels only</dd>
+                  </dl>
+                </div>
+              ))
+            }
           </div>
-          <p class="arch__wire">internal network, no route off the pool</p>
 
-          <div class="arch__proxy frame">
+          <div class="arch__wire arch__wire--inner" aria-hidden="true">
+            <span class="arch__wire-label">internal network · no other route</span>
+          </div>
+
+          <div class="frame arch__proxy">
             <span class="frame__title">pool agent + proxy</span>
-            <p class="arch__note">mTLS per box · TLS interception · policy · secret swap · audit</p>
+            <ul class="arch__chips arch__chips--proxy">
+              <li>mTLS per sandbox</li><li>TLS interception</li><li>policy</li><li>secret swap</li><li>audit</li>
+            </ul>
           </div>
         </div>
 
-        <div class="arch__out" aria-hidden="true">
-          <span class="arch__arrow">↓ the only route out</span>
-          <span class="arch__world">npm · github · your APIs · the internet</span>
+        <div class="arch__wire" aria-hidden="true">
+          <span class="arch__wire-label">the only route out</span>
+        </div>
+
+        <div class="frame frame--quiet arch__world">
+          <span class="frame__title">the internet</span>
+          <p class="arch__where">npm · github · your APIs · everything else</p>
         </div>
       </div>
     </section>
@@ -203,7 +216,7 @@ const references = [
         the same on every provider.
       </p>
       <p>
-        <strong>On your desktop</strong>, Discobox has built-in providers, so a box runs
+        <strong>On your desktop</strong>, Discobox has built-in providers, so a sandbox runs
         on your own machine with nothing else to set up. <strong>In the cloud</strong>,
         pools run through integrations with third parties: hosted sandbox platforms,
         cloud VMs, or servers you already run. Add one with{' '}
@@ -461,163 +474,161 @@ const references = [
     color: var(--text-faint);
   }
 
-  /* The architecture diagram --------------------------------------------- */
+  /* The architecture diagram ---------------------------------------------
+     Built from the language's own devices: quiet frames with their titles on
+     the border for each part, the one focused frame for the proxy, and grounds
+     that step down as the parts nest (page, raised pool, sunken sandbox), so
+     the nesting reads without squinting at hairlines. Connectors are drawn
+     lines with an arrowhead, labelled with what crosses them. */
 
   .arch {
-    margin-top: 1.75rem;
+    margin-top: 2.25rem;
     display: grid;
   }
 
-  .arch__plane {
-    border: 1px solid var(--line-bright);
-    border-radius: var(--radius-card);
-    padding: 1rem 1.1rem;
+  .arch .frame--quiet {
+    border-color: var(--line-bright);
+  }
+
+  .arch__plane,
+  .arch__world {
     background: var(--ink-raised);
   }
 
-  .arch__link {
-    display: flex;
-    justify-content: center;
-    position: relative;
-    padding-block: 0.9rem;
+  .arch__world {
+    padding-block: 1.3rem 1rem;
   }
 
-  .arch__link::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 50%;
-    border-left: 1px dashed var(--line-bright);
-  }
-
-  .arch__link span {
-    position: relative;
-    padding: 0.1rem 0.6rem;
-    background: var(--ink);
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    color: var(--text-faint);
-  }
-
-  /* The pool's border is dashed: the provider that brings it up swaps. */
   .arch__pool {
-    border: 1px dashed var(--line-bright);
-    border-radius: var(--radius-frame);
-    padding: 1.1rem;
+    background: var(--ink-raised);
+    padding: 1.6rem 1.3rem 1.3rem;
     display: grid;
-    gap: 0.9rem;
+    gap: 0;
   }
 
-  .arch__pool-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 0.9rem;
-  }
-
-  .arch__swap {
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
+  .arch .arch__where {
+    margin: 0;
+    font-size: 0.92rem;
     color: var(--text-muted);
   }
 
-  .arch__providers {
+  .arch__chips {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0.75rem 0 0;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
   }
 
-  .arch__providers li {
+  .arch__chips li {
     padding: 0.1rem 0.5rem;
     border: 1px solid var(--line-bright);
     border-radius: var(--radius-key);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .arch__boxes {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  @media (min-width: 40rem) {
-    .arch__boxes {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .arch__box {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-card);
-    padding: 0.85rem 1rem;
-    background: var(--ink-sunken);
-  }
-
-  .arch__wire {
-    margin: 0;
-    font-family: var(--font-mono);
     font-size: var(--step--1);
-    color: var(--text-faint);
-    text-align: center;
-  }
-
-  /* The proxy is the page's one focused frame: the way out of every pool. */
-  .arch__proxy {
-    margin-top: 0.4rem;
-  }
-
-  .arch__label {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-  }
-
-  .arch__label--box {
     color: var(--text);
   }
 
-  .arch__lead {
-    margin-top: 0.35rem;
-    color: var(--text);
-  }
-
-  .arch .arch__note {
-    margin-top: 0.3rem;
-    font-size: 0.88rem;
-    color: var(--text-muted);
-  }
-
-  .arch__proxy .arch__note {
+  .arch__chips--proxy {
     margin-top: 0;
   }
 
-  .arch__out {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-    margin-top: 0.9rem;
-    text-align: center;
+  .arch__chips--proxy li {
+    border-color: color-mix(in oklab, var(--magenta) 55%, var(--line-bright));
   }
 
-  .arch__arrow {
+  .arch__boxes {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 1.4rem 0.9rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 44rem) {
+    .arch__boxes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* A sandbox sits on the sunken ground, one step below the pool; its title
+     chip takes the same ground so it cuts the border cleanly. */
+  .arch__box {
+    background: var(--ink-sunken);
+    padding: 1.3rem 1rem 0.9rem;
+  }
+
+  .arch__box .frame__title {
+    background: var(--ink-sunken);
+  }
+
+  .arch__kv {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.25rem 0.9rem;
     font-family: var(--font-mono);
     font-size: var(--step--1);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
   }
 
-  .arch__world {
-    font-size: 0.9rem;
+  .arch__kv dt {
     color: var(--text-faint);
+  }
+
+  .arch__kv dd {
+    margin: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  .arch__proxy {
+    background: var(--ink-sunken);
+    padding: 1.4rem 1.1rem 1rem;
+  }
+
+  .arch__proxy .frame__title {
+    background: var(--ink-sunken);
+  }
+
+  /* A connector: a drawn line down the middle with an arrowhead at its foot,
+     and what crosses it written beside the line. */
+  .arch__wire {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding-block: 1.1rem 1.3rem;
+  }
+
+  .arch__wire::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0.35rem;
+    border-left: 1.5px solid var(--text-muted);
+  }
+
+  .arch__wire::after {
+    content: '';
+    position: absolute;
+    left: calc(50% - 0.33rem);
+    bottom: 0;
+    border-left: 0.36rem solid transparent;
+    border-right: 0.36rem solid transparent;
+    border-top: 0.45rem solid var(--text-muted);
+  }
+
+  .arch__wire-label {
+    position: relative;
+    padding: 0.15rem 0.6rem;
+    background: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--text);
+  }
+
+  .arch__wire--inner .arch__wire-label {
+    background: var(--ink-raised);
   }
 
   /* Providers, and what is managed around them ----------------------------- */
