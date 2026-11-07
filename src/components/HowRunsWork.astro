@@ -15,12 +15,12 @@ const parts = [
   {
     flag: 'acme/api',
     name: 'The source',
-    body: 'A GitHub repository, any Git URL, or a local directory, such as the one you are in. A repository is cloned into the box and a directory is copied in. Nothing is written back to yours.',
+    body: 'A GitHub repository, any Git URL, or a local directory, such as the one you are in. A repository is cloned into the sandbox and a directory is copied in. Nothing is written back to yours.',
   },
   {
     flag: '-p "…"',
     name: 'The task',
-    body: 'The prompt the harness starts on. It works with full control of the box, including sudo, Docker and a browser, and never stops to ask for approval.',
+    body: 'The prompt the harness starts on. It works with full control of the sandbox, including sudo, Docker and a browser, and never stops to ask for approval.',
   },
 ];
 
@@ -44,7 +44,7 @@ const modes = [
   {
     line: '$ discobox run -d …',
     name: 'Detached',
-    body: 'Discobox starts the box, prints its name, and gives you your prompt back. Attach to it later, or never.',
+    body: 'Discobox starts the sandbox, prints its name, and gives you your prompt back. Attach to it later, or never.',
   },
 ];
 ---
@@ -52,11 +52,12 @@ const modes = [
 <section class="section" id="how-it-works">
   <div class="page">
     <p class="eyebrow">How a run works</p>
-    <h2 class="couplet__hook">A harness, a source and a task. Each run gets a new box.</h2>
+    <h2 class="couplet__hook">A harness, a source and a task. Each run gets its own sandbox.</h2>
     <p class="couplet__turn">
-      The box starts with the code you pointed it at. The harness works there until the
-      task is done, then pushes a branch or opens a pull request, the way it would from
-      your laptop.
+      The sandbox comes from Discobox's built-in providers on your desktop, or from the
+      infrastructure you run at scale. It starts with the code you pointed it at. The
+      harness works there until the task is done, then pushes a branch or opens a pull
+      request, the way it would from your laptop.
     </p>
 
     <ol class="parts">
@@ -87,7 +88,7 @@ const modes = [
       src={openBox}
       alt="An attached run: Claude Code working on the left, a shell on the right listing nested Docker containers, systemd services and listening sockets, with a forwarded port in the header."
       sizes="(min-width: 70.5rem) 68rem, calc(100vw - 2.5rem)"
-      caption="An attached run: Claude Code on the left, a shell in the same box beside it, the services the repository declares as tabs, and a forwarded port in the header."
+      caption="An attached run: Claude Code on the left, a shell in the same sandbox beside it, the services the repository declares as tabs, and a forwarded port in the header."
     />
 
     <div class="ux">

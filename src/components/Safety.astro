@@ -5,12 +5,12 @@
 
 const beats = [
   {
-    name: 'Its own VM and container',
-    body: 'Every run is a container inside a virtual machine, on Linux, macOS and Windows. Two layers between the harness and your computer.',
+    name: 'A sandbox of its own, from any provider',
+    body: 'Every harness runs in its own sandbox. Discobox has built-in sandboxes for your desktop and runs on other providers for the cloud and scale. The controls here are the same on all of them.',
   },
   {
     name: 'Secrets stay outside',
-    body: 'The box holds a placeholder, never the real credential. The proxy swaps the real value in only on requests to the host it belongs to.',
+    body: 'The sandbox holds a placeholder, never the real credential. The proxy swaps the real value in only on requests to the host it belongs to.',
   },
   {
     name: 'One way out, logged',
@@ -56,17 +56,17 @@ const policies = [
 <section class="section" id="safety">
   <div class="page">
     <p class="eyebrow">Isolation</p>
-    <h2 class="couplet__hook">The harness gets the whole box. Your credentials never enter it.</h2>
+    <h2 class="couplet__hook">The harness gets the whole sandbox. Your credentials never enter it.</h2>
     <p class="couplet__turn">
       A factory runs unattended and Bob holds credentials for months, so both need the
-      same guarantee. Inside the box the agent is unrestricted. Anything that leaves it
+      same guarantee. Inside the sandbox the agent is unrestricted. Anything that leaves it
       goes through one proxy, and that is where the controls are.
     </p>
 
     <div class="diagram" role="img"
-      aria-label="A run's box on one side, the world on the other, and a single door between them holding your credentials.">
+      aria-label="A run's sandbox on one side, the world on the other, and a single door between them holding your credentials.">
       <div class="zone zone--box">
-        <p class="zone__label">the box</p>
+        <p class="zone__label">the sandbox</p>
         <p class="zone__lead">harness · sudo · docker · browser</p>
         <p class="zone__note">Unrestricted, by design</p>
       </div>
@@ -139,7 +139,7 @@ const policies = [
       </div>
     </div>
 
-    <a class="button button--ghost safety__more" href="/architecture">How isolation works</a>
+    <a class="button button--ghost safety__more" href="/architecture">Sandboxes, providers and the proxy</a>
   </div>
 </section>
 
