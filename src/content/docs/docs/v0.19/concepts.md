@@ -1,15 +1,18 @@
 ---
 title: "Concepts"
-editUrl: https://github.com/discobox-ai/discobox/edit/804129d799f272aa28eebd23469b14a894c56d06/docs/public/concepts.md
+editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/concepts.md
 ---
 
 This page describes the **v0.19 prerelease** line.
 
 ## Boxes and sources
 
-A discobox is a disposable environment with its own writable disk, terminals,
-services and copy of your source. You can give it passwordless sudo and
-nested Docker without giving it your host checkout. Its name is a display
+A discobox, or box, is the sandbox one harness runs in: its own writable
+disk, terminals, services and copy of your source. You can give it
+passwordless sudo and nested Docker without giving it your host checkout. A
+box can be short-lived, one per task and archived once its work is pushed,
+or long-lived: a named agent with its own files, logins and credentials that
+you stop, start and talk to for as long as you need it. Its name is a display
 label; its ID is unambiguous. Names and tags make parallel tasks easier to find.
 
 `discobox run SOURCE [PROMPT...]` creates a box. A source can be a local
@@ -35,6 +38,39 @@ Saved configuration is applied when a box is provisioned. Changes made in
 one box are reviewed before being saved back as shared harness settings.
 The console's `H` action opens that review; inspect its changes before saving.
 
+## Skills
+
+A skill is a folder of instructions a harness can follow: how your team
+triages an issue, fixes a bug, or opens a pull request. Each subdirectory
+holding a `SKILL.md` is one skill.
+
+- `discobox run --skills DIR` copies the skills in `DIR` into the box.
+- `discobox run --skills URL[@REF][//PATH]` checks a Git repository out in the
+  box and links its skills rather than copying them, so an improvement to a
+  skill can be committed and pushed back for the next box.
+- `--user-skills` brings your own `~/.claude/skills` and `~/.agents/skills`.
+- A repository can declare skills under `.discobox/skills`, and
+  `discobox admin skills` manages skills repositories every new box in the
+  project gets. `--no-project-skills` leaves those out of one box.
+
+## Boxes that lead other boxes
+
+A box created with `--discobox-api` can create boxes of its own and lead
+them: run commands and copy files in them, read and type into their
+terminals, wait until they finish or ask a question, start and stop them, and
+archive them when their work is done. It acts only on the boxes it created
+or was allowed to adopt. A lead box given a credential to delegate
+(`--delegate`) can bind it to the boxes it creates and answer their access
+requests itself, within the routes it was delegated.
+
+This is how a software factory runs on Discobox. Skills define each step of
+your process: how to pick up a task, do it, and record the result. The state
+of the work lives somewhere every box can read and write, such as GitHub
+issues, labels and pull requests. A long-lived lead box watches that state and
+starts a box with the right skill for whichever step is due. Each box moves
+one piece of work one step forward and is done, and a person still makes the
+decisions and merges.
+
 ## Providers and pools
 
 The server is the control plane. A provider supplies runtime capacity; a
@@ -42,6 +78,13 @@ pool uses that provider to run boxes and share downloads and build caches.
 The CLI can connect to a local or remote server. The same command on your
 machine can therefore run a box on a different host. A project groups its
 boxes, harnesses, pools and secrets.
+
+On your desktop, Discobox includes built-in providers, so boxes run on your
+own machine with nothing else to set up. For the cloud and for scale,
+providers integrate with third-party sandbox and infrastructure platforms.
+Whichever provider runs a pool, harnesses, sources, secrets, policy and the
+pool proxy work the same way. Choose the pool for one box with
+`discobox run --pool POOL`.
 
 Use `discobox admin provider catalog` to inspect the provider types offered
 by the connected server. Provider-specific flags for create and update are
@@ -95,7 +138,11 @@ not imply approving delegation. The console marks boxes with pending
 requests; open the request action to approve or deny it. Do not approve a
 role just because its name sounds appropriate.
 
-Outbound requests are subject to egress policy and auditing. Isolation and
+Every request a box makes leaves through its pool's proxy: the box's network
+has no other route out. Outbound requests are subject to egress policy and
+auditing. Egress can be restricted to allow lists of hosts, wildcards, IP
+addresses or CIDR ranges, set on the project, the pool, the harness or one
+box. Isolation and
 credential routing do not make agent-written code trustworthy: review code
 and results before merging or running them on your machine.
 
@@ -109,3 +156,43 @@ client is connected; the console shows where to reach them.
 Tools under `.discobox/tools` open editors or other programs for a box.
 `discobox tools ls` lists available tools. Repository tools run inside the
 box; only user-owned tools may request execution on the user's host.
+
+## Private Git sources
+
+When a pool needs authentication for missing source objects, choose how this
+client supplies them with `--git-credentials=ask|lend|local` on `run`, `attach`,
+`start`, or `console`. The command-line option overrides `git.credentials` in
+your client configuration. Omission defaults to `ask`. For example:
+
+```yaml
+git:
+  credentials: local
+```
+
+This machine-wide setting covers all servers and repositories used by this
+client. Saving `lend` authorizes future eligible pulls without another question.
+Choosing an option in a dialog does not save it.
+
+- `ask` explains both choices before you confirm. Without interactive input it
+  fails with the configuration path and a retry command when a choice is needed.
+- `lend` sends your local Git helper's username/password or token through the
+  control plane to the pool for the synchronous HTTPS pull. Discobox does not
+  save it in server/pool resources, cache Git configuration, or credential stores.
+  Your local helper may save it on success. Discobox's use ends with the request;
+  the original credential keeps its provider scope and expiry and is not revoked
+  or restricted to this repository. Trust the server and pool with it. If the
+  pool pull cannot finish, the client reports its switch to local fetching.
+- `local` authenticates with this machine's Git configuration, downloads objects
+  and sends them to the pool, without lending the upstream credential. Objects
+  remain cached and the initial download travels through this machine twice.
+
+These choices govern consent, not the location of every fetch: public sources
+and commits already cached need no question. A failed delivery leaves the box
+awaiting source; use the reported attach command to retry. Noninteractive
+operations suppress Git, askpass, credential-manager and SSH questions; configure
+a noninteractive credential helper or an SSH key and known host first.
+
+A discobox creating another discobox uses its proxy to fetch locally and cannot
+lend credentials. Use `local` there. The older `run --lend-git-credentials`
+spelling still works: true means `lend`, false means `ask`; it cannot be combined
+with `--git-credentials`.

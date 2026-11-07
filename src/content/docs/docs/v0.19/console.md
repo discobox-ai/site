@@ -1,6 +1,6 @@
 ---
 title: "Console guide"
-editUrl: https://github.com/discobox-ai/discobox/edit/804129d799f272aa28eebd23469b14a894c56d06/docs/public/console.md
+editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/console.md
 ---
 
 This guide describes the **v0.19 prerelease** console. Open it with
