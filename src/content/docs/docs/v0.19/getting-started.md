@@ -1,6 +1,6 @@
 ---
 title: "Getting started"
-editUrl: https://github.com/discobox-ai/discobox/edit/804129d799f272aa28eebd23469b14a894c56d06/docs/public/getting-started.md
+editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/getting-started.md
 ---
 
 This is the **v0.19 prerelease** manual. The stable installer may install an
@@ -40,10 +40,36 @@ manual is selected after it lands. `discobox-dev` is Homebrew's latest dot
 release channel; it does not select an `-rc` tag. Stable and development
 clients share local state and cannot run their servers simultaneously.
 
-Discobox supports macOS, Linux and Windows. Linux uses Docker by default;
-ensure Docker is installed and accessible to the server user. First use can
+Discobox supports macOS, Linux and Windows. On Linux, the built-in provider
+needs Docker installed and accessible to the server user. First use can
 download the server, images and agent bundles, so allow time and network
 access. A remote server runs its pools on the server side.
+
+## Take the tour
+
+With a version supporting repository startup scripts, start the guided tour
+from your host:
+
+```sh
+discobox run discobox-ai/tour
+```
+
+Select a default harness if prompted. The menu runs in the Linux box before
+that harness starts, with chapters for shells, tools, access requests and
+leaving and returning. No agent account is needed for the menu; continuing
+into an agent may require its normal sign-in. You can choose the shell harness.
+The access chapter uses a disposable example value and can be denied or skipped.
+
+**Continue to my harness** completes the tour and skips it on subsequent
+primary launches in this box. **Exit tour** or Ctrl-C leaves a shell without
+starting the harness. To replay, open a shell in the tour checkout and run
+`.discobox/scripts/pre-harness --replay`; returning from replay starts no
+additional harness. Detach with Ctrl-A then d and reconnect from your host
+with `discobox attach BOX`. After collecting any work, archive with
+`discobox rm BOX`. Replace BOX with its name or identifier.
+
+The tour is ordinary source code running inside the sandbox. See
+[Repository startup scripts](/docs/v0.19/repository-scripts/) for the execution contract.
 
 ## Configure and run
 
@@ -70,6 +96,18 @@ discobox run . 'fix the failing tests'
 `.` is the source; the words after it are the agent's prompt. Each box gets
 its own checkout at your selected commit. Uncommitted files stay on your
 machine unless you explicitly add `--include-dirty`.
+
+A run names three things: the harness, the source and the task. Choose a
+harness for one run with `-H`, and give a repository as the source instead of
+a directory:
+
+```sh
+discobox run -H codex OWNER/REPO -p 'fix the flaky retry test'
+```
+
+Without `-d`, your terminal becomes the box's window: the harness's own
+interface, with shells and services beside it. Press **Ctrl-A**, then **d**,
+to detach; the box keeps running.
 
 For an empty box, use `discobox run --no-source`. To start a task without
 opening its workspace, add `-d`; it prints the box identifier:
