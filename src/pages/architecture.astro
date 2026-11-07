@@ -15,48 +15,6 @@ import SiteFooter from '../components/SiteFooter.astro';
 
 const repo = 'https://github.com/discobox-ai/discobox/blob/main';
 
-// The providers that ship, from server/providers. `pod` is the one the design
-// names as later; it carries a designed tag rather than a row of its own.
-// The providers Discobox ships today.
-const providers = [
-  {
-    type: 'libkrun · vz · wslc',
-    runs: 'Built in, for your desktop',
-    body: 'A VM per pool on your own machine: a libkrun microVM on Linux, the Apple Virtualization framework on macOS, and WSL Containers on Windows. Discobox ships and pins the guest image, and the VM publishes no port to your network.',
-  },
-  {
-    type: 'docker',
-    runs: 'Any Docker host',
-    body: 'A Docker daemon you point it at, on this machine or another one.',
-  },
-  {
-    type: 'digitalocean',
-    runs: 'A cloud VM per pool',
-    body: 'One droplet per pool, created and deleted for you, reached over SSH.',
-  },
-  {
-    type: 'exec',
-    runs: 'Anything a script can start',
-    body: 'Each operation runs your command as <command> <op> <pool-id>, so a pool can live on a server, another cloud or in-house infrastructure without Discobox knowing what it is.',
-  },
-];
-
-// disco-vm (discobox-ai/vm) is the framework infrastructure plugs into: one
-// driver seam, embedded in Discobox as its `vm` provider. Statuses are its
-// README's, as of 2026-11-07.
-const drivers = [
-  { name: 'vz', runs: 'macOS guests on Apple silicon', status: 'Working', tone: 'strong' },
-  { name: 'docker', runs: 'machines as containers, with systemd', status: 'Working', tone: 'strong' },
-  { name: 'Archil', runs: 'cloud sandboxes', status: 'Passes conformance', tone: 'partial' },
-  { name: 'boxd', runs: 'cloud microVMs', status: 'In progress', tone: 'partial' },
-  { name: 'hcs', runs: 'Windows guests on Windows', status: 'In progress', tone: 'partial' },
-  { name: 'exe.dev', runs: 'cloud VMs', status: 'Planned', tone: 'designed' },
-];
-
-// The kind of platform a disco-vm driver is designed for. None is supported
-// yet; the page says so.
-const platforms = ['Daytona', 'E2B', 'Modal', 'Fly Machines', 'Vercel Sandbox'];
-
 // What Discobox manages, whatever the provider.
 const managed = [
   {
@@ -142,7 +100,7 @@ const ledger = [
   {
     claim: 'A box is as isolated as its provider makes it',
     tone: 'weak',
-    body: 'The proxy and the internal network hold on every provider. The wall between a box and its host is the provider’s: a VM on the desktop providers, whatever the host gives on docker or exec. Box containers run privileged today, for systemd and nested Docker; a rootless profile is designed.',
+    body: 'The proxy, the internal network and the secret swap hold on every provider. The wall between a box and the machine it runs on is the provider’s, so it is as strong as the sandbox the provider gives.',
   },
 ];
 
@@ -150,21 +108,17 @@ const references = [
   { what: 'Sandbox providers: the provider seam, drivers and pools', href: `${repo}/server/providers/DESIGN.md`, label: 'providers/DESIGN.md' },
   { what: 'A pool is its own runtime host', href: `${repo}/docs/adr/0006-pool-is-the-runtime-host.md`, label: 'ADR 0006' },
   { what: 'A remote pool reaches the control plane over a channel the server opens', href: `${repo}/docs/adr/26-10-30-875-a-remote-pool-reaches-its-control-plane-over-a-channel-the-server-opens.md`, label: 'ADR 26-10-30-875' },
-  { what: 'disco-vm: the driver seam, drivers and their status', href: 'https://github.com/discobox-ai/vm/blob/main/DESIGN.md', label: 'vm/DESIGN.md' },
-  { what: 'disco-vm as a pool runtime', href: `${repo}/docs/adr/26-10-09-106-disco-vm-is-a-pool-runtime-and-the-server-runs-its-machines.md`, label: 'ADR 26-10-09-106' },
   { what: 'The proxy: certificates, audit, cache, sentinel swapping', href: `${repo}/proxy/DESIGN.md`, label: 'proxy/DESIGN.md' },
   { what: 'Pool agent: proxy wiring, network topology, credential broker', href: `${repo}/pool-agent/DESIGN.md`, label: 'pool-agent/DESIGN.md' },
   { what: 'Secrets: grants, requests, hosts, sentinel shape', href: `${repo}/server/internal/resources/secrets/DESIGN.md`, label: 'secrets/DESIGN.md' },
   { what: 'The agent credentials protocol', href: `${repo}/docs/agent-credentials-protocol.md`, label: 'agent-credentials-protocol.md' },
   { what: 'No credential without a verdict on record', href: `${repo}/docs/adr/0091-a-credential-is-not-issued-without-a-verdict-on-record.md`, label: 'ADR 0091' },
-  { what: 'Linux desktop pools use libkrun microVMs', href: `${repo}/docs/adr/0013-local-linux-pools-use-libkrun-microvms.md`, label: 'ADR 0013' },
-  { what: 'Rootless containers as the default isolation', href: `${repo}/docs/adr/0004-user-namespaces-are-the-default-isolation.md`, label: 'ADR 0004' },
 ];
 ---
 
 <BaseLayout
   title="Architecture — Discobox"
-  description="Discobox runs on any sandbox: a VM on your desktop, a Docker host, a cloud VM, or anything a script can start. It manages everything around the sandbox — harness, source, secrets, access control — and every box's traffic leaves through a proxy it deploys."
+  description="Discobox plugs into sandbox and infrastructure providers: built-in providers on your desktop, third-party integrations in the cloud. It manages everything around the sandbox, from harness and source to secrets and access control, and every box's traffic leaves through a proxy it deploys."
 >
   <SiteHeader />
 
@@ -173,11 +127,12 @@ const references = [
       <p class="eyebrow">Architecture</p>
       <h1 class="doc__title">Bring any sandbox. Discobox runs everything around it.</h1>
       <p class="lede doc__lede">
-        A box needs somewhere to run. On your desktop Discobox brings its own VM. In the
-        cloud and at scale, a box runs on what you already have: a Docker host, a cloud
-        VM, a server, a hosted sandbox, or anything a script can start. That sandbox layer is one part, and
-        it swaps. Discobox manages what surrounds it: the harness, the source, secrets,
-        access control, and the proxy every box's traffic goes through.
+        Every harness runs in its own sandbox, and Discobox plugs into sandbox and
+        infrastructure providers to get one. On your desktop it uses its built-in
+        providers. In the cloud it runs through integrations with third parties. That
+        sandbox layer is one part, and it swaps. Discobox manages what surrounds it: the
+        harness, the source, secrets, access control, and the proxy every box's traffic
+        goes through.
       </p>
     </header>
 
@@ -210,11 +165,8 @@ const references = [
             <span class="arch__swap">brought up by any provider</span>
           </div>
           <ul class="arch__providers" aria-hidden="true">
-            <li>desktop VM</li>
-            <li>docker</li>
-            <li>digitalocean</li>
-            <li>exec</li>
-            <li>disco-vm: Archil · boxd · exe.dev …</li>
+            <li>built in, on your desktop</li>
+            <li>third-party, in the cloud</li>
           </ul>
 
           <div class="arch__boxes">
@@ -245,70 +197,23 @@ const references = [
     <section class="doc__section">
       <h2>The sandbox is a provider</h2>
       <p>
-        A provider brings up a pool's host and gives Discobox a way to reach it. That
-        is all it does. The seam is small on purpose: start, stop and delete the host,
-        reach its container runtime, reach the pool agent, and read the host's log.
-        Everything above it, from placing a box to swapping a secret, is the same on
-        every provider.
+        Discobox does not make you use its sandbox. It plugs into sandbox and
+        infrastructure providers: a provider brings up the machine a pool runs on and
+        gives Discobox a way to reach it, and everything above that is Discobox's and
+        the same on every provider.
       </p>
-
-      <ul class="providers">
-        {
-          providers.map((provider) => (
-            <li class="provider">
-              <div class="provider__head">
-                <code class="provider__type">{provider.type}</code>
-                <span class="provider__runs">{provider.runs}</span>
-              </div>
-              <p class="provider__body">{provider.body}</p>
-            </li>
-          ))
-        }
-      </ul>
-
-      <h3 class="doc__sub">disco-vm: one seam for any infrastructure</h3>
       <p>
-        The providers above each wrap their own backend. disco-vm is what comes next:
-        one engine that makes, runs, snapshots and removes machines through a single
-        driver interface, embedded in Discobox as its <code>vm</code> provider. A driver
-        covers create, exec, copy, stop and snapshot for one kind of infrastructure, and
-        passes a shared conformance suite. Adding infrastructure to Discobox becomes
-        writing a driver.
+        <strong>On your desktop</strong>, Discobox has built-in providers, so a box runs
+        on your own machine with nothing else to set up. <strong>In the cloud</strong>,
+        pools run through integrations with third parties: hosted sandbox platforms,
+        cloud VMs, or servers you already run. Add one with{' '}
+        <code>discobox admin provider create</code>, and choose where a box runs with{' '}
+        <code>discobox run --pool</code>.
       </p>
-
-      <ul class="drivers">
-        {
-          drivers.map((driver) => (
-            <li class="driver">
-              <code class="driver__name">{driver.name}</code>
-              <span class="driver__runs">{driver.runs}</span>
-              <span class:list={['tag', `tag--${driver.tone}`]}>{driver.status}</span>
-            </li>
-          ))
-        }
-      </ul>
-
       <p>
-        Hosted sandbox platforms such as{' '}
-        {platforms.map((name, index) => (
-          <>
-            <strong>{name}</strong>
-            {index < platforms.length - 2 ? ', ' : index === platforms.length - 2 ? ' and ' : ''}
-          </>
-        ))}{' '}
-        offer the same shape: create a machine, run commands in it, copy files, stop
-        it, snapshot it. That is the shape a disco-vm driver plugs in. None of them is a
-        Discobox provider yet. With a driver, any of them can be the sandbox while
-        Discobox keeps the harness, the source, the secrets and the proxy.
-      </p>
-
-      <h3 class="doc__sub">Choosing a provider</h3>
-      <p>
-        You add a provider instance with <code>discobox admin provider create</code>,
-        bind pools to it, and choose a pool per box with <code>discobox run --pool</code>.
-        A remote pool needs no address back to you: the server opens a channel to the
-        pool agent and the agent reaches the control plane through it, so a control
-        plane on a laptop can run pools in the cloud.
+        A remote pool needs no address back to you. The server opens a channel to the
+        pool, and the pool reaches the control plane through it, so a control plane on a
+        laptop can run pools in the cloud.
       </p>
     </section>
 
@@ -435,9 +340,8 @@ const references = [
       <h2>What this does not defend against</h2>
       <ul class="limits">
         <li>
-          <strong>A weak sandbox.</strong> A box is only as separated from its host as the
-          provider makes it. Choose the provider for the trust you need: a VM per pool on
-          the desktop providers, and whatever your own infrastructure gives elsewhere.
+          <strong>A weak sandbox.</strong> A box is only as separated from the machine it
+          runs on as its provider makes it. Choose the provider for the trust you need.
         </li>
         <li>
           <strong>Covert channels through allowed destinations.</strong> Data smuggled out
@@ -717,86 +621,6 @@ const references = [
   }
 
   /* Providers, and what is managed around them ----------------------------- */
-
-  .providers {
-    list-style: none;
-    padding: 0;
-    margin: 1.5rem 0 0;
-    display: grid;
-  }
-
-  .provider {
-    padding-block: 1rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .provider:last-child {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .provider__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.3rem 0.9rem;
-  }
-
-  .provider__type {
-    color: var(--magenta);
-    font-size: 0.9rem;
-  }
-
-  .provider__runs {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .doc__section .provider__body {
-    margin-top: 0.4rem;
-    font-size: 0.93rem;
-  }
-
-  .drivers {
-    list-style: none;
-    padding: 0;
-    margin: 1.5rem 0 0;
-    display: grid;
-  }
-
-  .driver {
-    display: grid;
-    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: 0.4rem 1rem;
-    padding-block: 0.7rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .driver:last-child {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .driver__name {
-    color: var(--magenta);
-    font-size: 0.9rem;
-  }
-
-  .driver__runs {
-    color: var(--text-muted);
-    font-size: 0.93rem;
-  }
-
-  @media (max-width: 30rem) {
-    .driver {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .driver__runs {
-      grid-column: 1 / -1;
-      grid-row: 2;
-    }
-  }
 
   .managed {
     margin: 1.5rem 0 0;
