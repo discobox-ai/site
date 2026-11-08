@@ -71,3 +71,18 @@ nav.sidebar a[aria-current='page']:focus {
 .site-title {
   color: var(--text);
 }
+
+/* The narrowest phones have no room for the title beside the search and menu
+   buttons: there the logo stands alone rather than the title being clipped
+   mid-word. The title stays the link's accessible name, since the logo's alt
+   text is empty. "Discobox docs" starts clipping below about 342px. */
+@media (max-width: 22rem) {
+  .site-title span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
