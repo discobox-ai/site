@@ -10,6 +10,7 @@ pnpm install
 pnpm dev         # dev server on http://localhost:4321
 pnpm build       # static build into dist/
 pnpm check       # astro check (TypeScript + template diagnostics)
+pnpm test:docs-header # after a build: the docs header at phone widths, in Chromium
 pnpm sync:assets # re-sync the brand art and screenshots from the discobox repository
 ```
 
@@ -209,6 +210,10 @@ manifest, and open a PR. Normal site builds use only committed inputs.
 `pnpm check:docs` validates snapshot hashes and metadata. `pnpm build` also
 validates built manual links/anchors, canonical URLs, search metadata and
 index output. `SITE_PREVIEW=true pnpm build` checks preview indexing rules.
+`pnpm test:docs-header` drives the built docs in Chromium at 320, 360, 375 and 414 px
+and checks the header stays one row; it needs a browser, so it runs in CI
+after the build rather than inside it (`playwright-core install --only-shell
+chromium` fetches one, or set `CHROMIUM` to a binary you have).
 See [the docs design](docs/DESIGN.md) for release promotion and rollback.
 
 ## Blog

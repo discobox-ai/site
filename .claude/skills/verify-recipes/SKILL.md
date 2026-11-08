@@ -13,8 +13,9 @@ prefix if none is installed. Search indexes exist only in production builds.
 
 Check `/docs/`, version landing, all manual links, provenance, upstream edit
 links, keyboard search (Ctrl-K, Escape), selected-version search and all-version
-search. Confirm results are docs only and include version labels. Resize to
-390px and use the sidebar menu to reach console and CLI pages. Exercise the
+search. Confirm results are docs only and include version labels. Run
+`pnpm test:docs-header` (set `CHROMIUM=/usr/bin/chromium` here) for the
+phone-width header. Resize to 390px and use the sidebar menu to reach console and CLI pages. Exercise the
 version selector; use temporary second-version fixtures when checking the
 preserve-page/fallback behavior, then remove them and rebuild. Confirm home
 and architecture still render, production canonical URLs and preview noindex.
