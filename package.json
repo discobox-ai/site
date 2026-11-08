@@ -11,7 +11,8 @@
     "sync:assets": "node scripts/sync-assets.mjs",
     "import:docs": "node scripts/import-docs.mjs",
     "check:docs": "node --test scripts/docs-check.test.mjs && node scripts/import-docs.mjs --check",
-    "test:blog": "node --test scripts/blog-build.test.mjs"
+    "test:blog": "node --test scripts/blog-build.test.mjs",
+    "test:docs-header": "node scripts/check-docs-header.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.5",
@@ -23,6 +24,7 @@
     "@astrojs/check": "^0.9.5",
     "@types/node": "^26.4.0",
     "linkedom": "^0.18.15",
+    "playwright-core": "1.56.1",
     "sharp": "^0.35.4",
     "typescript": "^5.9.3",
     "wrangler": "^4.128.0"

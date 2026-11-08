@@ -40,3 +40,8 @@ jobs:
       - run: pnpm build
         env:
           SITE_PREVIEW: true
+
+      # The docs header at phone widths, driven in Chromium against the build.
+      - run: pnpm exec playwright-core install --with-deps --only-shell chromium
+
+      - run: pnpm test:docs-header
