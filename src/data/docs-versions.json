@@ -1,13 +1,13 @@
 {
-  "currentStable": null,
+  "currentStable": "v0.19",
   "defaultVersion": "v0.19",
   "versions": [
     {
       "line": "v0.19",
-      "version": "v0.19 development",
-      "tag": null,
+      "version": "v0.19.0",
+      "tag": "v0.19.0",
       "commit": "589a456affc33ea8dbd2979bfd0a48427b4da16d",
-      "status": "prerelease",
+      "status": "stable",
       "generator": {
         "command": "go tool task docs:generate",
         "check": "go tool task docs:check",

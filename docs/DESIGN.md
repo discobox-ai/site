@@ -7,9 +7,14 @@ is separate work (#3).
 `src/data/docs-versions.json` pins each minor line to a full upstream commit,
 records an explicit public-file mapping, content hashes, exporter identity,
 release status and optional exact tag. A main snapshot has `tag: null` and
-must stay prerelease. The initial v0.19 snapshot is unreleased, so `/docs/`
-shows a version chooser rather than redirecting readers to a supposed stable
-release. Set `currentStable` only after importing a tagged stable release.
+must stay prerelease. `currentStable` names the line `/docs/` redirects to,
+and only a line imported at a stable release tag may hold it. With no stable line, `/docs/` shows the default line's pages
+instead, labelled with its status, rather than redirecting readers to a
+supposed stable release. A patch release is a new import of its line: set the
+new commit, tag and version, re-run `pnpm import:docs`, and commit the pages,
+edit links and hashes it rewrites. Nothing checks that the pages came from the
+manifest's commit, so changing those fields alone would put old pages under
+the new version. A patch keeps the line's status and URLs.
 
 `pnpm import:docs CHECKOUT v0.19` checks the checkout revision/cleanliness,
 runs upstream `go tool task docs:check`, copies only the allowlisted pages,
