@@ -1,10 +1,15 @@
 ---
+import { Icon } from '@astrojs/starlight/components';
 import manifest from '../../data/docs-versions.json';
 const id = Astro.locals.starlightRoute.entry.id;
 const version = manifest.versions.find(v => id.startsWith(`docs/${v.line}/`) || id === `docs/${v.line}`)?.line || manifest.defaultVersion;
 ---
 <docs-search data-version={version} data-versions={JSON.stringify(manifest.versions.map(v => v.line))}>
-  <button type="button" class="open-search">Search docs <kbd>Ctrl K</kbd></button>
+  <button type="button" class="open-search" aria-label="Search docs" aria-keyshortcuts="Control+K">
+    <span class="search-icon"><Icon name="magnifier" /></span>
+    <span class="search-label" aria-hidden="true">Search docs</span>
+    <kbd aria-hidden="true">Ctrl K</kbd>
+  </button>
   <dialog aria-label="Search documentation">
     <button type="button" class="close-search">Close</button>
     <label for="docs-query">Search documentation</label>
@@ -67,4 +72,18 @@ const version = manifest.versions.find(v => id.startsWith(`docs/${v.line}/`) || 
   li { margin-block: 1rem; }
   li p { font-size: .9rem; }
   kbd { font-size: .7rem; margin-inline-start: 1rem; }
+  /* Below Starlight's 50rem breakpoint the header shares one row with the
+     site title and the menu button, as Starlight's own search does: the
+     control is a square magnifier button, without the label or the shortcut. */
+  .open-search { display: flex; align-items: center; gap: .25rem; white-space: nowrap; }
+  .search-label, kbd { display: none; }
+  .search-icon { display: flex; font-size: 1.25rem; }
+  @media (min-width: 50rem) {
+    .search-icon { display: none; }
+    .search-label { display: inline; }
+  }
+  /* The shortcut only means something with a keyboard to press it. */
+  @media (min-width: 50rem) and (hover: hover) and (pointer: fine) {
+    kbd { display: inline; }
+  }
 </style>
