@@ -6,6 +6,14 @@
   discobox, check it against `discobox --help` here too. The hero restates How
   it works in one line, so it goes stale without ever showing up in that
   section's diff.
+- The supported harnesses are listed in four places: the hero's note
+  (`Hero.astro`), the harness card in `HowRunsWork.astro`, the Harness entry on
+  `architecture.astro`, and the homepage's meta description in `index.astro`.
+  Each names all of them in discobox's order and spelling (Claude Code, Codex,
+  OpenCode, GitHub Copilot, pi, omp) and ends on any terminal agent in an
+  image. When discobox adds or renames one, change all four:
+  `rg -i "claude code" src --glob '!src/content/docs/**'` finds them. The meta
+  description is easy to miss because it is in no component's diff.
 - Colours, faces, radii and strokes come from `src/styles/tokens.css`, which is
   synced from discobox's `assets/brand` and follows its `LANGUAGE.md`, and reach
   the site, the docs and the blog through `src/styles/brand.css`. A literal hex
