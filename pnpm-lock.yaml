@@ -31,8 +31,8 @@ importers:
         specifier: ^0.18.15
         version: 0.18.15
       playwright-core:
-        specifier: 1.56.1
-        version: 1.56.1
+        specifier: 1.64.0
+        version: 1.64.0
       sharp:
         specifier: ^0.35.4
         version: 0.35.4(@types/node@26.4.0)
@@ -2249,9 +2249,9 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
-  playwright-core@1.56.1:
-    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
-    engines: {node: '>=18'}
+  playwright-core@1.64.0:
+    resolution: {integrity: sha512-T9r+MZkTECl2+oUcZ26YgZzTrYidTsIhYYkJix+6iDOymOb1FB2RLLSOxRGnZGv5DStt+aduIVbt+E8WygXYpg==}
+    engines: {node: '>=20'}
     hasBin: true
 
   postcss-nested@7.0.2:
@@ -5389,7 +5389,7 @@ snapshots:
 
   picomatch@4.0.7: {}
 
-  playwright-core@1.56.1: {}
+  playwright-core@1.64.0: {}
 
   postcss-nested@7.0.2(postcss@8.5.32):
     dependencies:
