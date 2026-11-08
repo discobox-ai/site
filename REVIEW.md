@@ -20,3 +20,9 @@
   only imported manuals, so it cannot catch a broken release-post link.
 - Exercise shared navigation at 390px after adding a link. Keeping another
   link visible on mobile can push the wordmark and actions outside the viewport.
+- Before marking a docs line `stable` (or moving `currentStable`), search its
+  imported pages for prerelease or development wording. The status label comes
+  from the manifest, the prose from upstream at the pinned commit, and the hash
+  check cannot see the two disagree. The fix is upstream and a new import, never
+  an edit to the imported pages. v0.19.0 shipped with such wording
+  (discobox-ai/discobox#856).
