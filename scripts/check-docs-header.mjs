@@ -1,11 +1,13 @@
 // The docs header on a phone: drives the built site in Chromium at phone
 // widths and checks that the header is one row whose site title, search
 // control and menu button neither overflow it nor overlap, that the title is
-// not clipped (below 360px it may be hidden, leaving the logo),
-// that the keyboard hint is hidden, and that the compact search
-// control still opens the search dialog. Wider than the 50rem breakpoint the
-// search control keeps its label, and its keyboard hint shows with a mouse
-// but not on a touch screen. Run after `pnpm build`; set
+// not clipped (below 360px it may be hidden, leaving the logo), and that the
+// keyboard hint is hidden. Wider than the 50rem breakpoint the search control
+// keeps its label, and its keyboard hint shows with a mouse but not on a
+// touch screen. At every width, phone and wide, in both themes, the search
+// control opens the search dialog centred horizontally in the viewport, its
+// top pinned clear of the top edge so the input stays put as results arrive,
+// and clear of the bottom edge; Escape closes it. Run after `pnpm build`; set
 // CHROMIUM to a Chromium binary to use it instead of Playwright's own.
 import { createServer } from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';
@@ -70,11 +72,54 @@ try {
         if (header.titleHidden && width >= 360) failures.push(`${at}: site title is hidden though it fits`);
         if (!header.logo) failures.push(`${at}: no logo`);
         if (header.label || header.hint) failures.push(`${at}: search shows its label or keyboard hint`);
-        await page.click('.open-search');
-        if (!(await page.evaluate(() => document.querySelector('docs-search dialog').open))) failures.push(`${at}: compact search does not open the dialog`);
       } else {
         if (!header.label) failures.push(`${at}: wide search lost its label`);
         if (header.hint !== !touch) failures.push(`${at}: keyboard hint ${touch ? 'shows on a touch screen' : 'is missing with a mouse'}`);
+      }
+      // The dialog sits centred horizontally, its top pinned clear of the top
+      // edge so the input stays put as results arrive, in both themes.
+      // Starlight's reset zeroes every margin, including the `margin: auto`
+      // that places a modal dialog by default.
+      for (const theme of ['dark', 'light']) {
+        await page.evaluate(theme => { document.documentElement.dataset.theme = theme; }, theme);
+        await page.click('.open-search');
+        const dialog = await page.evaluate(() => {
+          const element = document.querySelector('docs-search dialog');
+          const { left, right, top, bottom } = element.getBoundingClientRect();
+          // The viewport the dialog centres in, without any scrollbar.
+          const { clientWidth, clientHeight } = document.documentElement;
+          const input = document.querySelector('#docs-query').getBoundingClientRect().top;
+          return { open: element.open, left, right, top, bottom, clientWidth, clientHeight, input };
+        });
+        const where = `${at} (${theme})`;
+        if (!dialog.open) { failures.push(`${where}: search control does not open the dialog`); continue; }
+        if (Math.abs(dialog.left - (dialog.clientWidth - dialog.right)) > 1) failures.push(`${where}: dialog is not centred (left ${dialog.left}, right ${dialog.right})`);
+        if (dialog.top < 8) failures.push(`${where}: dialog touches the top edge (top ${dialog.top})`);
+        if (dialog.bottom > dialog.clientHeight - 8) failures.push(`${where}: dialog runs off the bottom (bottom ${dialog.bottom})`);
+        // Results fill the dialog to its height cap; the input must not move
+        // while the reader types, and the full dialog must still fit.
+        await page.fill('#docs-query', 'box');
+        const filled = await page.waitForFunction(() => {
+          const element = document.querySelector('docs-search dialog');
+          if (!element.querySelector('.results li')) return false;
+          return { bottom: element.getBoundingClientRect().bottom, input: element.querySelector('#docs-query').getBoundingClientRect().top };
+        }, null, { timeout: 10000 }).then(handle => handle.jsonValue()).catch(() => null);
+        if (!filled) failures.push(`${where}: searching "box" shows no results`);
+        else {
+          if (Math.abs(filled.input - dialog.input) > 1) failures.push(`${where}: the input moves as results arrive (top ${dialog.input} to ${filled.input})`);
+          if (filled.bottom > dialog.clientHeight - 8) failures.push(`${where}: dialog with results runs off the bottom (bottom ${filled.bottom})`);
+        }
+        await page.fill('#docs-query', '');
+        await page.keyboard.press('Escape');
+        // A dialog left open covers the page, and the next click would time
+        // out and lose every failure collected so far: close it regardless.
+        const closed = await page.evaluate(() => {
+          const element = document.querySelector('docs-search dialog');
+          const open = element.open;
+          element.close();
+          return !open;
+        });
+        if (!closed) failures.push(`${where}: Escape does not close the dialog`);
       }
     }
     await context.close();
@@ -99,4 +144,4 @@ try {
   server.close();
 }
 if (failures.length) { console.error(failures.join('\n')); process.exit(1); }
-console.log('Docs header verified at 320px, 360px, 375px, 414px and 1024px (touch) and 1280px, title swept 320-414px');
+console.log('Docs header and search dialog verified at 320px, 360px, 375px, 414px and 1024px (touch) and 1280px, title swept 320-414px');
