@@ -1,4 +1,5 @@
 # /security was the page's URL before it was rewritten as /architecture.
 # Workers static assets serves this file as real redirects; it is copied
-# verbatim from public/ into the build output.
+# from public/ into the build output, and the build appends the /docs/
+# redirect to the current stable docs line (src/integrations/docs-redirect.mjs).
 /security /architecture 301

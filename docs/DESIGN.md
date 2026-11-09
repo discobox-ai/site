@@ -8,7 +8,13 @@ is separate work (#3).
 records an explicit public-file mapping, content hashes, exporter identity,
 release status and optional exact tag. A main snapshot has `tag: null` and
 must stay prerelease. `currentStable` names the line `/docs/` redirects to,
-and only a line imported at a stable release tag may hold it. With no stable line, `/docs/` shows the default line's pages
+and only a line imported at a stable release tag may hold it. The redirect is
+a real HTTP 302: the build appends `/docs` and `/docs/` rules for it to the
+`_redirects` copied from `public/` (`src/integrations/docs-redirect.mjs`), and
+Workers static assets serves them before any page. A static build can only
+write `Astro.redirect` as a page with a two-second meta refresh, so that page
+stays as the fallback. The build check fails unless both point at
+`currentStable`, or, with no stable line, neither exists. With no stable line, `/docs/` shows the default line's pages
 instead, labelled with its status, rather than redirecting readers to a
 supposed stable release. A patch release is a new import of its line: set the
 new commit, tag and version, re-run `pnpm import:docs`, and commit the pages,

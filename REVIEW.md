@@ -43,3 +43,10 @@
 - Generate Astro's content types before standalone TypeScript checks. In #15,
   a warm local `.astro/` hid missing `astro:content` declarations in the fresh
   CI check job; verify/check jobs do not share generated files.
+
+- Check a change to `_redirects` (`public/_redirects`, or the `/docs/` rules
+  the build appends) under `pnpm exec wrangler dev --env preview --local`
+  after a build, with `curl -sI` on each source path. `pnpm dev` and
+  `pnpm preview` ignore the file, and the build check reads only the `/docs/`
+  rules' text, so how a rule is actually served shows up nowhere else before
+  it is deployed.

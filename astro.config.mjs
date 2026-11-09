@@ -2,10 +2,12 @@
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 import versions from './src/data/docs-versions.json' with { type: 'json' }
+import docsRedirect from './src/integrations/docs-redirect.mjs'
 export default defineConfig({
   site: 'https://discobox.ai',
   devToolbar: { enabled: false },
   integrations: [
+    docsRedirect(versions),
     starlight({
       title: 'Discobox docs',
       customCss: ['./src/styles/docs.css'],
