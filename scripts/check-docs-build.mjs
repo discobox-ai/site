@@ -26,8 +26,29 @@ for (const version of manifest.versions) {
     }
   }
 }
+// /docs/ is a real HTTP redirect to currentStable, from the built _redirects,
+// with the meta-refresh page as its fallback; with no stable line it is neither.
+const redirects = existsSync('dist/_redirects') ? readFileSync('dist/_redirects', 'utf8') : '';
+const docsRules = redirects
+  .split('\n')
+  .map((line) => line.trim().split(/\s+/))
+  .filter(([from]) => from === '/docs' || from === '/docs/');
+const fallback = read('dist/docs/index.html').querySelector('meta[http-equiv=refresh]')?.getAttribute('content') ?? null;
+if (manifest.currentStable) {
+  const target = `/docs/${manifest.currentStable}/`;
+  for (const from of ['/docs', '/docs/']) {
+    const rules = docsRules.filter(([source]) => source === from);
+    if (rules.length !== 1 || rules[0].length !== 3 || rules[0][1] !== target || rules[0][2] !== '302') {
+      throw Error(`_redirects must send ${from} to ${target} with a 302 exactly once, for currentStable ${manifest.currentStable}: ${JSON.stringify(rules.map((r) => r.join(' ')))}`);
+    }
+  }
+  if (!fallback?.endsWith(`url=${target}`)) throw Error(`/docs/ fallback page does not point to ${target}: ${fallback}`);
+} else {
+  if (docsRules.length) throw Error(`_redirects redirects /docs/ with no currentStable: ${JSON.stringify(docsRules.map((r) => r.join(' ')))}`);
+  if (fallback) throw Error(`/docs/ redirects with no currentStable: ${fallback}`);
+}
 if (!existsSync('dist/pagefind/pagefind.js')) throw Error('Search index missing');
 for (const path of ['dist/index.html', 'dist/architecture/index.html']) {
   if (!read(path).querySelector('[data-pagefind-ignore="all"]')) throw Error(`Marketing page enters docs search: ${path}`);
 }
-console.log('Built docs routes, links, anchors, canonicals, search metadata and preview indexing verified');
+console.log('Built docs redirect, routes, links, anchors, canonicals, search metadata and preview indexing verified');

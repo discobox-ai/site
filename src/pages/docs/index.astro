@@ -6,7 +6,10 @@ import SiteFooter from '../../components/SiteFooter.astro';
 
 // The way into the versioned manuals. Once a stable line is published this
 // page only redirects to it; until then it says what the manual covers and
-// which line it describes, in the same words as the home page.
+// which line it describes, in the same words as the home page. In a static
+// build the redirect is a meta-refresh page, so it is only the fallback: the
+// deployed site answers /docs/ with a real 302 from the rule that
+// src/integrations/docs-redirect.mjs writes into _redirects.
 const stable = manifest.currentStable;
 if (stable) return Astro.redirect(`/docs/${stable}/`, 302);
 

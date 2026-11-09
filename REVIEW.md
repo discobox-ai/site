@@ -34,3 +34,9 @@
   check cannot see the two disagree. The fix is upstream and a new import, never
   an edit to the imported pages. v0.19.0 shipped with such wording
   (discobox-ai/discobox#856).
+- Check a change to `_redirects` (`public/_redirects`, or the `/docs/` rules
+  the build appends) under `pnpm exec wrangler dev --env preview --local`
+  after a build, with `curl -sI` on each source path. `pnpm dev` and
+  `pnpm preview` ignore the file, and the build check reads only the `/docs/`
+  rules' text, so how a rule is actually served shows up nowhere else before
+  it is deployed.
