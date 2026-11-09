@@ -151,14 +151,18 @@ hand. Both set `workers_dev: false`, so neither is reachable at a
 `*.workers.dev` URL — the custom domain is the only way in.
 
 `public/_redirects` is part of the deploy too: Workers static assets reads it
-from the build output and serves it as real redirects. It currently holds one
-line, keeping `/security` — the URL the architecture page shipped under first,
-and the one the upstream README still links — alive as a 301 to
-`/architecture`. Nothing on this site links `/security` any more, and neither
-`pnpm dev` nor `pnpm preview` reads the file, so it is only ever exercised in a
-real deploy: a mistake in it shows up as an external link 404ing and nowhere
-else. Push to `preview` and check it against preview.discobox.ai rather than
-locally.
+from the build output and serves it as real redirects. The file in `public/`
+holds one line, keeping `/security` — the URL the architecture page shipped
+under first, and the one the upstream README still links — alive as a 301 to
+`/architecture`. Nothing on this site links `/security` any more. The build
+appends two more, sending `/docs` and `/docs/` to the current stable docs line
+with a 302 (see [the docs design](docs/DESIGN.md)); the build check fails if
+they disagree with the manifest.
+
+Neither `pnpm dev` nor `pnpm preview` reads `_redirects`, so check it after a
+build with Wrangler, which serves the built assets as the deploy does:
+`pnpm exec wrangler dev --env preview --local`, then `curl -sI` the redirected
+paths. The deployed check is preview.discobox.ai after a push to `preview`.
 
 Any other branch deploys nowhere. Open a pull request and `ci.yml` type-checks
 and builds it; to see it served, push to `preview`.
