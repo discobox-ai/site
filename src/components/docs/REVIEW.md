@@ -14,3 +14,10 @@
   two together. `pnpm test:docs-header` checks this at 320, 360, 375 and
   414 px.
 - Preserve periods in content IDs so minor version URLs remain `/v0.19/`.
+- Give every native `<dialog>` or popover in the docs a margin of its own.
+  Starlight's reset sets `margin: 0` on every element, which removes the
+  browser's own `margin: auto` centring, so a modal dialog opens pinned to the
+  top-left corner. The search dialog shipped that way. Its top is pinned
+  (`7.5vh auto auto`), not centred, because results grow it and a vertically
+  centred dialog moves the input as the reader types. `pnpm test:docs-header`
+  checks its position at every width, and that the input stays put.
