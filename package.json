@@ -5,17 +5,26 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "pnpm check:docs && astro build && node scripts/check-docs-build.mjs && node scripts/check-blog-build.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "sync:assets": "node scripts/sync-assets.mjs"
+    "sync:assets": "node scripts/sync-assets.mjs",
+    "import:docs": "node scripts/import-docs.mjs",
+    "check:docs": "node --test scripts/docs-check.test.mjs && node scripts/import-docs.mjs --check",
+    "test:blog": "node --test scripts/blog-build.test.mjs",
+    "test:docs-header": "node scripts/check-docs-header.mjs"
   },
   "dependencies": {
-    "astro": "^7.2.4"
+    "@astrojs/markdown-remark": "^7.3.5",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/starlight": "^0.42.8",
+    "astro": "^7.4.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
     "@types/node": "^26.4.0",
+    "linkedom": "^0.18.15",
+    "playwright-core": "1.64.0",
     "sharp": "^0.35.4",
     "typescript": "^5.9.3",
     "wrangler": "^4.128.0"

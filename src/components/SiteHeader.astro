@@ -2,11 +2,12 @@
 import Wordmark from './Wordmark.astro';
 
 const links = [
-  { label: 'Autonomy', href: '/#autonomy' },
-  { label: 'Parallel', href: '/#parallel' },
-  { label: 'Safety', href: '/#safety' },
-  { label: 'Experience', href: '/#experience' },
-  { label: 'Discord', href: 'https://discord.gg/BSFr7Fa7f2' },
+  { label: 'How it works', href: '/#how-it-works' },
+  { label: 'Factory', href: '/#factory' },
+  { label: 'Agents', href: '/#agents' },
+  { label: 'Isolation', href: '/#safety' },
+  { label: 'Docs', href: '/docs/' },
+  { label: 'Blog', href: '/blog/' },
 ];
 ---
 
@@ -69,7 +70,9 @@ const links = [
   }
 
   @media (max-width: 46rem) {
-    .nav a:not(.nav__cta) {
+    .header__inner { flex-wrap: wrap; }
+    .nav { gap: 1rem; }
+    .nav a:not(.nav__cta):not([href="/docs/"]):not([href="/blog/"]) {
       display: none;
     }
   }

@@ -1,7 +1,8 @@
 # ADR 0001: Docs and blog on discobox.ai
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-04
+- Accepted by the owner by merging #5, 2026-11-04
 - Scope: [site #2](https://github.com/discobox-ai/site/issues/2) and
   [site #3](https://github.com/discobox-ai/site/issues/3), for v0.19
 
@@ -14,8 +15,9 @@ serves `dist/`; only `/`, `/install.sh`, and `/install.ps1` run the installer
 Worker (`wrangler.jsonc`, `worker/index.ts`). The same static site is also
 served on `edge.discobox.ai`. `preview.discobox.ai` is a branch deployment.
 
-`.github/workflows/ci.yml` checks and builds PRs. `deploy.yml` checks, builds,
-and deploys `main` and `preview`. Builds currently need no product checkout;
+`.github/workflows/ci.yml` checks and builds PRs. Cloudflare Workers Builds
+builds and deploys `main` and `preview` through its git integration. Builds
+currently need no product checkout;
 brand assets are committed copies synced explicitly from discobox
 (`README.md`, `scripts/sync-assets.mjs`). There is no ADR directory, index,
 or numbering process in this repository; this record starts a four-digit
@@ -199,7 +201,7 @@ exporter interface, import manifest schema and script names, exact sidebar
 structure, visual design, and the first post's text. They must satisfy the
 ownership, versioning, URL, and publication contracts above. This record adds
 no exporter, content migration, dependencies, routes, automation, or release
-post. It remains **Proposed** until accepted by the owner.
+post. It was accepted by the owner by merging #5.
 
 ## References
 

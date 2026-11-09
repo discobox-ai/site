@@ -1,0 +1,26 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+interface Props { title: string; description: string; }
+---
+<BaseLayout {...Astro.props}>
+  <Fragment slot="head">
+    <link rel="alternate" type="application/rss+xml" title="Discobox blog" href="https://discobox.ai/blog/rss.xml" />
+  </Fragment>
+  <SiteHeader />
+  <main class="blog page section"><slot /></main>
+  <SiteFooter />
+</BaseLayout>
+<style is:global>
+  .blog { max-width: 48rem; min-height: 65vh; overflow-wrap: anywhere; }
+  .blog h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin-bottom: 1.5rem; }
+  .blog h2 { margin-block: 2rem 1rem; }
+  .blog p, .blog ul, .blog ol, .blog pre { margin-block: 1rem; }
+  .blog img { max-width: 100%; height: auto; }
+  .blog pre { padding: 1rem; overflow-x: auto; }
+  .blog .meta { color: var(--text-muted); font-size: .9rem; }
+  .blog .posts { list-style: none; padding: 0; }
+  .blog .posts li { padding-block: 1.5rem; border-top: 1px solid var(--line); }
+  .blog .posts h2 { margin-top: 0; }
+</style>

@@ -1,0 +1,129 @@
+---
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+// The second use case: a run that never ends. Named, long-lived, with memory
+// on its own disk and its own credentials. Mirrors Factory's layout with the
+// terminal on the left, so the two read as a pair.
+
+const traits = [
+  {
+    name: 'A name',
+    body: 'Rename a run and it is Bob from then on, in discobox ls, in attach, and in everything you script against it.',
+  },
+  {
+    name: 'A memory',
+    body: 'Bob’s box is his to keep. His files, notes and harness logins are still there after a stop, a restart or a month.',
+  },
+  {
+    name: 'Accounts of his own',
+    body: 'Bind the credentials Bob works with, such as GitHub or Slack, each limited to the hosts it belongs to. He uses them without ever seeing the real values.',
+  },
+  {
+    name: 'Someone you can talk to',
+    body: 'Attach to him, or send him a message from a script and wait for the reply.',
+  },
+];
+
+const session: Line[] = [
+  [{ text: '# give him a job and a name', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox run -d --no-source --bind github --bind slack \\', tone: 'command' },
+  ],
+  [{ text: '    -p "You are Bob. Triage new issues in acme/api each morning."', tone: 'command' }],
+  [{ text: 'purple-mongoose', tone: 'ok' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox rename purple-mongoose bob', tone: 'command' },
+  ],
+  '',
+  [{ text: '# three weeks later', tone: 'dim' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox send bob "what did you close this week?"', tone: 'command' },
+  ],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox send-key bob Enter && discobox wait bob --until finished', tone: 'command' },
+  ],
+  [{ text: 'finished', tone: 'ok' }],
+  [
+    { text: '$ ', tone: 'prompt' },
+    { text: 'discobox attach bob', tone: 'command' },
+  ],
+];
+---
+
+<section class="section" id="agents">
+  <div class="page">
+    <p class="eyebrow">Persistent agents</p>
+    <h2 class="couplet__hook">Name your agent Bob, and keep him around.</h2>
+    <p class="couplet__turn">
+      A run does not have to end. Give it a name and a standing job, and it becomes an
+      agent that lives for months, remembers what it did, and works with the same
+      accounts every day.
+    </p>
+
+    <div class="usecase">
+      <div class="usecase__demo">
+        <TerminalWindow lines={session} title="bob" />
+      </div>
+
+      <ul class="traits">
+        {
+          traits.map((trait) => (
+            <li class="trait">
+              <p class="trait__name">{trait.name}</p>
+              <p class="trait__body">{trait.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .usecase {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @media (min-width: 62rem) {
+    .usecase {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    }
+  }
+
+  .traits {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .trait {
+    border-left: 1px solid var(--line-bright);
+    padding-left: 1rem;
+  }
+
+  .trait__name {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .trait__body {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .usecase__demo {
+    min-width: 0;
+  }
+</style>

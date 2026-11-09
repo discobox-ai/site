@@ -1,0 +1,80 @@
+{
+  "currentStable": "v0.19",
+  "defaultVersion": "v0.19",
+  "versions": [
+    {
+      "line": "v0.19",
+      "version": "v0.19.0",
+      "tag": "v0.19.0",
+      "commit": "589a456affc33ea8dbd2979bfd0a48427b4da16d",
+      "status": "stable",
+      "generator": {
+        "command": "go tool task docs:generate",
+        "check": "go tool task docs:check",
+        "version": "discobox-docs v1"
+      },
+      "files": [
+        {
+          "source": "docs/public/index.md",
+          "output": "src/content/docs/docs/v0.19/index.md",
+          "slug": "",
+          "title": "Discobox v0.19 manual",
+          "sourceHash": "898e290375bae13c5378c6222fe67f93fc71424f0f5fb1b8125dcdc67b767890",
+          "outputHash": "a49e73a6316217b2c04e7dccf00efe01c892ec7eca80bc14a1e708cdcb4255e0"
+        },
+        {
+          "source": "docs/public/getting-started.md",
+          "output": "src/content/docs/docs/v0.19/getting-started.md",
+          "slug": "getting-started",
+          "title": "Getting started",
+          "sourceHash": "2a9c81c98683f5ebb0be72d580c7bfbc0c587c484019f3bfb0a9b716af839223",
+          "outputHash": "3136b1c2ed61e5646f9533b08775aa875c19f7d7c2d0cc35ed75fffe7cc79538"
+        },
+        {
+          "source": "docs/public/repository-scripts.md",
+          "output": "src/content/docs/docs/v0.19/repository-scripts.md",
+          "slug": "repository-scripts",
+          "title": "Repository startup scripts",
+          "sourceHash": "78d746c71a9d9177249e5c326dac674df372a0941c820200f6c320f5b807448a",
+          "outputHash": "dfb4be0a5f0480a13c74a8c2898a5c13b5270fcefecf0264b2ecd067812188c6"
+        },
+        {
+          "source": "docs/public/concepts.md",
+          "output": "src/content/docs/docs/v0.19/concepts.md",
+          "slug": "concepts",
+          "title": "Concepts",
+          "sourceHash": "3d02634d03b74a48807434165d50d9f91e1bb0278372abdc630ccc330a32475f",
+          "outputHash": "7037e7c4196fdd9c2c56bc3710687b9b0f46507ea402d79be0001b441c9cada9"
+        },
+        {
+          "source": "docs/public/console.md",
+          "output": "src/content/docs/docs/v0.19/console.md",
+          "slug": "console",
+          "title": "Console guide",
+          "sourceHash": "62b69a03521685320a66c872330f9c0a9f8a07a244d832d5fd56f74bcb446c84",
+          "outputHash": "8426dd0c3338e54932582003f5f9c5fc29f76d8b265d60a197d7e548238b00be"
+        },
+        {
+          "source": "docs/public/cli.md",
+          "output": "src/content/docs/docs/v0.19/cli.md",
+          "slug": "cli",
+          "title": "CLI reference",
+          "sourceHash": "9efe126cf87287e992477de750814552493b13cef21a9a0bb1bf420895c7621a",
+          "outputHash": "9557dc0481682f16e0743cb3814bd34fe77f9af96e0d0ac4b88d361123c1a52a"
+        }
+      ],
+      "attribution": [
+        {
+          "source": "LICENSE",
+          "output": "public/docs-attribution/v0.19/LICENSE",
+          "outputHash": "b894d16e529a43240126c03e481ea4c735c0c665e5f4eff8835f82dee0b5a0b8"
+        },
+        {
+          "source": "NOTICE",
+          "output": "public/docs-attribution/v0.19/NOTICE",
+          "outputHash": "e113d5ee7b02c16ef7bbaad7e64b50bf66762b233df38edef0f8ed7fc64658dc"
+        }
+      ]
+    }
+  ]
+}

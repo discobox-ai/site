@@ -10,6 +10,7 @@ pnpm install
 pnpm dev         # dev server on http://localhost:4321
 pnpm build       # static build into dist/
 pnpm check       # astro check (TypeScript + template diagnostics)
+pnpm test:docs-header # after a build: the docs header at phone widths, in Chromium
 pnpm sync:assets # re-sync the brand art and screenshots from the discobox repository
 ```
 
@@ -33,6 +34,15 @@ asset mirror at `assets.discobox.ai`:
 Why it is shaped this way — and why the rules for `edge` must match the scripts'
 own — is discobox's ADR 0109.
 
+## Design language
+
+The site follows discobox's design language, `assets/brand/LANGUAGE.md` in the
+discobox repository: its colour roles, JetBrains Mono as the voice with IBM
+Plex Sans for prose, the frame and band, and both themes. The tokens arrive as
+`src/styles/tokens.css` with the brand art below, and `global.css` imports
+them. Change a colour upstream in `tokens.json`, never here. Pictures of a
+terminal carry `.theme-dark` and stay dark in the light theme.
+
 ## Brand assets and screenshots
 
 The brand art and the screenshots are committed here so the site builds and
@@ -48,7 +58,9 @@ a real run. Do not hand-edit these files — change them upstream and re-sync.
 discobox: assets/brand/logo-purple.svg       -> src/assets/logo.svg
 discobox: assets/brand/wordmark-gradient.svg -> src/assets/wordmark-gradient.svg
 discobox: assets/brand/wordmark-white.svg    -> src/assets/wordmark-white.svg
+discobox: assets/brand/wordmark-black.svg    -> src/assets/wordmark-black.svg
 discobox: assets/brand/favicon.svg           -> public/favicon.svg
+discobox: assets/brand/tokens.css           -> src/styles/tokens.css
 discobox: cli/internal/tui/logo.json         -> src/data/logo.json
 discobox: assets/screens/launcher.png        -> src/assets/screens/launcher.png
 discobox: assets/screens/claude-code.png     -> src/assets/screens/claude-code.png
@@ -120,11 +132,12 @@ Two things about the cell data, and one about the wordmarks:
 
 ## Deployment
 
-The site is a **Cloudflare Worker serving static assets** — `wrangler.jsonc`
-points `assets.directory` at `dist/` and there is no `main`, so no Worker code
-runs. GitHub Actions builds and deploys it; Cloudflare does not watch the
-repository. That keeps one build image (`.node-version` + `packageManager`) for
-both the checked build and the deployed one.
+The site is a **Cloudflare Worker serving static assets**. `wrangler.jsonc`
+points `assets.directory` at `dist/`; `worker/index.ts` serves the install
+scripts on the paths described above. Cloudflare Workers Builds watches the
+repository through its git integration and builds and deploys pushes to
+`main` and `preview`. GitHub Actions checks and builds pull requests through
+`ci.yml`.
 
 | Push | Worker | URL |
 | --- | --- | --- |
@@ -150,22 +163,16 @@ locally.
 Any other branch deploys nowhere. Open a pull request and `ci.yml` type-checks
 and builds it; to see it served, push to `preview`.
 
-### What the deploy needs
+### Deployment configuration
 
-`deploy.yml` reads two repository secrets:
+Build settings and deployment credentials are managed in Cloudflare Workers
+Builds, rather than GitHub repository secrets. Keep the Cloudflare build
+settings aligned with `.node-version` and `packageManager` in `package.json`,
+and use `SITE_PREVIEW=true` for preview builds so they stay out of search
+indexes.
 
-| Secret | Value |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Token with *Workers Scripts:Edit* on the account, plus *Zone:Read*, *Workers Routes:Edit* and *DNS:Edit* on `discobox.ai` |
-| `CLOUDFLARE_ACCOUNT_ID` | `27da65de69e2c4d905c1849912684b76` (Obot AI) |
-
-The zone permissions matter only when a custom domain is being attached or
-changed; a deploy that touches no routes needs just the Workers scope. There is
-no OIDC for Cloudflare, so that token is copied by hand and has to be rotated
-the same way.
-
-Fork pull requests never deploy: `deploy.yml` runs on `push`, and secrets are
-withheld from fork PRs regardless. A fork PR still gets `ci.yml`.
+Fork pull requests get `ci.yml`; deployment happens when changes land on
+`main` or `preview`.
 
 ### The pnpm pin is not optional
 
@@ -185,3 +192,47 @@ made easier by `discobot.ai` being a real zone on the same account — and
 `discobot-ai.acorn-io.workers.dev` with no custom domain attached. The rename
 to `discobox-ai` created a new Worker; the old one is a separate script and has
 to be deleted in the dashboard.
+
+## Versioned product documentation
+
+The public manual lives at `/docs/`, which redirects to the current stable
+line (`currentStable` in `src/data/docs-versions.json`), today v0.19 under
+`/docs/v0.19/`.
+The product repository owns the prose and generated CLI reference; edit links
+on imported pages point to the pinned upstream source.
+
+To refresh a snapshot, review the upstream `docs/public` changes and update
+its commit/tag/status in `src/data/docs-versions.json`. In a clean product
+checkout at that commit, run `go tool task docs:generate` and `docs:check`,
+commit any generated updates upstream, then pin that resulting clean revision.
+Run `pnpm import:docs /path/to/discobox v0.19` here, review the import and
+manifest, and open a PR. Normal site builds use only committed inputs.
+
+`pnpm check:docs` validates snapshot hashes and metadata. `pnpm build` also
+validates built manual links/anchors, canonical URLs, search metadata and
+index output. `SITE_PREVIEW=true pnpm build` checks preview indexing rules.
+`pnpm test:docs-header` drives the built docs in Chromium at 320, 360, 375 and 414 px
+and checks the header stays one row; it needs a browser, so it runs in CI
+after the build rather than inside it (`playwright-core install --only-shell
+chromium` fetches one, or set `CHROMIUM` to a binary you have).
+See [the docs design](docs/DESIGN.md) for release promotion and rollback.
+
+## Blog
+
+Blog posts live in `src/content/blog/*.md` and are reviewed through site PRs.
+Required frontmatter: `title`, `description`, `author`, `slug`, `published`
+(an ISO date) and `draft` (a boolean). `updated` is optional and cannot precede
+`published`. Slugs use lowercase words separated by hyphens and must be
+unique, including among drafts. Keep slugs stable after publication.
+
+The listing is `/blog/`, posts use `/blog/<slug>/`, and the RSS feed is
+`/blog/rss.xml`. Drafts and future-dated posts are omitted from every public
+route and the feed, including preview builds. There is no private draft URL;
+review drafts in the PR. A future date requires a new main build at or after
+that date; it does not schedule a deploy. Dates display in UTC.
+
+To publish, verify the release and versioned docs links, finish the release
+copy, set the publication date and `draft: false`, then open a PR. Preview
+publishes after a human merges to preview; promotion to main publishes to
+production through Cloudflare Workers Builds. The initial v0.19 post stays
+a draft until that release is available and the manual matches it.

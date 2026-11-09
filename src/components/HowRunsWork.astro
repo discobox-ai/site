@@ -1,0 +1,249 @@
+---
+import Screenshot from './Screenshot.astro';
+import openBox from '../assets/screens/claude-code.png';
+
+// The hero's command, taken apart. Three arguments and one flag are the whole
+// interface, so this section is those and nothing else; everything a box can
+// do beyond them is the architecture page's job.
+
+const parts = [
+  {
+    flag: '-H codex',
+    name: 'The harness',
+    body: 'The agent to run: Claude Code, Codex, OpenCode, GitHub Copilot, pi, omp, or any terminal agent packaged as an image. Leave it off to use your project’s default.',
+  },
+  {
+    flag: 'acme/api',
+    name: 'The source',
+    body: 'A GitHub repository, any Git URL, or a local directory, such as the one you are in. A repository is cloned into the sandbox and a directory is copied in. Nothing is written back to yours.',
+  },
+  {
+    flag: '-p "…"',
+    name: 'The task',
+    body: 'The prompt the harness starts on. It works with full control of the sandbox, including sudo, Docker and a browser, and never stops to ask for approval.',
+  },
+];
+
+const verbs = [
+  { verb: 'ls', body: 'List your runs' },
+  { verb: 'attach', body: 'Open a run’s terminal' },
+  { verb: 'exec', body: 'Run a command, or a shell' },
+  { verb: 'cp', body: 'Copy files in and out' },
+  { verb: 'proxy', body: 'Forward its ports' },
+  { verb: 'stop', body: 'Stop a run' },
+  { verb: 'start', body: 'Start it again' },
+  { verb: 'rm', body: 'Archive it' },
+];
+
+const modes = [
+  {
+    line: '$ discobox run …',
+    name: 'Attached',
+    body: 'Your terminal becomes the harness’s own interface, with shells and services beside it. Press Ctrl-A d to leave. The run keeps going.',
+  },
+  {
+    line: '$ discobox run -d …',
+    name: 'Detached',
+    body: 'Discobox starts the sandbox, prints its name, and gives you your prompt back. Attach to it later, or never.',
+  },
+];
+---
+
+<section class="section" id="how-it-works">
+  <div class="page">
+    <p class="eyebrow">How a run works</p>
+    <h2 class="couplet__hook">A harness, a source and a task. Each run gets its own sandbox.</h2>
+    <p class="couplet__turn">
+      The sandbox comes from Discobox's built-in providers on your desktop, or from the
+      infrastructure you run at scale. It starts with the code you pointed it at. The
+      harness works there until the task is done, then pushes a branch or opens a pull
+      request, the way it would from your laptop.
+    </p>
+
+    <ol class="parts">
+      {
+        parts.map((part) => (
+          <li class="card part">
+            <code class="part__flag">{part.flag}</code>
+            <h3 class="part__name">{part.name}</h3>
+            <p class="part__body">{part.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="modes">
+      {
+        modes.map((mode) => (
+          <div class="mode">
+            <p class="mode__name">{mode.name}</p>
+            <code class="mode__line">{mode.line}</code>
+            <p class="mode__body">{mode.body}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <Screenshot
+      src={openBox}
+      alt="An attached run: Claude Code working on the left, a shell on the right listing nested Docker containers, systemd services and listening sockets, with a forwarded port in the header."
+      sizes="(min-width: 70.5rem) 68rem, calc(100vw - 2.5rem)"
+      caption="An attached run: Claude Code on the left, a shell in the same sandbox beside it, the services the repository declares as tabs, and a forwarded port in the header."
+    />
+
+    <div class="ux">
+      <div class="ux__head">
+        <h3 class="ux__title">Simple, familiar UX</h3>
+        <p class="ux__lede">After run, every command works the way you already expect.</p>
+      </div>
+      <dl class="ux__grid">
+        {
+          verbs.map((v) => (
+            <div class="ux__cell">
+              <dt><code class="ux__verb"><span class="ux__bin">discobox </span>{v.verb}</code></dt>
+              <dd class="ux__body">{v.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .parts {
+    list-style: none;
+    padding: 0;
+    margin: 2.5rem 0 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 56rem) {
+    .parts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .part {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+  }
+
+  .part__flag {
+    font-size: 0.95rem;
+    color: var(--magenta);
+  }
+
+  .part__name {
+    font-size: 1.1rem;
+  }
+
+  .part__body {
+    color: var(--text-muted);
+    font-size: 0.96rem;
+  }
+
+  .modes {
+    display: grid;
+    gap: 1.5rem;
+    margin-block: clamp(2.5rem, 6vw, 3.5rem);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 48rem) {
+    .modes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+  }
+
+  .mode {
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+    border-left: 1px solid var(--line-bright);
+    padding-left: 1rem;
+  }
+
+  .mode__name {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .mode__line {
+    color: var(--magenta);
+    font-size: 0.85rem;
+  }
+
+  .mode__body {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .ux {
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .ux__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+  }
+
+  .ux__title {
+    font-size: 1.25rem;
+  }
+
+  .ux__lede {
+    color: var(--text-muted);
+    font-size: 0.98rem;
+  }
+
+  /* One panel, cells divided by hairlines: the gap shows the panel's border
+     colour through it, so every cell gets an even rule on every side. */
+  .ux__grid {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  @media (min-width: 48rem) {
+    .ux__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .ux__cell {
+    display: grid;
+    gap: 0.3rem;
+    align-content: start;
+    padding: 1rem 1.1rem;
+    background: var(--ink-sunken);
+  }
+
+  .ux__verb {
+    font-size: 0.95rem;
+    color: var(--magenta);
+  }
+
+  .ux__bin {
+    color: var(--text-faint);
+  }
+
+  .ux__body {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+</style>

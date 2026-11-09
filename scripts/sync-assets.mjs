@@ -40,7 +40,11 @@ const copies = [
   ['assets/brand/logo-purple.svg', 'src/assets/logo.svg'],
   ['assets/brand/wordmark-gradient.svg', 'src/assets/wordmark-gradient.svg'],
   ['assets/brand/wordmark-white.svg', 'src/assets/wordmark-white.svg'],
+  ['assets/brand/wordmark-black.svg', 'src/assets/wordmark-black.svg'],
   ['assets/brand/favicon.svg', 'public/favicon.svg'],
+  // The design language's tokens (assets/brand/LANGUAGE.md there), rendered to
+  // CSS by `go tool task brand:tokens`. global.css imports them.
+  ['assets/brand/tokens.css', 'src/styles/tokens.css'],
   // Cell data, not an image, so it stays out of Astro's image pipeline.
   ['cli/internal/tui/logo.json', 'src/data/logo.json'],
   // Screenshots of the running launcher, captured upstream from a real run

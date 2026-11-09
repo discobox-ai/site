@@ -1,0 +1,21 @@
+---
+import { render } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { publishedPosts, formatDate } from '../../lib/blog';
+export async function getStaticPaths() {
+  return (await publishedPosts()).map(post => ({ params: { slug: post.data.slug }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<BlogLayout title={`${post.data.title} — Discobox`} description={post.data.description}>
+  <a href="/blog/">← All posts</a>
+  <article>
+    <h1>{post.data.title}</h1>
+    <p class="meta">By {post.data.author} · <time datetime={post.data.published.toISOString()}>{formatDate(post.data.published)}</time>
+      {post.data.updated && <> · Updated <time datetime={post.data.updated.toISOString()}>{formatDate(post.data.updated)}</time></>}
+    </p>
+    <Content />
+    <p><a href={`https://github.com/discobox-ai/site/edit/preview/src/content/blog/${post.id}.md`}>Edit this post on GitHub</a></p>
+  </article>
+</BlogLayout>

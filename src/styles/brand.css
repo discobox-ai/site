@@ -1,0 +1,19 @@
+/*
+ * The brand layer every surface on this site imports: the home and blog pages
+ * (global.css) and the Starlight docs (docs.css).
+ *
+ * The colours, faces, scale, radii and strokes are discobox's design language
+ * (assets/brand/tokens.json, explained in assets/brand/LANGUAGE.md in the
+ * discobox repository), synced here as tokens.css by `pnpm sync:assets`.
+ * Change a value there, never here. tokens.css answers to the system's
+ * appearance and to a [data-theme] on the root, which is what Starlight's theme
+ * picker sets, so the docs switch with the same roles.
+ */
+@import './tokens.css';
+
+:root {
+  /* What the site adds: its prose face, and its layout. */
+  --font-sans: var(--font-prose);
+  --page: 68rem;
+  --radius: var(--radius-frame);
+}

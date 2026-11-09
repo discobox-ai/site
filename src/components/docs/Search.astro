@@ -1,0 +1,89 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+import manifest from '../../data/docs-versions.json';
+const id = Astro.locals.starlightRoute.entry.id;
+const version = manifest.versions.find(v => id.startsWith(`docs/${v.line}/`) || id === `docs/${v.line}`)?.line || manifest.defaultVersion;
+---
+<docs-search data-version={version} data-versions={JSON.stringify(manifest.versions.map(v => v.line))}>
+  <button type="button" class="open-search" aria-label="Search docs" aria-keyshortcuts="Control+K">
+    <span class="search-icon"><Icon name="magnifier" /></span>
+    <span class="search-label" aria-hidden="true">Search docs</span>
+    <kbd aria-hidden="true">Ctrl K</kbd>
+  </button>
+  <dialog aria-label="Search documentation">
+    <button type="button" class="close-search">Close</button>
+    <label for="docs-query">Search documentation</label>
+    <input id="docs-query" type="search" autocomplete="off" />
+    <label><input class="all-versions" type="checkbox" /> Search all versions</label>
+    <p class="status" aria-live="polite"></p>
+    <ul class="results"></ul>
+  </dialog>
+</docs-search>
+<script>
+  class DocsSearch extends HTMLElement {
+    connectedCallback() {
+      const dialog = this.querySelector('dialog')!;
+      const input = this.querySelector<HTMLInputElement>('#docs-query')!;
+      const all = this.querySelector<HTMLInputElement>('.all-versions')!;
+      const results = this.querySelector('.results')!;
+      const status = this.querySelector('.status')!;
+      let request = 0;
+      const open = () => { dialog.showModal(); input.focus(); };
+      this.querySelector('.open-search')!.addEventListener('click', open);
+      this.querySelector('.close-search')!.addEventListener('click', () => dialog.close());
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && dialog.open) { e.preventDefault(); dialog.close(); }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); if (dialog.open) dialog.close(); else open(); }
+      });
+      const search = async () => {
+        const current = ++request;
+        results.replaceChildren();
+        if (!input.value.trim()) { status.textContent = ''; return; }
+        status.textContent = 'Searching…';
+        try {
+          const path = '/pagefind/pagefind.js';
+          const pagefind = await import(/* @vite-ignore */ path);
+          const response = await pagefind.search(input.value, { filters: { version: all.checked ? { any: JSON.parse(this.dataset.versions!) } : this.dataset.version } });
+          const pages = await Promise.all(response.results.slice(0, 20).map((r: { data: () => Promise<any> }) => r.data()));
+          if (current !== request) return;
+          status.textContent = `${response.results.length} results${all.checked ? ' across all versions' : ' in ' + this.dataset.version}`;
+          for (const page of pages) {
+            const li = document.createElement('li');
+            const link = document.createElement('a'); link.href = page.url;
+            link.textContent = `${page.meta.title} · ${page.filters.version?.join(', ') || this.dataset.version}`;
+            const excerpt = document.createElement('p'); excerpt.textContent = page.excerpt.replace(/<[^>]*>/g, '');
+            li.append(link, excerpt); results.append(li);
+          }
+        } catch { if (current === request) status.textContent = 'Search is available in the production build. Please try again after loading the published site.'; }
+      };
+      input.addEventListener('input', search); all.addEventListener('change', search);
+    }
+  }
+  customElements.define('docs-search', DocsSearch);
+</script>
+<style>
+  button, input { font: inherit; color: var(--sl-color-white); background: var(--sl-color-gray-6); border: 1px solid var(--sl-color-gray-3); border-radius: .3rem; padding: .4rem .7rem; }
+  button { cursor: pointer; }
+  dialog { color: var(--sl-color-white); background: var(--sl-color-bg); border: 1px solid var(--sl-color-gray-3); border-radius: .5rem; width: min(45rem, 90vw); max-height: 85vh; padding: 1.5rem; }
+  dialog::backdrop { background: #0009; }
+  label { display: block; margin-block: .8rem; }
+  input[type=search] { width: 100%; }
+  .close-search { float: right; }
+  li { margin-block: 1rem; }
+  li p { font-size: .9rem; }
+  kbd { font-size: .7rem; margin-inline-start: 1rem; }
+  /* Below Starlight's 50rem breakpoint the header shares one row with the
+     site title and the menu button, as Starlight's own search does: the
+     control is a square magnifier button, without the label or the shortcut. */
+  .open-search { display: flex; align-items: center; gap: .25rem; white-space: nowrap; }
+  .search-label, kbd { display: none; }
+  .search-icon { display: flex; font-size: 1.25rem; }
+  @media (min-width: 50rem) {
+    .search-icon { display: none; }
+    .search-label { display: inline; }
+  }
+  /* The shortcut only means something with a keyboard to press it. */
+  @media (min-width: 50rem) and (hover: hover) and (pointer: fine) {
+    kbd { display: inline; }
+  }
+</style>

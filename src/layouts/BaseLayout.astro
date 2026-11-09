@@ -19,14 +19,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="dark light" />
+    <!-- The design language's faces: JetBrains Mono is the voice, IBM Plex Sans
+         carries long prose (assets/brand/LANGUAGE.md in discobox). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
+    {import.meta.env.SITE_PREVIEW === 'true' && <meta name="robots" content="noindex, nofollow" />}
+    <slot name="head" />
     <meta name="generator" content={Astro.generator} />
   </head>
-  <body>
+  <body data-pagefind-ignore="all">
     <slot />
   </body>
 </html>
