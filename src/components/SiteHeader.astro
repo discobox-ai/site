@@ -1,9 +1,12 @@
 ---
 import Wordmark from './Wordmark.astro';
 
+// Try it leads: it is the page a developer arriving for the first time needs.
+// It is one of the links that stays on a phone, with Docs and Blog.
 const links = [
+  { label: 'Try it', href: '/try/' },
   { label: 'How it works', href: '/#how-it-works' },
-  { label: 'Factory', href: '/#factory' },
+  { label: 'Factory', href: '/#personal-factory' },
   { label: 'Agents', href: '/#agents' },
   { label: 'Isolation', href: '/#safety' },
   { label: 'Docs', href: '/docs/' },
@@ -72,7 +75,7 @@ const links = [
   @media (max-width: 46rem) {
     .header__inner { flex-wrap: wrap; }
     .nav { gap: 1rem; }
-    .nav a:not(.nav__cta):not([href="/docs/"]):not([href="/blog/"]) {
+    .nav a:not(.nav__cta):not([href="/try/"]):not([href="/docs/"]):not([href="/blog/"]) {
       display: none;
     }
   }

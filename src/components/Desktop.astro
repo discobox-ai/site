@@ -1,0 +1,57 @@
+---
+import Screenshot from './Screenshot.astro';
+import desktop from '../assets/screens/desktop.png';
+
+// The emotional hook for one developer: the agent's browser is not yours. One
+// screenshot and two sentences, per the brief; the mechanism (port 6900, the
+// desktop as a forwarded port) is the Try it page's to explain.
+//
+// The capture is a real box's desktop, taken in this repository rather than
+// synced from discobox's assets/screens like the others. It moves upstream,
+// and into scripts/sync-assets.mjs, when it is retaken there.
+---
+
+<section class="section desktop" id="desktop">
+  <div class="page desktop__inner">
+    <div class="desktop__copy">
+      <p class="eyebrow">Its own desktop and browser</p>
+      <h2 class="couplet__hook">Your laptop stays yours while the agent works.</h2>
+      <p class="couplet__turn">
+        Every box has a desktop with Chromium in it, so the agent can open your app, click
+        through the signup flow and screenshot what it sees without touching your browser,
+        your tabs or your logged-in sessions. Open the box’s desktop in a browser tab to watch
+        it work, or circle what is wrong and leave it a note.
+      </p>
+    </div>
+
+    <Screenshot
+      src={desktop}
+      alt="A box's desktop: the agent's Chromium open on the site it is working on, beside a terminal in the same box."
+      sizes="(min-width: 70.5rem) 40rem, (min-width: 56rem) 58vw, calc(100vw - 2.5rem)"
+      class="desktop__shot"
+      caption="A box’s desktop: the agent’s Chromium and terminal, not yours."
+    />
+  </div>
+</section>
+
+<style>
+  /* The copy beside the shot on a wide screen: the capture is a 5:4 desktop,
+     and at the page's full width it would be taller than the window. */
+  .desktop__inner {
+    display: grid;
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+  }
+
+  @media (min-width: 56rem) {
+    .desktop__inner {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: clamp(2rem, 4vw, 3.5rem);
+    }
+
+    .desktop__inner :global(.desktop__shot) {
+      margin-top: 0;
+    }
+  }
+</style>

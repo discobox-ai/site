@@ -4,7 +4,15 @@ import openBox from '../assets/screens/claude-code.png';
 
 // The hero's command, taken apart. Three arguments and one flag are the whole
 // interface, so this section is those and nothing else; everything a box can
-// do beyond them is the architecture page's job.
+// do beyond them is the architecture page's job. The section opens on the
+// command itself, drawn as a line of tokens with each argument named under it.
+
+const runline = [
+  { text: 'discobox run', tone: 'verb' },
+  { text: '-H codex', label: 'harness' },
+  { text: 'acme/api', label: 'source' },
+  { text: '-p "fix the flaky retry test"', label: 'task' },
+];
 
 const parts = [
   {
@@ -60,6 +68,18 @@ const modes = [
       request, the way it would from your laptop.
     </p>
 
+    <figure class="runline" aria-label='discobox run -H codex acme/api -p "fix the flaky retry test"'>
+      <span class="runline__prompt" aria-hidden="true">$</span>
+      {
+        runline.map((part, index) => (
+          <span class={`runline__part${part.label ? ' runline__part--arg' : ''}`} aria-hidden="true">
+            <code class="runline__code">{part.text}{index < runline.length - 1 && <span class="runline__cont"> \</span>}</code>
+            {part.label && <span class="runline__label">{part.label}</span>}
+          </span>
+        ))
+      }
+    </figure>
+
     <ol class="parts">
       {
         parts.map((part) => (
@@ -111,6 +131,101 @@ const modes = [
 </section>
 
 <style>
+  /* The command, drawn as a line of tokens with a bracket and a name under each
+     argument. The tokens wrap as whole units, so on a phone the task drops to
+     its own line with its label still under it. */
+  .runline {
+    margin: clamp(2.25rem, 5vw, 3rem) 0 0;
+    padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 2rem) clamp(1rem, 2.5vw, 1.4rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: 0.85em;
+    row-gap: 0.9rem;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius);
+    background: var(--ink-sunken);
+    font-family: var(--font-mono);
+    font-size: clamp(0.95rem, 2.1vw, 1.35rem);
+  }
+
+  .runline__prompt {
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  .runline__part {
+    display: grid;
+    gap: 0.45rem;
+    justify-items: start;
+  }
+
+  .runline__code {
+    font-size: 1em;
+    line-height: 1.5;
+    white-space: pre;
+    color: var(--text);
+  }
+
+  .runline__part--arg .runline__code {
+    color: var(--magenta);
+  }
+
+  .runline__label {
+    justify-self: stretch;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--line-bright);
+    font-size: 0.72rem;
+    font-size: max(0.72rem, 0.5em);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  /* The continuation backslash only shows when the command is broken over
+     lines, as a shell would need it. */
+  .runline__cont {
+    display: none;
+    color: var(--text-faint);
+  }
+
+  /* On a phone the parts can't share a line, and wrapping them wherever they
+     fall strands a label from its argument. So the command is written the way
+     you would type it over several lines: one argument per line, continued
+     with a backslash, each label beside its argument. */
+  @media (max-width: 40rem) {
+    .runline {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      column-gap: 0.6em;
+      row-gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .runline__part {
+      grid-column: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 1rem;
+      row-gap: 0.1rem;
+    }
+
+    .runline__part--arg {
+      padding-left: 1.2em;
+    }
+
+    .runline__cont {
+      display: inline;
+    }
+
+    .runline__label {
+      padding-top: 0;
+      border-top: 0;
+      font-size: 0.68rem;
+    }
+  }
+
   .parts {
     list-style: none;
     padding: 0;

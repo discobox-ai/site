@@ -2,8 +2,8 @@
 import TerminalWindow from './TerminalWindow.astro';
 import type { Line } from './TerminalWindow.astro';
 
-// The headline use case, drawn from discobox-ai/manager, the factory we run
-// ourselves. The pattern is a control loop: GitHub is the shared state (one
+// The personal factory (PersonalFactory.astro) at team size, drawn from
+// discobox-ai/manager, the factory we run ourselves. The pattern is a control loop: GitHub is the shared state (one
 // status/* label per issue), a skill defines each step, and one long-lived
 // manager box watches that state and starts a box for whichever step is due.
 // Workers move one issue one step and write the result back; nobody waits on
@@ -64,12 +64,13 @@ const session: Line[] = [
 
 <section class="section" id="factory">
   <div class="page">
-    <p class="eyebrow">Software factory</p>
-    <h2 class="couplet__hook">Your skills plus discobox make a software factory.</h2>
+    <p class="eyebrow">Team factory</p>
+    <h2 class="couplet__hook">When your team is ready, the same loop scales.</h2>
     <p class="couplet__turn">
-      A factory is a control loop: shared state that records the work, a skill for each
-      step, and a lead box that starts a box for whichever step is due. Each box moves
-      one piece of work forward, records the result, and is done.
+      Your personal factory, written down so it runs without you at the keyboard: shared
+      state that records the work, a skill for each step, and a lead box that starts a box
+      for whichever step is due. Each box moves one piece of work forward, records the
+      result, and is done. Your team’s skills plus discobox make a software factory.
     </p>
 
     <p class="flow__caption">An example: a factory built around GitHub issues and pull requests</p>

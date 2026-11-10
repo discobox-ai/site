@@ -1,0 +1,182 @@
+---
+import TerminalWindow from './TerminalWindow.astro';
+import type { Line } from './TerminalWindow.astro';
+
+// The factory loop at the size of one developer, which is how the people who
+// build discobox use it every day. Same parts as Factory's: shared state (your
+// own repository and its PRs), a step per job (a prompt per box), and someone
+// deciding what is due (you). Told as one day so the loop reads as a habit
+// rather than an architecture. Every command is the real CLI's, or gh's.
+
+const day = [
+  {
+    when: 'Morning',
+    name: 'Three boxes, three prompts',
+    body: 'Start three boxes from the repository you are in, one for each thing on your list, and mix harnesses if you like. Each prints its name and gives you your prompt back. Go get coffee.',
+    title: '~/src/api · 9:05',
+    lines: [
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: "discobox run -d . 'fix #231, the timezone bug in reports; open a PR'", tone: 'command' },
+      ],
+      [{ text: 'tidy-wren', tone: 'ok' }],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: "discobox run -d -H codex . 'add CSV export to reports; open a PR'", tone: 'command' },
+      ],
+      [{ text: 'swift-marten', tone: 'ok' }],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: "discobox run -d . 'spike: stream the report template; open a draft PR'", tone: 'command' },
+      ],
+      [{ text: 'bold-heron', tone: 'ok' }],
+    ] satisfies Line[],
+  },
+  {
+    when: 'Afternoon',
+    name: 'Review, merge two, throw one away',
+    body: 'Three pull requests are waiting. Read the diffs the way you read anyone’s, merge the two that are right, and close the spike once it has taught you what you needed to know. Archiving its box is one more command.',
+    title: '~/src/api · 14:30',
+    lines: [
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'gh pr diff 418', tone: 'command' },
+        { text: '            # tidy-wren: the timezone fix', tone: 'dim' },
+      ],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'gh pr merge 418 --squash', tone: 'command' },
+      ],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'gh pr merge 419 --squash', tone: 'command' },
+        { text: '  # swift-marten: CSV export', tone: 'dim' },
+      ],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'gh pr close 420', tone: 'command' },
+        { text: '           # bold-heron: the spike was a dead end', tone: 'dim' },
+      ],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'discobox rm bold-heron', tone: 'command' },
+      ],
+    ] satisfies Line[],
+  },
+  {
+    when: 'Evening',
+    name: 'A box that never went home',
+    body: 'Last week you started one more box and gave it a standing job: groom new issues, fix the small ones. It has been at it ever since, with its own GitHub access and no access to yours, and tonight it pings you with a pull request.',
+    title: '~/src/api · 19:40',
+    lines: [
+      [{ text: '# last week, once', tone: 'dim' }],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'discobox run -d --bind github:GH_TOKEN . \\', tone: 'command' },
+      ],
+      [{ text: "    -p 'Each evening, groom new issues. Fix the small ones and open a PR.'", tone: 'command' }],
+      [{ text: 'calm-ibis', tone: 'ok' }],
+      [
+        { text: '$ ', tone: 'prompt' },
+        { text: 'discobox rename calm-ibis groomer', tone: 'command' },
+      ],
+      '',
+      [{ text: '# tonight, from GitHub', tone: 'dim' }],
+      [{ text: 'groomer opened #422: fix the off-by-one in the page cursor (#417)', tone: 'ok' }],
+    ] satisfies Line[],
+  },
+];
+---
+
+<section class="section" id="personal-factory">
+  <div class="page">
+    <p class="eyebrow">Your personal factory</p>
+    <h2 class="couplet__hook">One developer, a fleet of boxes, and you as the manager.</h2>
+    <p class="couplet__turn">
+      This is how we use discobox every day. The shared state is your own repository and
+      its pull requests, each box takes one job, and the one deciding what is due and what
+      gets merged is you.
+    </p>
+
+    <ol class="day">
+      {
+        day.map((part) => (
+          <li class="day__part">
+            <div class="day__text">
+              <p class="day__when">{part.when}</p>
+              <h3 class="day__name">{part.name}</h3>
+              <p class="day__body">{part.body}</p>
+            </div>
+            <div class="day__demo">
+              <TerminalWindow lines={part.lines} title={part.title} />
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="day__more">
+      Your token reaches those boxes the way any credential does: bound once with{' '}
+      <code>discobox secret bind</code>, swapped in by the proxy, never seen by the agent.{' '}
+      <a href="#safety">How isolation works</a>.
+    </p>
+  </div>
+</section>
+
+<style>
+  .day {
+    list-style: none;
+    padding: 0;
+    margin: clamp(2.5rem, 6vw, 3.5rem) 0 0;
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+  }
+
+  /* Each part of the day: what you do beside the terminal you do it in. The
+     line on the left is the day's timeline, one rule down the whole list. */
+  .day__part {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    border-left: 1px solid var(--line-bright);
+    padding-left: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  @media (min-width: 56rem) {
+    .day__part {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: clamp(2rem, 4vw, 3rem);
+    }
+  }
+
+  .day__when {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--magenta);
+  }
+
+  .day__name {
+    margin-top: 0.4rem;
+    font-size: 1.15rem;
+  }
+
+  .day__body {
+    margin-top: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.96rem;
+  }
+
+  .day__demo {
+    min-width: 0;
+  }
+
+  .day__more {
+    margin-top: clamp(2rem, 5vw, 2.75rem);
+    max-width: 62ch;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+</style>

@@ -1,0 +1,225 @@
+---
+// "Many sessions, many boxes" and "It is just git", from discobox's README:
+// why one box per agent, and how work gets out of a box. Placed straight after
+// the hero because they are the two answers a developer needs before anything
+// else — what happens to my checkout, and how do I get the work back.
+
+// The path a change takes, left to right. The last stage is the reader's.
+const path = [
+  { label: 'your repository', note: 'the commit you have checked out' },
+  { label: 'box A · B · C', note: 'a clone each', edge: 'clone' },
+  { label: 'a branch or a PR', note: 'on your Git host', edge: 'git push' },
+  { label: 'you merge', note: 'or throw it away', edge: 'review', person: true },
+];
+
+const facts = [
+  {
+    name: 'Where a box clones from',
+    body: 'The source you name, a dot for the repository you are in, at the commit you have checked out. In the box, origin is your repository, read-only: the agent can fetch from it but cannot push to it, and nothing it does touches your files.',
+  },
+  {
+    name: 'Where the work goes',
+    body: 'The agent commits in the box and pushes to a Git remote. Open a pull request, or fetch and merge the branch on your machine. There is no sync layer to learn.',
+  },
+];
+---
+
+<section class="section many" id="many-boxes">
+  <div class="page">
+    <div class="many__grid">
+      <div>
+        <p class="eyebrow">Many sessions, many boxes</p>
+        <h2 class="couplet__hook">An agent in your checkout ties it up. A box does not.</h2>
+        <p class="couplet__turn">
+          Run an agent in your own directory and you wait for it to finish. Run a second
+          one there and it edits the same files, switches the same branch, and fights over
+          the same ports and databases. Each box has its own copy of the source, its own Git
+          repository, and its own services and Docker, so a bug fix, a feature and an
+          experiment you may throw away can all run at once while you keep working.
+        </p>
+      </div>
+
+      <div>
+        <p class="eyebrow">It is just git</p>
+        <h2 class="couplet__hook">Clone in, push out, merge what you like.</h2>
+        <p class="couplet__turn">
+          Give an agent a computer of its own and it needs the source the way you would on a
+          new machine. A box does exactly that.
+        </p>
+      </div>
+    </div>
+
+    <ol class="gitflow" aria-label="How work leaves a box: your repository is cloned into each box, each box pushes a branch or pull request, and you merge or discard it">
+      {
+        path.map((stage) => (
+          <li class="gitflow__stage">
+            {stage.edge && (
+              <span class="gitflow__edge">
+                <code class="gitflow__verb">{stage.edge}</code>
+              </span>
+            )}
+            <span class:list={['gitflow__node', stage.person && 'frame']}>
+              {stage.person && <span class="frame__title">your move</span>}
+              <code class="gitflow__label">{stage.label}</code>
+              <span class="gitflow__note">{stage.note}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <ul class="many__facts">
+      {
+        facts.map((fact) => (
+          <li>
+            <p class="many__fact-name">{fact.name}</p>
+            <p class="many__fact-body">{fact.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Close behind the hero: this is the hero's second half. */
+  .many {
+    padding-top: clamp(1rem, 3vw, 2rem);
+  }
+
+  .many__grid {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 56rem) {
+    .many__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* A change's path, left to right; top to bottom on a phone. Drawn the way
+     Factory draws an issue's, so the two read as the same kind of picture. */
+  .gitflow {
+    list-style: none;
+    padding: 0;
+    margin: clamp(2.5rem, 6vw, 3.25rem) 0 0;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 56rem) {
+    .gitflow {
+      grid-template-columns: auto repeat(3, minmax(0, 1fr));
+      gap: 0;
+      align-items: stretch;
+    }
+  }
+
+  .gitflow__stage {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 56rem) {
+    .gitflow__stage {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0;
+      align-items: center;
+    }
+  }
+
+  .gitflow__node {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius);
+    background: var(--ink-sunken);
+  }
+
+  .gitflow__node.frame {
+    border: var(--stroke-focus) solid var(--magenta);
+  }
+
+  .gitflow__label {
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .gitflow__note {
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+
+  .gitflow__edge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0.35rem 0;
+  }
+
+  .gitflow__edge::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed var(--line-bright);
+  }
+
+  @media (min-width: 56rem) {
+    .gitflow__edge {
+      padding: 0 0.9rem;
+      min-width: 7rem;
+    }
+
+    .gitflow__edge::before {
+      left: 0;
+      right: 0;
+      top: 50%;
+      bottom: auto;
+      border-left: 0;
+      border-top: 1px dashed var(--line-bright);
+    }
+  }
+
+  .gitflow__verb {
+    position: relative;
+    padding: 0.15rem 0.5rem;
+    background: var(--ink);
+    font-size: 0.78rem;
+    color: var(--magenta);
+  }
+
+  .many__facts {
+    list-style: none;
+    padding: 0;
+    margin: clamp(2rem, 5vw, 2.75rem) 0 0;
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 48rem) {
+    .many__facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+  }
+
+  .many__fact-name {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .many__fact-body {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+</style>

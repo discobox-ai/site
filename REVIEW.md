@@ -1,11 +1,15 @@
 # Review notes
 
-- Every command on the homepage is copied from the real CLI: the hero's
-  `discobox run` line, the cards in `HowRunsWork.astro`, and the terminals in
-  `Factory.astro` and `PersistentAgents.astro`. When a flag or verb changes in
-  discobox, check it against `discobox --help` here too. The hero restates How
-  it works in one line, so it goes stale without ever showing up in that
-  section's diff.
+- Every command on the site is copied from the real CLI: the hero's terminal,
+  the run line and cards in `HowRunsWork.astro`, the terminals in
+  `PersonalFactory.astro`, `Factory.astro` and `PersistentAgents.astro`, and
+  every terminal on `try.astro`. When a flag or verb changes in discobox, check
+  it against `discobox --help` here too. The hero and the Try it page restate
+  the same runs, so they go stale without ever showing up in the diff that
+  changed the others.
+- A secret bound for `gh` names its variable: `--bind github:GH_TOKEN` or
+  `--as GH_TOKEN`. Left out, it arrives as the upper-snaked secret name
+  (`GITHUB`), which `gh` ignores, so a command shown working would not.
 - The supported harnesses are listed in four places: the hero's note
   (`Hero.astro`), the harness card in `HowRunsWork.astro`, the Harness entry on
   `architecture.astro`, and the homepage's meta description in `index.astro`.
