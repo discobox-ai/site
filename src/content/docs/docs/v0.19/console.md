@@ -1,11 +1,10 @@
 ---
 title: "Console guide"
-editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/console.md
+editUrl: https://github.com/discobox-ai/discobox/edit/3f47653772b1bc496cee4cd97ba8bb282991b5a7/docs/public/console.md
 ---
 
-This guide describes the **v0.19 prerelease** console. Open it with
-`discobox console` (`c` is an alias). `discobox configure` opens its harnesses
-screen. `discobox run` and `discobox attach BOX` open a workspace directly.
+Open the console with `discobox console` (`c` is an alias). `discobox
+configure` opens its harnesses screen. `discobox run` and `discobox attach BOX` open a workspace directly.
 
 ## Create and find a task
 

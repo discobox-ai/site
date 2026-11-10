@@ -1,6 +1,6 @@
 ---
 title: "Repository startup scripts"
-editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/repository-scripts.md
+editUrl: https://github.com/discobox-ai/discobox/edit/3f47653772b1bc496cee4cd97ba8bb282991b5a7/docs/public/repository-scripts.md
 ---
 
 On Linux boxes, a repository may provide an executable
