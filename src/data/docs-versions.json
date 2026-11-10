@@ -4,9 +4,9 @@
   "versions": [
     {
       "line": "v0.19",
-      "version": "v0.19.0",
-      "tag": "v0.19.0",
-      "commit": "589a456affc33ea8dbd2979bfd0a48427b4da16d",
+      "version": "v0.19.1",
+      "tag": "v0.19.1",
+      "commit": "3f47653772b1bc496cee4cd97ba8bb282991b5a7",
       "status": "stable",
       "generator": {
         "command": "go tool task docs:generate",
@@ -19,16 +19,16 @@
           "output": "src/content/docs/docs/v0.19/index.md",
           "slug": "",
           "title": "Discobox v0.19 manual",
-          "sourceHash": "898e290375bae13c5378c6222fe67f93fc71424f0f5fb1b8125dcdc67b767890",
-          "outputHash": "a49e73a6316217b2c04e7dccf00efe01c892ec7eca80bc14a1e708cdcb4255e0"
+          "sourceHash": "bfa7d27d19c03b2cafa376d641fdfb81de185b5a7743e68ed0fb0bbcbf9dc176",
+          "outputHash": "699f95e7519313bceea10c94b92cc5d2d356739ae3affc1b813507a9e3af7de3"
         },
         {
           "source": "docs/public/getting-started.md",
           "output": "src/content/docs/docs/v0.19/getting-started.md",
           "slug": "getting-started",
           "title": "Getting started",
-          "sourceHash": "2a9c81c98683f5ebb0be72d580c7bfbc0c587c484019f3bfb0a9b716af839223",
-          "outputHash": "3136b1c2ed61e5646f9533b08775aa875c19f7d7c2d0cc35ed75fffe7cc79538"
+          "sourceHash": "c39431886ae95b8b5713524c9111ed8ded94af125ab771d252e4e9ba66a6cba9",
+          "outputHash": "0e802d630ee6784c6f1eec056895efc5cf95fa74f7ec903bd2dab3ab0cfa9b6c"
         },
         {
           "source": "docs/public/repository-scripts.md",
@@ -36,31 +36,31 @@
           "slug": "repository-scripts",
           "title": "Repository startup scripts",
           "sourceHash": "78d746c71a9d9177249e5c326dac674df372a0941c820200f6c320f5b807448a",
-          "outputHash": "dfb4be0a5f0480a13c74a8c2898a5c13b5270fcefecf0264b2ecd067812188c6"
+          "outputHash": "4fc6be4cc327297fbdb834edf165d9da8eeacd6d787857f2c09aea3f0bcf5cec"
         },
         {
           "source": "docs/public/concepts.md",
           "output": "src/content/docs/docs/v0.19/concepts.md",
           "slug": "concepts",
           "title": "Concepts",
-          "sourceHash": "3d02634d03b74a48807434165d50d9f91e1bb0278372abdc630ccc330a32475f",
-          "outputHash": "7037e7c4196fdd9c2c56bc3710687b9b0f46507ea402d79be0001b441c9cada9"
+          "sourceHash": "cbacdcd7d47c9f1ce95b838acce0b911904b156509edea4db2a235b101b8e887",
+          "outputHash": "c37eb037978a7208aba1f3be59760c2fc78b265e2a38b5978d4d8c3c50c80977"
         },
         {
           "source": "docs/public/console.md",
           "output": "src/content/docs/docs/v0.19/console.md",
           "slug": "console",
           "title": "Console guide",
-          "sourceHash": "62b69a03521685320a66c872330f9c0a9f8a07a244d832d5fd56f74bcb446c84",
-          "outputHash": "8426dd0c3338e54932582003f5f9c5fc29f76d8b265d60a197d7e548238b00be"
+          "sourceHash": "3d6c46755f3177a95a1a772dbbea4e9dbf73f79d4eb770d6a83c00f9bed5b114",
+          "outputHash": "a7272efbdd9c69785d095b2c693a068c422b27b411704325bb8ea421e4a2e698"
         },
         {
           "source": "docs/public/cli.md",
           "output": "src/content/docs/docs/v0.19/cli.md",
           "slug": "cli",
           "title": "CLI reference",
-          "sourceHash": "9efe126cf87287e992477de750814552493b13cef21a9a0bb1bf420895c7621a",
-          "outputHash": "9557dc0481682f16e0743cb3814bd34fe77f9af96e0d0ac4b88d361123c1a52a"
+          "sourceHash": "e9836e99ed306190e3c06b9dd5b1eba42d6fc1e31734977b292a40464e9ff81c",
+          "outputHash": "baeef57c46a4d4ea093027dab15f02425fa1d63b8f95c32f1c9527b4a5ec4059"
         }
       ],
       "attribution": [
