@@ -1,12 +1,7 @@
 ---
 title: "Discobox v0.19 manual"
-editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/index.md
+editUrl: https://github.com/discobox-ai/discobox/edit/3f47653772b1bc496cee4cd97ba8bb282991b5a7/docs/public/index.md
 ---
-
-**Prerelease documentation.** This manual describes the v0.19 development
-line. It does not declare v0.19 stable. Use the exact product version and
-revision shown by the documentation site's snapshot manifest; a prerelease
-snapshot stays labeled prerelease until a reviewed stable import replaces it.
 
 Discobox is a harness runtime. Give it a harness, a source and a task, and
 it runs the harness in its own sandbox with its own copy of the code. The

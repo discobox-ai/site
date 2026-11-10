@@ -1,9 +1,7 @@
 ---
 title: "Concepts"
-editUrl: https://github.com/discobox-ai/discobox/edit/589a456affc33ea8dbd2979bfd0a48427b4da16d/docs/public/concepts.md
+editUrl: https://github.com/discobox-ai/discobox/edit/3f47653772b1bc496cee4cd97ba8bb282991b5a7/docs/public/concepts.md
 ---
-
-This page describes the **v0.19 prerelease** line.
 
 ## Boxes and sources
 
