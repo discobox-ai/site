@@ -9,7 +9,7 @@ The [Discobox](https://github.com/discobox-ai/discobox) marketing site: an
 pnpm install
 pnpm dev         # dev server on http://localhost:4321
 pnpm build       # static build into dist/
-pnpm check       # astro check (TypeScript + template diagnostics)
+pnpm check       # oxlint, formatting, TypeScript and Astro diagnostics
 pnpm test:docs-header # after a build: the docs header at phone widths, in Chromium
 pnpm sync:assets # re-sync the brand art and screenshots from the discobox repository
 ```
@@ -26,9 +26,9 @@ The scripts are not in this repository. Each discobox release uploads its own,
 stamped with the release it installs, and the Worker fetches them through the
 asset mirror at `assets.discobox.ai`:
 
-| Host | Serves |
-| --- | --- |
-| `discobox.ai` | the newest stable release's installer (the mirror's `latest` alias) |
+| Host               | Serves                                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `discobox.ai`      | the newest stable release's installer (the mirror's `latest` alias)                                               |
 | `edge.discobox.ai` | the newest release's installer, prereleases included: the newer of the mirror's `latest` and `prerelease` aliases |
 
 Why it is shaped this way — and why the rules for `edge` must match the scripts'
@@ -94,7 +94,7 @@ side.
 
 `sharp` is a dev dependency for those two: the sync trims with it, and Astro's
 image pipeline needs it to emit the WebP the pages actually load. Astro declares
-it as an *optional* dependency of its own, which is the failure worth knowing
+it as an _optional_ dependency of its own, which is the failure worth knowing
 about — an optional dependency that does not install is skipped silently, and
 the first sign of it is `MissingSharp` from `astro build`, or a 500 from the dev
 server's `/_image` route with the pages showing alt text. Declaring it directly
@@ -125,7 +125,7 @@ Two things about the cell data, and one about the wordmarks:
   `viewBox` and no `width`/`height`, so `Wordmark.astro` restates the viewBox
   ratio as an `aspect-ratio`; without it the image paints once and collapses.
 
-> **Note:** the wordmark art currently reads *discobot* — it was copied from
+> **Note:** the wordmark art currently reads _discobot_ — it was copied from
 > that repository. Replace the two files upstream in discobox and run
 > `pnpm sync:assets`; no code changes are needed. If the replacement has a
 > different aspect ratio, update the `aspect-ratio` in `Wordmark.astro`.
@@ -139,9 +139,9 @@ repository through its git integration and builds and deploys pushes to
 `main` and `preview`. GitHub Actions checks and builds pull requests through
 `ci.yml`.
 
-| Push | Worker | URL |
-| --- | --- | --- |
-| `main` | `discobox-ai` | [discobox.ai](https://discobox.ai) |
+| Push      | Worker                | URL                                                |
+| --------- | --------------------- | -------------------------------------------------- |
+| `main`    | `discobox-ai`         | [discobox.ai](https://discobox.ai)                 |
 | `preview` | `discobox-ai-preview` | [preview.discobox.ai](https://preview.discobox.ai) |
 
 The two targets are the top-level config and the `preview` environment in
@@ -185,8 +185,9 @@ Fork pull requests get `ci.yml`; deployment happens when changes land on
 `onlyBuiltDependencies`. pnpm 10 does not recognise the key, so it silently
 declines to run esbuild's install script and the build then fails somewhere
 inside Astro looking for a binary that was never downloaded. In CI this is
-handled by `pnpm/action-setup`, which reads `packageManager` from
-`package.json`; keep that field and `.node-version` in step with `engines`.
+handled by the managed pnpm action, which reads `packageManager` and
+`devEngines.runtime` from `package.json`; keep `.node-version` aligned with
+that runtime pin.
 
 ### History
 
@@ -241,3 +242,14 @@ publishes after a human merges to preview; promotion to main publishes to
 production through Cloudflare Workers Builds. The v0.19 post links
 the line's first release and the tags page rather than naming a patch
 release, and stays a draft until the owner publishes it.
+
+## Repository checks
+
+Run `pnpm run ci` and `pnpm run build` before opening a PR into `preview`.
+CI uses Depot runners for separate verify, check, test, build and repocheck
+jobs. `pnpm run check:repo` runs the same pinned repository checker locally;
+this separate command needs Go. Normal site builds need only Node and pnpm.
+
+`pnpm run fmt` formats authored files. Imported manuals and generated snapshot
+metadata retain their generator's formatting. `pnpm run verify` checks that
+formatting and Astro type generation leave committed inputs unchanged.

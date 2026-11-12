@@ -49,3 +49,10 @@
   `pnpm preview` ignore the file, and the build check reads only the `/docs/`
   rules' text, so how a rule is actually served shows up nowhere else before
   it is deployed.
+- Snapshot symlinks with lstat/readlink when checking generated-file drift.
+  Repostd requires `.claude/skills` to link to a directory; dereferencing it
+  made verify fail with EISDIR during #15. Include executable bits and names
+  as well as file contents so tooling changes cannot pass unnoticed.
+- Generate Astro's content types before standalone TypeScript checks. In #15,
+  a warm local `.astro/` hid missing `astro:content` declarations in the fresh
+  CI check job; verify/check jobs do not share generated files.

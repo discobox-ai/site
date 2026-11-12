@@ -22,8 +22,16 @@ body {
   -webkit-font-smoothing: antialiased;
   /* Two lights on a dark floor: the mark's magenta and its shadow violet. */
   background-image:
-    radial-gradient(60rem 40rem at 15% -10%, color-mix(in oklab, var(--violet) 22%, transparent), transparent 70%),
-    radial-gradient(50rem 35rem at 90% 0%, color-mix(in oklab, var(--magenta) 12%, transparent), transparent 65%);
+    radial-gradient(
+      60rem 40rem at 15% -10%,
+      color-mix(in oklab, var(--violet) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50rem 35rem at 90% 0%,
+      color-mix(in oklab, var(--magenta) 12%, transparent),
+      transparent 65%
+    );
   background-repeat: no-repeat;
 }
 
@@ -116,7 +124,9 @@ kbd {
   font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
-  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  transition:
+    border-color 150ms ease-out,
+    background-color 150ms ease-out;
 }
 
 .button:hover {
