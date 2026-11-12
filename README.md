@@ -238,6 +238,6 @@ that date; it does not schedule a deploy. Dates display in UTC.
 To publish, verify the release and versioned docs links, finish the release
 copy, set the publication date and `draft: false`, then open a PR. Preview
 publishes after a human merges to preview; promotion to main publishes to
-production through Cloudflare Workers Builds. The v0.19 post is written
-against the v0.19.1 release and manual, and stays a draft until the owner
-publishes it.
+production through Cloudflare Workers Builds. The v0.19 post links
+the line's first release and the tags page rather than naming a patch
+release, and stays a draft until the owner publishes it.
