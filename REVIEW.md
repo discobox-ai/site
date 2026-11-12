@@ -26,6 +26,11 @@
   before validation and edit links can lose the source filename.
 - Check blog links and anchors in the built output. The docs validator walks
   only imported manuals, so it cannot catch a broken release-post link.
+- Check a draft post's links by building it once with `draft: false` and a
+  date no later than today, confirm `dist/blog/<slug>/index.html` exists,
+  and don't commit that. A draft or future-dated post produces no route, so
+  the build's blog check skips it and passes, and a broken link only shows up
+  when the post is published.
 - Exercise shared navigation at 390px after adding a link. Keeping another
   link visible on mobile can push the wordmark and actions outside the viewport.
 - Before marking a docs line `stable` (or moving `currentStable`), search its
