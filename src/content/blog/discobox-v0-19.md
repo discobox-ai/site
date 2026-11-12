@@ -9,7 +9,7 @@ draft: true
 
 Discobox gives a coding agent its own disposable environment, with your
 source checked out and a terminal you can return to.
-[Discobox v0.19](https://github.com/discobox-ai/discobox/releases/tag/v0.19.1)
+[Discobox v0.19](https://github.com/discobox-ai/discobox/releases/tag/v0.19.0)
 is out, and its manual is now the stable documentation at
 [discobox.ai/docs](/docs/).
 
@@ -51,9 +51,8 @@ Each manual page identifies the product revision it describes.
 
 ## Release details
 
-v0.19.1 is the current release in the v0.19 line, and the manual on this site
-is imported from it. The
-[v0.19.1 release notes](https://github.com/discobox-ai/discobox/releases/tag/v0.19.1)
-list what changed since v0.19.0, and the
-[v0.19.0 release notes](https://github.com/discobox-ai/discobox/releases/tag/v0.19.0)
-list everything that shipped in the line's first release.
+The [v0.19.0 release notes](https://github.com/discobox-ai/discobox/releases/tag/v0.19.0)
+list everything that shipped in the line's first release, and every later
+v0.19 patch release is on the
+[tags page](https://github.com/discobox-ai/discobox/tags). Each manual page
+names the exact release it describes.
