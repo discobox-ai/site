@@ -1,7 +1,7 @@
-# ADR 0002: Main documentation line
+# 0002 — Main documentation line
 
-- Status: Proposed
-- Date: 2026-11-04
+- **Status**: Proposed
+- **Date**: 2026-11-04
 - Scope: [site #7](https://github.com/discobox-ai/site/issues/7)
 - Amends: [ADR 0001: Docs and blog on discobox.ai](https://github.com/discobox-ai/site/blob/9f2853d57f2fa73d3dd0341bfe7108fe5fc8593c/docs/adr/0001-docs-and-blog.md)
 
@@ -26,7 +26,7 @@ The release-only scheme cannot show documentation for work on product
 while `/docs/` continues to select the latest stable release. This is
 additional scope, not part of v0.19 unless the owner explicitly adds it.
 
-## Proposed decision
+## Decision
 
 ### Source ownership and imports
 
@@ -122,18 +122,18 @@ Implementation must demonstrate on the built site that:
   checkout or upstream content fetch. Reverting a refresh restores the prior
   snapshot. Release-line content and stable promotion remain independent.
 
-## Alternatives
+## Alternatives rejected
 
-| Option | Reason to reject |
-| --- | --- |
-| Keep release docs only | Cannot read instructions for product main. |
-| Fetch main at build or request time | Breaks pinned provenance and makes publication depend on a moving upstream source. |
-| Make main the `/docs/` target or picker default | Sends released-product users to unreleased instructions. |
-| Publish main at `/next/` as well | Adds an unnecessary second identity for the requested line. |
-| Manual-only refreshes | Does not meet the requested scheduled refresh workflow. |
-| Let the import job write directly to preview | Skips review and exposes site write access to the upstream generator. |
+| Option                                          | Reason to reject                                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Keep release docs only                          | Cannot read instructions for product main.                                         |
+| Fetch main at build or request time             | Breaks pinned provenance and makes publication depend on a moving upstream source. |
+| Make main the `/docs/` target or picker default | Sends released-product users to unreleased instructions.                           |
+| Publish main at `/next/` as well                | Adds an unnecessary second identity for the requested line.                        |
+| Manual-only refreshes                           | Does not meet the requested scheduled refresh workflow.                            |
+| Let the import job write directly to preview    | Skips review and exposes site write access to the upstream generator.              |
 
-## Open decisions and implementation gates
+## Consequences
 
 **Owner decision remains open:** whether docs-only refresh PRs may auto-merge.
 This proposal grants no auto-merge authority; human review is required until
@@ -151,7 +151,7 @@ No routes, snapshots, dependencies, workflows, or deployment behavior are
 implemented here. Acceptance is by owner merge into preview; implementation
 records that acceptance separately. This record remains **Proposed**.
 
-## References
+### References
 
 - [GitHub scheduled workflow rules](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule): schedules run from the default branch.
 - [Triggering workflows from workflows](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow): token choice affects automatic checks and approval requirements.
