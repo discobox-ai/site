@@ -31,6 +31,10 @@
   and don't commit that. A draft or future-dated post produces no route, so
   the build's blog check skips it and passes, and a broken link only shows up
   when the post is published.
+- Don't name a patch release as the current one in a blog post. Link the
+  line's first release (`v0.19.0`) and the tags page, and let the manual
+  pages name the exact version. The v0.19 draft named v0.19.1 and then v0.19.3
+  as current, and each went stale before it was published.
 - Exercise shared navigation at 390px after adding a link. Keeping another
   link visible on mobile can push the wordmark and actions outside the viewport.
 - Before marking a docs line `stable` (or moving `currentStable`), search its
