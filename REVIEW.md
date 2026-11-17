@@ -59,3 +59,10 @@
   `pnpm preview` ignore the file, and the build check reads only the `/docs/`
   rules' text, so how a rule is actually served shows up nowhere else before
   it is deployed.
+
+- Name `main` as every PR's base and `prod` as production, which is only
+  moved to a commit on `main`. "preview" is now only the host, the Wrangler
+  environment and `SITE_PREVIEW`, not a branch; text that sends a PR or a
+  merge to `preview`, or merges into `prod`, describes a flow that no longer
+  exists. Branch names also live in code, config comments and tests (the blog
+  edit link, `wrangler.jsonc`, `ci.yml`), so grep for them, not only the prose.

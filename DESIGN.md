@@ -5,8 +5,9 @@ and an Astro content-collection blog. [Documentation design](docs/DESIGN.md)
 covers imported snapshots, provenance, version selection and publication.
 [Docs UI design](src/components/docs/DESIGN.md) covers presentation and search.
 
-Cloudflare Workers Builds builds `main` for production and `preview` for the
-preview host. The owner promotes preview only at release time. GitHub Actions
+Cloudflare Workers Builds builds `main` for the preview host and `prod` for
+production. `prod` is a branch used as a tag, moved only to a commit on `main`
+by a box the owner grants that one credential. GitHub Actions
 validates PRs and pushes; it holds no deployment credentials.
 
 `wrangler.jsonc` serves static output from `dist/`. `worker/index.ts` handles
