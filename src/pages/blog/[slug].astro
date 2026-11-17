@@ -16,6 +16,6 @@ const { Content } = await render(post);
       {post.data.updated && <> · Updated <time datetime={post.data.updated.toISOString()}>{formatDate(post.data.updated)}</time></>}
     </p>
     <Content />
-    <p><a href={`https://github.com/discobox-ai/site/edit/preview/src/content/blog/${post.id}.md`}>Edit this post on GitHub</a></p>
+    <p><a href={`https://github.com/discobox-ai/site/edit/main/src/content/blog/${post.id}.md`}>Edit this post on GitHub</a></p>
   </article>
 </BlogLayout>
