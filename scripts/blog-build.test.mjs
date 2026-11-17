@@ -47,7 +47,7 @@ test('publication rules agree across routes, listing, sitemap and RSS', () => {
         assert.equal(output.includes(`/blog/test-${name}/`), included)
     }
     const post = readFileSync('dist/blog/test-published/index.html', 'utf8')
-    assert.ok(post.includes('/edit/preview/src/content/blog/test-published-source.md'))
+    assert.ok(post.includes('/edit/main/src/content/blog/test-published-source.md'))
     for (const html of [listing, post]) {
       const doc = new DOMParser().parseFromString(html, 'text/html')
       assert.equal(
