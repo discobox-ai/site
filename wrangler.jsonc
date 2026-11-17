@@ -11,9 +11,10 @@
     "binding": "ASSETS",
     "run_worker_first": ["/", "/install.sh", "/install.ps1"],
   },
-  // Cloudflare Workers Builds deploys the `main` branch here through its git
-  // integration. workers_dev is off so the only public URLs are the
-  // custom domains -- no stray *.workers.dev copy of the site. edge.discobox.ai
+  // Cloudflare Workers Builds deploys the `prod` ref here through its git
+  // integration; `prod` is only ever moved to a commit on `main`. workers_dev
+  // is off so the only public URLs are the custom domains -- no stray
+  // *.workers.dev copy of the site. edge.discobox.ai
   // serves the edge installer and, on any other path, this same site.
   "workers_dev": false,
   "routes": [
@@ -21,9 +22,10 @@
     { "pattern": "edge.discobox.ai", "custom_domain": true },
   ],
   "env": {
-    // Cloudflare Workers Builds deploys the `preview` branch here through its
+    // Cloudflare Workers Builds deploys the `main` branch here through its
     // git integration, as the discobox-ai-preview Worker.
-    // Named environments inherit `main` but not `assets`, so it is repeated.
+    // Named environments inherit `main` (the Worker entry point) but not
+    // `assets`, so it is repeated.
     "preview": {
       "assets": {
         "directory": "./dist",

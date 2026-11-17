@@ -136,13 +136,13 @@ The site is a **Cloudflare Worker serving static assets**. `wrangler.jsonc`
 points `assets.directory` at `dist/`; `worker/index.ts` serves the install
 scripts on the paths described above. Cloudflare Workers Builds watches the
 repository through its git integration and builds and deploys pushes to
-`main` and `preview`. GitHub Actions checks and builds pull requests through
+`main` and `prod`. GitHub Actions checks and builds pull requests through
 `ci.yml`.
 
-| Push      | Worker                | URL                                                |
-| --------- | --------------------- | -------------------------------------------------- |
-| `main`    | `discobox-ai`         | [discobox.ai](https://discobox.ai)                 |
-| `preview` | `discobox-ai-preview` | [preview.discobox.ai](https://preview.discobox.ai) |
+| Push   | Worker                | URL                                                |
+| ------ | --------------------- | -------------------------------------------------- |
+| `main` | `discobox-ai-preview` | [preview.discobox.ai](https://preview.discobox.ai) |
+| `prod` | `discobox-ai`         | [discobox.ai](https://discobox.ai)                 |
 
 The two targets are the top-level config and the `preview` environment in
 `wrangler.jsonc`. Wrangler derives the preview Worker's name by appending the
@@ -162,10 +162,24 @@ they disagree with the manifest.
 Neither `pnpm dev` nor `pnpm preview` reads `_redirects`, so check it after a
 build with Wrangler, which serves the built assets as the deploy does:
 `pnpm exec wrangler dev --env preview --local`, then `curl -sI` the redirected
-paths. The deployed check is preview.discobox.ai after a push to `preview`.
+paths. The deployed check is preview.discobox.ai after a merge to `main`.
 
-Any other branch deploys nowhere. Open a pull request and `ci.yml` type-checks
-and builds it; to see it served, push to `preview`.
+Any other branch deploys nowhere. Open a pull request into `main` and `ci.yml`
+type-checks and builds it; it is served on preview.discobox.ai once merged.
+
+### Deploying
+
+`main` is the trunk: every PR targets it, and every merge deploys to
+preview.discobox.ai. Production is `prod`, a branch used as a tag. Cloudflare
+Workers Builds deploys on branch pushes, not tags, so the ref has to be a
+branch, but nothing commits to it: it is only ever moved (force-updated) to a
+commit already on `main`, never merged into and never the base of a PR.
+
+To deploy, start a box that asks the owner for a credential that can move
+`prod` and nothing else (plus reads). Once the owner grants it, the box moves
+`prod` to the commit named, by default `main`'s head with green checks, and
+stops: one move per box. Rolling back is the same move to an earlier commit
+on `main`.
 
 ### Deployment configuration
 
@@ -176,7 +190,7 @@ and use `SITE_PREVIEW=true` for preview builds so they stay out of search
 indexes.
 
 Fork pull requests get `ci.yml`; deployment happens when changes land on
-`main` or `preview`.
+`main` or `prod` is moved.
 
 ### The pnpm pin is not optional
 
@@ -233,19 +247,22 @@ unique, including among drafts. Keep slugs stable after publication.
 The listing is `/blog/`, posts use `/blog/<slug>/`, and the RSS feed is
 `/blog/rss.xml`. Drafts and future-dated posts are omitted from every public
 route and the feed, including preview builds. There is no private draft URL;
-review drafts in the PR. A future date requires a new main build at or after
-that date; it does not schedule a deploy. Dates display in UTC.
+review drafts in the PR. A future date requires a new production build at or
+after that date; it does not schedule a deploy. Production builds only when
+`prod` moves, and moving it to the commit it already names pushes nothing, so
+a post dated after the last deploy appears with the next `prod` move after its
+date. Dates display in UTC.
 
 To publish, verify the release and versioned docs links, finish the release
 copy, set the publication date and `draft: false`, then open a PR. Preview
-publishes after a human merges to preview; promotion to main publishes to
-production through Cloudflare Workers Builds. The v0.19 post links
+publishes after a human merges to `main`; moving `prod` to that commit
+publishes to production through Cloudflare Workers Builds. The v0.19 post links
 the line's first release and the tags page rather than naming a patch
 release, and stays a draft until the owner publishes it.
 
 ## Repository checks
 
-Run `pnpm run ci` and `pnpm run build` before opening a PR into `preview`.
+Run `pnpm run ci` and `pnpm run build` before opening a PR into `main`.
 CI uses Depot runners for separate verify, check, test, build and repocheck
 jobs. `pnpm run check:repo` runs the same pinned repository checker locally;
 this separate command needs Go. Normal site builds need only Node and pnpm.

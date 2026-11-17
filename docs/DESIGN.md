@@ -49,10 +49,11 @@ Both import `src/styles/brand.css`; docs maps its palette and fonts to
 Starlight tokens for both themes without importing marketing element styles.
 Canonical links always use discobox.ai. The preview deployment sets
 `SITE_PREVIEW=true` to exclude all HTML from indexing. CI builds with this
-flag too. Main and preview use the existing Worker static-assets deployment;
-installer routing is unchanged. No production deployment is possible from a
-fork PR. After a human merges into preview, exercise its deployed URLs before
-promotion to main; this worker never pushes either base branch.
+flag too. `main` (preview) and `prod` (production) use the existing Worker
+static-assets deployment; installer routing is unchanged. No production
+deployment is possible from a fork PR. After a human merges into `main`,
+exercise preview's deployed URLs before `prod` is moved to that commit; a PR's
+worker never pushes `main` or `prod`.
 
 The native Astro blog uses its own Markdown collection. `publishedPosts()`
 is the shared inclusion rule for static post paths, the listing and RSS:
@@ -62,4 +63,4 @@ fail the build. RSS uses the production origin and the same stable permalinks.
 BlogLayout exposes RSS discovery and inherits production canonical URLs,
 preview noindex and exclusion from the docs search index from BaseLayout.
 Starlight generates the site sitemap from built routes; excluded posts have
-no routes to expose. Authoring and release promotion are described in README.
+no routes to expose. Authoring and deploying are described in README.

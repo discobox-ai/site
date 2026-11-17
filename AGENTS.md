@@ -9,10 +9,10 @@
 
 ### Branches and publishing
 
-PRs target `preview`, never `main`. Nothing reaches `main` until a release
-(0.19, 0.20); the owner promotes `preview` into `main` at release time.
-A PR into `preview` does not close its issue; whoever merges it closes the
-issue. Use `Refs #N` rather than an automatic closing keyword in PR bodies.
+PRs target `main`, the trunk; a merge publishes to preview.discobox.ai.
+Production is the `prod` ref, which is only ever moved to a commit on
+`main`: never a PR's base, never merged into, never pushed by a PR's worker.
+See [Deploying](README.md#deploying).
 
 ## Shared Libraries
 
