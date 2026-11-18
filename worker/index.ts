@@ -5,41 +5,45 @@
 //   discobox.ai/install.sh    the stable install.sh, to anyone
 //   discobox.ai/install.ps1   the stable install.ps1, to anyone
 //   edge.discobox.ai/...      the same three paths, for the edge installer
+//   main.discobox.ai/...      the same three paths, for the newest main build
 //
 // wrangler.jsonc runs it for those three paths only, so every other request is
-// the static site and never reaches this code. On `/`, anything that is not
-// curl, wget, or PowerShell — a browser, a bot unfurling a link — gets the site.
+// the static site and never reaches this code. On discobox.ai's `/`, anything
+// that is not curl, wget, or PowerShell — a browser, a bot unfurling a link —
+// gets the site; edge and main have no site of their own at `/`.
 //
 // Each release uploads its own installer, stamped with what it installs, and
 // the asset mirror fronts them: its `latest` alias is the newest release marked
 // stable, its `prerelease` alias the newest one that is not. Stable is the
 // first; edge is whichever of the two is newer, because the prerelease alias on
 // its own drifts back to an old alpha once everything newer is blessed.
+//
+// Main builds are released into their own repository, discobox-main, which
+// holds nothing else and marks each build its latest release, so GitHub's
+// latest there is the newest main build. The mirror has no namespace for it
+// yet, so main is served from GitHub alone (discobox's ADR 26-11-16-249 §4).
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> }
 }
 
 type Script = 'install.sh' | 'install.ps1'
+type Channel = 'stable' | 'edge' | 'main'
 
 const mirror = 'https://assets.discobox.ai/discobox'
 const releases = 'https://github.com/discobox-ai/discobox/releases'
+const mainReleases = 'https://github.com/discobox-ai/discobox-main/releases'
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
-    const script = chooseScript(
-      url.pathname,
-      request.headers.get('user-agent') ?? '',
-      url.hostname.startsWith('edge.'),
-    )
+    const channel = channelOf(url.hostname)
+    const script = chooseScript(url.pathname, request.headers.get('user-agent') ?? '', channel)
     if (!script || (request.method !== 'GET' && request.method !== 'HEAD')) {
       return env.ASSETS.fetch(request)
     }
-    const channel = url.hostname.startsWith('edge.') ? 'edge' : 'stable'
     try {
-      const { tag, body } =
-        channel === 'edge' ? await edgeInstaller(script) : await stableInstaller(script)
+      const { tag, body } = await installers[channel](script)
       return new Response(request.method === 'HEAD' ? null : body, {
         headers: {
           'content-type': 'text/plain; charset=utf-8',
@@ -62,12 +66,28 @@ export default {
   },
 }
 
-function chooseScript(path: string, userAgent: string, edge: boolean): Script | null {
+const installers: Record<Channel, (script: Script) => Promise<{ tag: string; body: string }>> = {
+  stable: stableInstaller,
+  edge: edgeInstaller,
+  main: mainInstaller,
+}
+
+// edge. and main. are installer hosts; every other host, preview.discobox.ai
+// included, is the site and serves stable.
+function channelOf(hostname: string): Channel {
+  if (hostname.startsWith('edge.')) return 'edge'
+  if (hostname.startsWith('main.')) return 'main'
+  return 'stable'
+}
+
+// On discobox.ai `/` is the site to a browser. edge and main have no site of
+// their own, so `/` there is install.sh to anything but PowerShell.
+function chooseScript(path: string, userAgent: string, channel: Channel): Script | null {
   if (path === '/install.sh') return 'install.sh'
   if (path === '/install.ps1') return 'install.ps1'
   if (path !== '/') return null
   if (/PowerShell/i.test(userAgent)) return 'install.ps1'
-  if (edge || /^(curl|wget)\//i.test(userAgent)) return 'install.sh'
+  if (channel !== 'stable' || /^(curl|wget)\//i.test(userAgent)) return 'install.sh'
   return null
 }
 
@@ -84,8 +104,8 @@ async function stableInstaller(script: Script): Promise<{ tag: string; body: str
 
 async function edgeInstaller(script: Script): Promise<{ tag: string; body: string }> {
   const [stable, prerelease] = await Promise.all([
-    aliasTag('latest', script),
-    aliasTag('prerelease', script),
+    redirectTag(`${mirror}/latest/${script}`),
+    redirectTag(`${mirror}/prerelease/${script}`),
   ])
   let tag = stable
   if (prerelease && (!stable || newer(prerelease, stable))) tag = prerelease
@@ -94,6 +114,16 @@ async function edgeInstaller(script: Script): Promise<{ tag: string; body: strin
     `${mirror}/${tag}/${script}`,
     `${releases}/download/${tag}/${script}`,
   ])
+  if (!response) throw new Error(`${tag} has no ${script}`)
+  return { tag, body: await response.text() }
+}
+
+// The newest main build's installer. GitHub's latest is resolved to its tag
+// first, so the response can name the build and the script is fetched by tag.
+async function mainInstaller(script: Script): Promise<{ tag: string; body: string }> {
+  const tag = await redirectTag(`${mainReleases}/latest/download/${script}`)
+  if (!tag) throw new Error(`GitHub named no main build for ${script}`)
+  const response = await firstFound([`${mainReleases}/download/${tag}/${script}`])
   if (!response) throw new Error(`${tag} has no ${script}`)
   return { tag, body: await response.text() }
 }
@@ -113,12 +143,15 @@ async function firstFound(sources: string[]): Promise<Response | null> {
   return null
 }
 
-// The release a mirror alias redirects to. It redirects without checking the
-// asset exists, which is fine: only the tag is wanted here.
-async function aliasTag(alias: 'latest' | 'prerelease', script: Script): Promise<string | null> {
+// The release a mirror alias or GitHub's latest download redirects to, or null
+// when it redirects to no release (there is none yet) or cannot be reached.
+// Neither checks the asset exists before redirecting, which is fine: only the
+// tag is wanted here.
+async function redirectTag(source: string): Promise<string | null> {
   try {
-    const response = await fetch(`${mirror}/${alias}/${script}`, { redirect: 'manual' })
-    return tagIn(new URL(response.headers.get('location') ?? '', mirror).pathname)
+    const response = await fetch(source, { redirect: 'manual' })
+    const location = response.headers.get('location')
+    return location ? tagIn(new URL(location, source).pathname) : null
   } catch {
     return null
   }
