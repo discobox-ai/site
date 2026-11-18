@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 import versions from './src/data/docs-versions.json' with { type: 'json' }
+import links from './src/data/links.json' with { type: 'json' }
 import docsRedirect from './src/integrations/docs-redirect.mjs'
 export default defineConfig({
   site: 'https://discobox.ai',
@@ -25,7 +26,8 @@ export default defineConfig({
         })),
       })),
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/discobox-ai/discobox' },
+        { icon: 'discord', label: 'Discord', href: links.discord },
+        { icon: 'github', label: 'GitHub', href: links.github },
       ],
     }),
   ],
