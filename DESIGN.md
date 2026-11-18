@@ -12,8 +12,9 @@ validates PRs and pushes; it holds no deployment credentials.
 
 `wrangler.jsonc` serves static output from `dist/`. `worker/index.ts` handles
 installer content negotiation only on `/`, `/install.sh` and `/install.ps1`,
-fetching release scripts from the asset mirror. Other routes serve static
-assets. Preview builds use `SITE_PREVIEW=true` and production canonical URLs.
+fetching release scripts from the asset mirror, or from GitHub alone for main
+builds. Other routes serve static assets. Preview builds use
+`SITE_PREVIEW=true` and production canonical URLs.
 
 Brand art, screenshots and imported public manuals are committed inputs from
 the product repository. Ordinary builds never fetch product source. Explicit

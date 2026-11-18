@@ -14,12 +14,14 @@
   // Cloudflare Workers Builds deploys the `prod` ref here through its git
   // integration; `prod` is only ever moved to a commit on `main`. workers_dev
   // is off so the only public URLs are the custom domains -- no stray
-  // *.workers.dev copy of the site. edge.discobox.ai
-  // serves the edge installer and, on any other path, this same site.
+  // *.workers.dev copy of the site. edge.discobox.ai and main.discobox.ai
+  // serve the edge and main-build installers and, on any other path, this same
+  // site.
   "workers_dev": false,
   "routes": [
     { "pattern": "discobox.ai", "custom_domain": true },
     { "pattern": "edge.discobox.ai", "custom_domain": true },
+    { "pattern": "main.discobox.ai", "custom_domain": true },
   ],
   "env": {
     // Cloudflare Workers Builds deploys the `main` branch here through its
