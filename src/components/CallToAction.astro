@@ -1,4 +1,5 @@
 ---
+import links from '../data/links.json';
 import InstallCommand from './InstallCommand.astro';
 import TerminalMark from './TerminalMark.astro';
 
@@ -17,10 +18,10 @@ import TerminalMark from './TerminalMark.astro';
     <InstallCommand class="cta__install" />
 
     <div class="cta__actions">
-      <a class="button button--primary" href="https://github.com/discobox-ai/discobox">
+      <a class="button button--primary" href={links.github}>
         View on GitHub
       </a>
-      <a class="button button--ghost" href="https://discord.gg/BSFr7Fa7f2">Join the Discord</a>
+      <a class="button button--ghost" href={links.discord}>Join the Discord</a>
       <a class="button button--ghost" href="/architecture">Read the architecture</a>
     </div>
   </div>

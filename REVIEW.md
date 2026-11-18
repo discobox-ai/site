@@ -35,6 +35,11 @@
   line's first release (`v0.19.0`) and the tags page, and let the manual
   pages name the exact version. The v0.19 draft named v0.19.1 and then v0.19.3
   as current, and each went stale before it was published.
+- Link the GitHub repository and the Discord invite through
+  `src/data/links.json`, never a literal URL. The header, footer, call to
+  action and the docs' social icons (`astro.config.mjs`) all link them, and a
+  copied URL drifts when one changes. Links to paths inside the repository
+  (issues, `tree/`, `edit/`) are written out where they are built.
 - Exercise shared navigation at 390px after adding a link. Keeping another
   link visible on mobile can push the wordmark and actions outside the viewport.
 - Before marking a docs line `stable` (or moving `currentStable`), search its
