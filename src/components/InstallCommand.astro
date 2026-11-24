@@ -22,6 +22,22 @@ const { class: className } = Astro.props;
 const brew = 'brew install discobox-ai/tap/discobox';
 const sh = 'curl -sSfL https://discobox.ai | sh';
 
+// The same installers from the latest GitHub release, for a visitor whose
+// resolver does not answer for discobox.ai: some block newly registered
+// domains, and that request never reaches the site to be helped
+// (discobox-ai/discobox#1431). Homebrew avoids the domain too, since the tap
+// downloads from GitHub. Worded as discobox-ai/discobox PR 1642 words its
+// README and getting-started page, so the site and the manual agree once the
+// next docs import brings that page in.
+const release = 'https://github.com/discobox-ai/discobox/releases/latest/download';
+const shFromGitHub = `curl -sSfL ${release}/install.sh | sh`;
+const ps1FromGitHub = `irm ${release}/install.ps1 | iex`;
+
+// A GitHub command split after each slash of its path, so the URL can wrap
+// there (at a <wbr>) rather than mid-word. `https://` stays whole. The copy
+// button takes the unsplit command, so this only shapes what is drawn.
+const breakable = (command: string) => command.split(/(?<=\/)(?!\/)/);
+
 // The order is the order of the tabs. macOS leads because it is what most
 // visitors are on, and WSL comes last of the four because it is the one a
 // visitor picks deliberately rather than the one their machine is.
@@ -30,16 +46,19 @@ const targets = [
     id: 'macos',
     label: 'macOS',
     command: sh,
+    fallback: shFromGitHub,
     prompt: '$',
     // Apple Silicon only: an Intel Mac is refused rather than installed and
-    // then failed at the first box (discobox ADR 0062).
-    note: 'Apple Silicon.',
+    // then failed at the first box (discobox ADR 0062). Said outright, because
+    // the browser on an Intel Mac lands it on this tab too.
+    note: 'Apple Silicon only, not Intel Macs.',
     alternative: brew,
   },
   {
     id: 'linux',
     label: 'Linux',
     command: sh,
+    fallback: shFromGitHub,
     prompt: '$',
     // The script refuses a musl system rather than install a binary whose
     // loader is not there.
@@ -50,6 +69,7 @@ const targets = [
     id: 'windows',
     label: 'Windows',
     command: 'irm https://discobox.ai/install.ps1 | iex',
+    fallback: ps1FromGitHub,
     // Not `$`, which is a sigil rather than a prompt in PowerShell: a visitor
     // who selects the line by hand instead of using the button would paste the
     // start of a variable name.
@@ -60,6 +80,7 @@ const targets = [
     id: 'wsl',
     label: 'WSL',
     command: sh,
+    fallback: shFromGitHub,
     prompt: '$',
     // The distinction the tab exists for: a Windows visitor has two installs
     // to choose between, and they are not the same one from two shells. No
@@ -118,6 +139,29 @@ const group = uniqueName('install-os');
             )}
           </span>
         </p>
+        <details class="install__fallback">
+          <summary class="install__summary">If discobox.ai does not resolve</summary>
+          <div class="install__fallback-body">
+            <p>
+              Some resolvers block newly registered domains. Install from the latest GitHub
+              release instead:
+            </p>
+            <div class="install__alt">
+              <code class="install__alt-code">
+                <span class="install__prompt">{target.prompt}</span>{' '}
+                {breakable(target.fallback).map((part) => <>{part}<wbr /></>)}
+              </code>
+              <button class="install__alt-copy" type="button" data-install={target.fallback}>
+                Copy
+              </button>
+            </div>
+            {target.alternative && (
+              <p>
+                Homebrew downloads from GitHub too: <code>{target.alternative}</code>.
+              </p>
+            )}
+          </div>
+        </details>
       </div>
     ))
   }
@@ -170,7 +214,7 @@ const group = uniqueName('install-os');
     });
   }
 
-  for (const button of document.querySelectorAll<HTMLButtonElement>('.install__copy')) {
+  for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-install]')) {
     button.addEventListener('click', async () => {
       const command = button.dataset.install;
       if (!command) return;
@@ -400,9 +444,8 @@ const group = uniqueName('install-os');
 
   /* The note takes a measure of its own rather than the width of its
      placement: a placement that leaves the pill room to grow leaves this room
-     to grow too, and small print set to 60-odd characters of monospace is both
-     hard to read and — in the hero, where the block is the width of the page —
-     long enough to run under the screenshot.
+     to grow too, and small print set at the width of the page, which is what
+     the hero gives it, is hard to read.
 
      Inline-block inside the paragraph rather than a max-width on the paragraph
      itself, for the third time in this file: a box that is placed by the
@@ -410,25 +453,116 @@ const group = uniqueName('install-os');
      the call to action, with nothing said here about either. */
   .install__measure {
     display: inline-block;
-    /* The longest of the notes is Linux's, at 65 characters; 65ch is the width
-       it draws at to the pixel, which rounds the wrong way. 68ch leaves it a
-       few characters of room and is still, at 498px, inside the 536px the hero
-       leaves between the start of its column and the left edge of the
-       screenshot at 56rem — the narrowest width the two stand side by side at,
-       and the mask over that edge means the last of those pixels are a fade
-       rather than a picture. That 536px is measured with --pill at 31rem and
-       moves with it, since the shot is placed past whichever of the pill and
-       the copy measure is wider. One line each is what keeps the page from
-       shifting as the tabs are changed. The fallback list is the exception:
+    /* The longest of the notes is macOS's, at 78 characters with its
+       Homebrew line; 81ch leaves it a few characters of room, since the width
+       a note draws at rounds the wrong way. One line each, wherever the
+       placement is that wide, is what keeps the page from shifting as the
+       tabs are changed. The fallback list is the exception:
        the system name it prepends to every note takes the longer two onto a
        second line, and nothing there is holding still anyway — the four are
        stacked. */
-    max-width: 68ch;
+    max-width: 81ch;
   }
 
   .install__note code {
     font-size: 1em;
     color: var(--text-muted);
+  }
+
+  /* The route around discobox.ai, closed until asked for: the summary is one
+     line in every tab, so it adds no shift of its own, and a visitor whose
+     resolver answers never has to read past it. Set as the note is, and
+     placed by the text-align it inherits like everything else here. */
+  .install__fallback {
+    margin-top: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    line-height: 1.7;
+    color: var(--text-faint);
+  }
+
+  /* A list item, as a summary is by default, so its marker stays: that
+     triangle is what says the line opens. Its contents follow the inherited
+     text-align, so it sits left in the hero and centred in the call to action. */
+  .install__summary {
+    display: list-item;
+    list-style-position: inside;
+    cursor: pointer;
+    color: var(--text-muted);
+  }
+
+  .install__summary:hover {
+    color: var(--text);
+  }
+
+  .install__summary:focus-visible {
+    outline: 2px solid var(--magenta);
+    outline-offset: 2px;
+    border-radius: var(--radius-key);
+  }
+
+  .install__summary::marker,
+  .install__summary::-webkit-details-marker {
+    color: var(--magenta);
+  }
+
+  .install__fallback-body {
+    display: inline-block;
+    max-width: 81ch;
+    text-align: start;
+  }
+
+  .install__fallback-body > * {
+    margin-top: 0.55rem;
+  }
+
+  .install__fallback-body code {
+    font-size: 1em;
+    color: var(--text-muted);
+  }
+
+  /* The GitHub command is twice the length of the main one, too long for a
+     pill on one line anywhere but the widest screens. So it is always set as
+     the main command's card is on a narrow screen — wrapped, here at the
+     slashes the markup breaks it at — with its button beside it while there
+     is room and under it when there is not. */
+  .install__alt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.9rem;
+    padding: 0.7rem 0.75rem 0.7rem 0.95rem;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius);
+    background: var(--ink-sunken);
+  }
+
+  .install__alt .install__alt-code {
+    flex: 1 1 20rem;
+    min-width: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text);
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .install__alt-copy {
+    flex: none;
+    border: 1px solid var(--line-bright);
+    border-radius: var(--radius-key);
+    padding: 0.42rem 0.85rem;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--ink-raised);
+    cursor: pointer;
+  }
+
+  .install__alt-copy:hover {
+    border-color: var(--magenta);
   }
 
   /* The longest command is PowerShell's — 41 characters of monospace, a `PS>`
@@ -440,9 +574,6 @@ const group = uniqueName('install-os');
      target. The threshold is above the drawn width rather than level with it,
      and the slack is for a font that draws the command wider than these
      numbers assume. */
-  /* 31rem is also Hero.astro's --pill: it places the screenshot past whatever
-     the pill can grow to, and a container query cannot read a custom property,
-     so the two carry the number separately. Change one and change the other. */
   @container (max-width: 31rem) {
     .install__pill {
       display: flex;
